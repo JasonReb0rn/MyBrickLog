@@ -7,6 +7,8 @@ services:
     ports:
       - "1000:80"
       - "1443:443"
+    env_file:
+      - .env
     volumes:
       - /etc/letsencrypt/live/mybricklog.com:/etc/nginx/ssl:ro
     environment:
@@ -33,6 +35,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "1080:80"
+    env_file:
+      - .env
     environment:
       - MBL_SQL_HOST=${MBL_SQL_HOST}
       - MBL_SQL_USER=${MBL_SQL_USER}
