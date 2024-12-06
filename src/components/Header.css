@@ -1,0 +1,126 @@
+.header {
+    background-color: #da291c;
+    border-bottom: 2px solid #b90f03;
+    padding: 16px 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 20;
+}
+
+.header-section {
+    flex: 1;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: flex-start;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.logo {
+    max-height: 40px;
+    min-width: 200px;
+    width: 100%;
+}
+
+.header-logo-link {
+    display: flex;
+}
+
+.nav-center {
+    display: flex;
+    justify-content: center;
+}
+
+.nav-list {
+    list-style: none;
+    display: flex;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-item {
+    margin: 0;
+}
+
+.nav-link {
+    padding: 8px 20px;
+    border-radius: 5px;
+    background-color: #0000002b;
+}
+
+.nav-link,
+.nav-link-button { /* Apply same styles for both links and button */
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+    white-space: nowrap;
+}
+
+.nav-link:hover,
+.nav-link-button:hover { /* Apply hover effect for both links and button */
+    color: #ffffff85;
+}
+
+.spacer {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 16px; /* Add padding to balance the logo padding */
+}
+
+.mobile-menu-button {
+    display: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 16px;
+    border-radius: 50%;
+    border: 2px solid #b90f03;
+    width: 50px;
+    height: 50px;
+    background-color: #ffbf00d6;
+}
+
+@media (max-width: 768px) {
+    .nav-list {
+        display: none;
+        flex-direction: column;
+        background-color: #93241c;
+        position: absolute;
+        top: 100%;
+        gap: unset;
+        left: 0;
+        right: 0;
+        padding: 0px;
+        border-top: 2px solid #b90f03;
+    }
+
+    .nav-list.open {
+        display: flex;
+    }
+
+    .nav-item {
+        border-bottom: 2px solid #0000002b;
+        padding: 16px;
+        text-align: right;
+    }
+
+    .mobile-menu-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .nav-center {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .spacer {
+        display: none;
+    }
+}

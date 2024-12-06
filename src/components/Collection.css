@@ -1,0 +1,58 @@
+/* Collection.css */
+
+.theme-section {
+    margin-bottom: 20px;
+}
+
+.theme-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    cursor: pointer;
+    color: #333;
+    text-align: center;
+}
+
+.theme-title:hover {
+    text-decoration: underline;
+}
+
+.theme-section.collapsed .sets-container {
+    display: none;
+}
+
+.stats-container, .centered-message {
+    text-align: center; /* Center the stats-container */
+    margin: 20px; /* Center horizontally with auto margins */
+}
+
+.collection-nouser-links-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+}
+
+.collection-stats {
+    display: flex;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    box-sizing: border-box;
+    max-width: 600px; /* Adjust max-width as per your design */
+    margin: auto; /* Center horizontally */
+}
+
+.stats-section {
+    flex: 1; /* Take up equal space */
+}
+
+.stats-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stats-value {
+    font-size: 20px;
+}

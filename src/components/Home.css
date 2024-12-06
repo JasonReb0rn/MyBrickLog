@@ -1,0 +1,155 @@
+.home-container {
+    text-align: center;
+    padding-top: 50px;
+    font-family: Arial, sans-serif;
+}
+
+.home-header {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.home-subtext {
+    font-size: 1.2em;
+    margin-bottom: 40px;
+    color: #555;
+    padding: 0px 70px;
+}
+
+.start-collection-button, .explore-themes-btn {
+    display: block;
+    margin: auto;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.explore-themes-btn {
+    margin-bottom: 4px;
+}
+
+.explore-themes-btn a {
+    color: white;
+}
+
+.start-collection-button {
+    margin-bottom: 40px;
+}
+
+.start-collection-button:hover {
+    background-color: #0056b3;
+}
+
+.home-footer {
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 40px;
+}
+
+.popular-themes-container {
+    margin-top: 20px;
+    background: #e1e1e1;
+    padding: 5px;
+}
+
+.theme-header, .user-collections-header {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.themes-list-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin: 10px auto;
+}
+
+.theme-card {
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    width: 150px;
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 768px) {
+    .theme-card {
+        width: 140px;
+    }
+
+}
+
+.theme-card:hover {
+    transform: scale(1.05);
+}
+
+.theme-image {
+    width: 100%;
+    height: 100%;
+    margin-bottom: 10px;
+}
+
+.theme-name {
+    font-size: 1.2rem;
+}
+
+.user-collections-container {
+    padding: 5px;
+    background-color: #f9f9f9;
+}
+
+.user-collections-header {
+    text-align: center;
+    color: #333;
+}
+
+.user-collections-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.user-card {
+    width: 150px;
+    padding: 10px;
+    margin: 10px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    background-color: white;
+}
+
+.user-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.user-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.user-name {
+    font-size: 1em;
+    color: #333;
+}
+
+.user-link {
+    text-decoration: none;
+    color: inherit;
+}
+

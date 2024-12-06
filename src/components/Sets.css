@@ -1,0 +1,84 @@
+/* src/components/Sets.css */
+
+.quantity-controls {
+    align-items: center;
+}
+
+.quantity-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.quantity-button:disabled {
+    background-color: #77b2f1;
+    cursor: not-allowed;
+}
+
+.quantity-button:hover {
+    background-color: #0056b3;
+}
+
+.quantity-button:disabled:hover {
+    background-color: #5c87b6;
+}
+
+.quantity-input {
+    width: 30px;
+    text-align: center;
+    border: 1px solid #ccc;
+    margin: 0 5px;
+    background: white;
+    border-radius: 5px;
+    padding: 1px 6px;
+}
+
+.remove-button, .incomplete-button, .complete-button, .wishlist-button {
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.remove-button {
+    background-color: #da291c;
+}
+
+.incomplete-button {
+    /*background-color: #4bcf22;*/
+    background-color: #007bff;
+}
+
+.complete-button {
+    background-color: #007bff;
+}
+
+.wishlist-button {
+    background-color: #f0c51c;
+    color: black;
+}
+
+.set-quantity {
+    margin-top: 10px;
+}
+
+.badge {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background-color: #da291c;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    z-index: 10;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+}  

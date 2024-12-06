@@ -1,0 +1,104 @@
+.auth-container {
+    max-width: 400px;
+    margin: 40px 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.auth-container-centered {
+    display: flex;
+    justify-content: center;
+}
+
+.auth-container:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.auth-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.auth-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-container form div {
+    margin-bottom: 15px;
+}
+
+.auth-container form label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+    width: 100%;
+}
+
+.auth-container form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #333;
+    width: calc(100% - 20px);
+}
+
+.auth-container form button {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.auth-container form button:hover {
+    background-color: #0056b3;
+}
+
+.resend-verification-button {
+    background-color: #da291c !important;
+}
+
+.resend-verification-button:hover {
+    background-color: #8f1f17 !important;
+}
+
+.auth-container .error {
+    color: red;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.signup-link {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.signup-link p {
+    margin: 0;
+}
+
+.signup-link a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+.verify-container {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 20px;
+}
