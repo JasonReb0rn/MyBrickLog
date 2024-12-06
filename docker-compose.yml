@@ -37,11 +37,6 @@ services:
       - "1080:80"
     env_file:
       - .env
-    environment:
-      - MBL_SQL_HOST=${MBL_SQL_HOST}
-      - MBL_SQL_USER=${MBL_SQL_USER}
-      - MBL_SQL_PASS=${MBL_SQL_PASS}
-      - MBL_SQL_PORT=${MBL_SQL_PORT}
     networks:
       - app-network
       - shared_public_net
