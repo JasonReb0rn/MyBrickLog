@@ -8,7 +8,7 @@ services:
       - "1000:80"
       - "1443:443"
     env_file:
-      - .env
+      - ./.env
     volumes:
       - /etc/letsencrypt/live/mybricklog.com:/etc/nginx/ssl:ro
     environment:
@@ -36,7 +36,7 @@ services:
     ports:
       - "1080:80"
     env_file:
-      - .env
+      - ./.env.production
     networks:
       - app-network
       - shared_public_net

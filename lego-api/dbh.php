@@ -1,11 +1,13 @@
 <?php
 
-require '../vendor/autoload.php';
-use Dotenv\Dotenv;
+@include '../vendor/autoload.php';
 
-if (file_exists(__DIR__ . '/../.env')) {
-    $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
-    $dotenv->load();
+// Only try to load Dotenv if not in Docker environment and if autoload exists
+if (!isset($_ENV['MBL_SQL_HOST']) && class_exists('Dotenv\Dotenv')) {
+    if (file_exists('../.env')) {
+        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+        $dotenv->load();
+    }
 }
 
 $db = 'mybricklogdb';
@@ -19,6 +21,9 @@ try {
     $pdo = new PDO($dsn, $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    echo 'Connection failed: ' . $e->getMessage();
+    header('Content-Type: application/json');
+    http_response_code(500);
+    echo json_encode(['error' => 'Database connection failed']);
+    exit();
 }
 ?>
