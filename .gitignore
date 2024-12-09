@@ -26,4 +26,6 @@ yarn-error.log*
 # secrets
 .env
 .env.production
+sql_backup.sql
+sql_backup.old
 /lego-api/create_log.php
