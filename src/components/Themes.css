@@ -142,7 +142,7 @@
     font-weight: 500;
 }
 
-.add-to-collection-button, .share-button, .register-button, .login-button {
+.share-button, .register-button, .login-button {
     display: block;
     margin: 20px auto;
     padding: 10px 20px;
