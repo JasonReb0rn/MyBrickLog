@@ -12,6 +12,7 @@ const Themes = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [selectedSets, setSelectedSets] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [submittedSets, setSubmittedSets] = useState({});
     const navigate = useNavigate();
 
     const priorityThemes = [721, 52, 246, 1, 158];
@@ -60,26 +61,27 @@ const Themes = () => {
         );
     };
 
-    const addToCollection = () => {
-        const setsToAdd = Object.entries(selectedSets)
-            .filter(([setNum, quantity]) => quantity)
-            .map(([setNum, quantity]) => ({ setNum, quantity }));
+    const addToCollection = (setNum, quantity) => {
+        const setToAdd = [{ setNum, quantity }];
     
-        axios.post(`${process.env.REACT_APP_API_URL}/add_to_collection.php`, { sets: setsToAdd })
+        axios.post(`${process.env.REACT_APP_API_URL}/add_to_collection.php`, { sets: setToAdd })
             .then(response => {
                 if (response.data.success) {
-                    alert('Sets added to collection!');
-                    setSelectedSets({}); // Clear the selection
-                    
-                    // Remove added sets from searchResults
+                    setSubmittedSets(prev => ({ ...prev, [setNum]: true }));
+                    setSelectedSets(prev => {
+                        const newSelected = { ...prev };
+                        delete newSelected[setNum];
+                        return newSelected;
+                    });
+                    // Remove the added set from search results
                     setSearchResults(prevResults => 
-                        prevResults.filter(set => !selectedSets[set.set_num])
+                        prevResults.filter(set => set.set_num !== setNum)
                     );
                 } else {
-                    alert('Failed to add sets to collection.');
+                    alert('Failed to add set to collection.');
                 }
             })
-            .catch(error => console.error('Error adding sets to collection:', error));
+            .catch(error => console.error('Error adding set to collection:', error));
     };
     
 
@@ -133,66 +135,80 @@ const Themes = () => {
                     <button onClick={clearSearchResults} className="back-button">Return to Themes</button>
                     <div className="theme-header">Search Results</div>
                     <div className="sets-container">
-                        {searchResults.map(set => (
-                            <div
-                                key={set.set_num}
-                                className={`set-card ${selectedSets[set.set_num] ? 'selected' : ''}`}
-                                onClick={() => toggleSelectSet(set.set_num)}
-                            >
-                                <img 
-                                    src={set.img_url} 
-                                    alt={set.name} 
-                                    className="set-image" 
-                                    onError={handleImageError}
-                                    loading="lazy"
-                                />
-                                <div className="set-name">{set.name}</div>
-                                <div className="set-num">
-                                    {selectedSets[set.set_num] !== undefined ? (
-                                        <div className="quantity-controls">
-                                            <button
-                                                className="quantity-button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleQuantityChange(set.set_num, Math.max(1, selectedSets[set.set_num] - 1));
-                                                }}
-                                            >
-                                                -
-                                            </button>
-                                            <input
-                                                type="text"
-                                                className="quantity-input"
-                                                value={selectedSets[set.set_num]}
-                                                onChange={(e) => {
-                                                    const quantity = parseInt(e.target.value, 10);
-                                                    if (!isNaN(quantity) && quantity > 0) {
-                                                        handleQuantityChange(set.set_num, quantity);
-                                                    }
-                                                }}
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
-                                            <button
-                                                className="quantity-button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleQuantityChange(set.set_num, selectedSets[set.set_num] + 1);
-                                                }}
-                                            >
-                                                +
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        set.set_num
-                                    )}
-                                </div>
+                    {searchResults.map(set => (
+                        <div
+                            key={set.set_num}
+                            className={`set-card ${selectedSets[set.set_num] ? 'selected' : ''}`}
+                            onClick={() => toggleSelectSet(set.set_num)}
+                        >
+                            <img 
+                                src={set.img_url} 
+                                alt={set.name} 
+                                className="set-image" 
+                                onError={handleImageError}
+                                loading="lazy"
+                            />
+                            <div className="set-name">{set.name}</div>
+                            <div className="set-num">
+                                {selectedSets[set.set_num] !== undefined ? (
+                                    <div className="quantity-controls">
+                                        <button
+                                            className="quantity-button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleQuantityChange(set.set_num, Math.max(1, selectedSets[set.set_num] - 1));
+                                            }}
+                                        >
+                                            -
+                                        </button>
+                                        <input
+                                            type="text"
+                                            className="quantity-input"
+                                            value={selectedSets[set.set_num]}
+                                            onChange={(e) => {
+                                                const quantity = parseInt(e.target.value, 10);
+                                                if (!isNaN(quantity) && quantity > 0) {
+                                                    handleQuantityChange(set.set_num, quantity);
+                                                }
+                                            }}
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                        <button
+                                            className="quantity-button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleQuantityChange(set.set_num, selectedSets[set.set_num] + 1);
+                                            }}
+                                        >
+                                            +
+                                        </button>
+                                        <button
+                                            className="add-to-collection-button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                addToCollection(set.set_num, selectedSets[set.set_num]);
+                                            }}
+                                        >
+                                            {submittedSets[set.set_num] ? (
+                                                <>
+                                                    <FontAwesomeIcon icon="thumbs-up" style={{ marginRight: '8px' }} />
+                                                    Added!
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FontAwesomeIcon icon="plus" style={{ marginRight: '8px' }} />
+                                                    Add To Collection
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    set.set_num
+                                )}
                             </div>
-                        ))}
+                        </div>
+                    ))}
                     </div>
-                    {Object.keys(selectedSets).filter(setNum => selectedSets[setNum]).length > 0 && (
-                        <button onClick={addToCollection} className="add-to-collection-button">
-                            Add to Collection
-                        </button>
-                    )}
                 </>
             )}
             {isLoading && (
