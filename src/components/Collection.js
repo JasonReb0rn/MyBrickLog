@@ -247,18 +247,20 @@ const Collection = () => {
 
 
 
-                                                        <div className="set-name">{set.name}</div>
+                                                        <div className="set-name">{set.name} ({set.year})</div>
                                                         {user && Number(user.user_id) === Number(userId) && selectedSet === set.set_num ? (
                                                             <div className="set-actions">
                                                                 <button className="quantity-button" onClick={() => updateQuantity(set.set_num, Number(set.quantity) - 1)} disabled={set.quantity <= 1}>-</button>
                                                                 <span className="quantity-input">{set.quantity}</span>
                                                                 <button className="quantity-button" onClick={() => updateQuantity(set.set_num, Number(set.quantity) + 1)}>+</button>
 
-                                                                <button className={`${Number(set.complete) === 0 ? 'incomplete-button' : 'complete-button'}`} onClick={() => toggleCompleteStatus(set.set_num, set.complete)}>
-                                                                    {Number(set.complete) ? 'Incomplete' : 'Complete'}
-                                                                </button>
+                                                                <div className="button-container collection">
+                                                                    <button className={`${Number(set.complete) === 0 ? 'incomplete-button' : 'complete-button'}`} onClick={() => toggleCompleteStatus(set.set_num, set.complete)}>
+                                                                        {Number(set.complete) ? 'Incomplete' : 'Complete'}
+                                                                    </button>
 
-                                                                <button className="remove-button" onClick={() => removeSet(set.set_num)}>Remove</button>
+                                                                    <button className="remove-button" onClick={() => removeSet(set.set_num)}>Remove</button>
+                                                                </div>
                                                             </div>
                                                         ) : (
                                                             <div className="set-num">{set.set_num}</div>

@@ -13,7 +13,7 @@ if ($userId !== null) {
 
         if ($user) {
             $stmt = $pdo->prepare("
-                SELECT s.set_num, s.name, s.num_parts, s.img_url, s.theme_id, t.name AS theme_name, c.collection_set_quantity as quantity, c.complete,
+                SELECT s.set_num, s.name, s.year, s.num_parts, s.img_url, s.theme_id, t.name AS theme_name, c.collection_set_quantity as quantity, c.complete,
                     COALESCE((
                         SELECT SUM(im.quantity)
                         FROM inventory_minifigs im

@@ -148,7 +148,7 @@ const Themes = () => {
                                 onError={handleImageError}
                                 loading="lazy"
                             />
-                            <div className="set-name">{set.name}</div>
+                            <div className="set-name">{set.name} ({set.year})</div>
                             <div className="set-num">
                                 {selectedSets[set.set_num] !== undefined ? (
                                     <div className="quantity-controls">
