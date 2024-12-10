@@ -14,8 +14,11 @@ const Home = () => {
     const [hasRecentSets, setHasRecentSets] = useState(false);
     const [selectedSets, setSelectedSets] = useState({});
     const [submittedSets, setSubmittedSets] = useState({});
+    const [showAllRecentSets, setShowAllRecentSets] = useState(false);
     const navigate = useNavigate();
     const { user } = useAuth();
+
+    const INITIAL_SETS_TO_SHOW = 5;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -96,6 +99,9 @@ const Home = () => {
             .catch(error => console.error('Error adding set to wishlist:', error));
     };
 
+    const displayedSets = showAllRecentSets ? recentSets : recentSets.slice(0, INITIAL_SETS_TO_SHOW);
+    const hasMoreSets = recentSets.length > INITIAL_SETS_TO_SHOW;
+
     return (
         <div className="home-container">
             <div className="home-header">
@@ -114,7 +120,7 @@ const Home = () => {
             <div className="theme-header">Recently Added Sets</div>
             <div className="theme-details">Discover the newest LEGO sets, freshly added to our database and ready to join your collection.</div>
             <div className="sets-list-container">
-                {recentSets.map(set => (
+                {displayedSets.map(set => (
                     <div
                         key={set.set_num}
                         className={`set-card ${selectedSets[set.set_num] ? 'selected' : ''}`}
@@ -201,6 +207,22 @@ const Home = () => {
                     </div>
                 ))}
             </div>
+            {hasMoreSets && (
+                <button 
+                    className="show-more-button"
+                    onClick={() => setShowAllRecentSets(!showAllRecentSets)}
+                >
+                    {showAllRecentSets ? (
+                        <>
+                            Show Less <FontAwesomeIcon icon="chevron-up" />
+                        </>
+                    ) : (
+                        <>
+                            Show More <FontAwesomeIcon icon="chevron-down" />
+                        </>
+                    )}
+                </button>
+            )}
 
             {/* Existing PopularThemes section */}
             <div className="popular-themes-container">
@@ -252,10 +274,6 @@ const Home = () => {
                         </div>
                     ))}
                 </div>
-            </div>
-
-            <div className="home-footer">
-                Not affiliated with the LEGO&copy; Group.
             </div>
         </div>
     );
