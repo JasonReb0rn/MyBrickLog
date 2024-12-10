@@ -15,6 +15,7 @@ import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { faCamera, faTimes, faEdit, faSave } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faFire);
 library.add(faHouse);
@@ -32,3 +33,4 @@ library.add(faChevronDown);
 library.add(faChevronRight);
 library.add(faBars);
 library.add(faCircleInfo);
+library.add(faCamera, faTimes, faEdit, faSave);

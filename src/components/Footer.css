@@ -28,6 +28,11 @@ footer {
     margin-bottom: 10px;
   }
 
+  .about-group span {
+    white-space: nowrap;
+    display: flex;
+  }
+
   .footer-item p {
     margin: 0px 5px;
   }

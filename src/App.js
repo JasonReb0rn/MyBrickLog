@@ -1,5 +1,6 @@
 // src/App.js
 import React from 'react';
+import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Home from './components/Home';
@@ -14,9 +15,12 @@ import SubThemes from './components/SubThemes';
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
+import About from './components/About';
 import { AuthProvider } from './components/AuthContext';
 import 'react-tooltip/dist/react-tooltip.css';
 import './App.css';
+
+axios.defaults.withCredentials = true;
 
 const App = () => {
     return (
@@ -39,6 +43,7 @@ const App = () => {
                                 <Route path="/verify/:verificationToken" element={<Verify />} />
                                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                                 <Route path="/terms-of-service" element={<TermsOfService />} />
+                                <Route path="/about" element={<About />} />
                             </Routes>
                         </div>
                     <Footer />

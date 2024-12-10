@@ -15,7 +15,7 @@ const Footer = () => {
                         <img className="logo" src="/images/mybricklog_logo.png" alt="MyBrickLog logo" />
                     </a>
                     <p>Created by <a href="/collection/1">Jason</a></p>
-                    <p>Built with React</p>
+                    <span><p>Enjoying the site?</p><a href="/about">Consider supporting me!</a></span>
                 </div>
 
                 <div className="footer-nav-group footer-item">

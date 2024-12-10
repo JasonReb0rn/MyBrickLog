@@ -265,7 +265,7 @@ const Home = () => {
                         <div key={user.user_id} className="user-card">
                             <Link to={`/collection/${user.user_id}`} className="user-link">
                                 <img 
-                                    src="/images/lego_user.png" 
+                                    src="../images/lego_user.png" 
                                     alt="User Collection" 
                                     className="user-image" 
                                 />

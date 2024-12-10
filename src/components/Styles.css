@@ -3,6 +3,14 @@ body {
     background: #f5f5f5;
 }
 
+a {
+    color: #ff6000;
+}
+
+a:hover {
+    color: #a63f00;
+}
+
 .loading, .error-message  {
     text-align: center;
     font-size: 20px;
