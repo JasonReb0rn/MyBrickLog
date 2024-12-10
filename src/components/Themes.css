@@ -22,7 +22,7 @@
 }
 
 .theme-button {
-    width: 150px;
+    width: 170px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -33,6 +33,12 @@
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
 }
+
+/*
+.theme-button span {
+    white-space: nowrap;
+}
+*/
 
 .theme-button:hover {
     transform: scale(1.05);

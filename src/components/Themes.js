@@ -8,6 +8,7 @@ import './Styles.css';
 
 const Themes = () => {
     const [parentThemes, setParentThemes] = useState([]);
+    const [popularThemeIds, setPopularThemeIds] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [selectedSets, setSelectedSets] = useState({});
@@ -15,14 +16,47 @@ const Themes = () => {
     const [submittedSets, setSubmittedSets] = useState({});
     const navigate = useNavigate();
 
-    const priorityThemes = [721, 52, 246, 1, 158];
-
     useEffect(() => {
         axios.defaults.withCredentials = true;
-        axios.get(`${process.env.REACT_APP_API_URL}/get_parent_themes.php`)
-            .then(response => setParentThemes(response.data))
-            .catch(error => console.error('Error fetching parent themes:', error));
+        
+        // Fetch both parent themes and popular theme IDs
+        Promise.all([
+            axios.get(`${process.env.REACT_APP_API_URL}/get_parent_themes.php`),
+            axios.get(`${process.env.REACT_APP_API_URL}/get_popular_theme_ids.php`)
+        ])
+        .then(([parentThemesResponse, popularThemesResponse]) => {
+            setParentThemes(parentThemesResponse.data);
+            setPopularThemeIds(popularThemesResponse.data);
+        })
+        .catch(error => {
+            console.error('Error fetching themes:', error);
+        });
     }, []);
+
+    // Function to sort themes with popular ones first
+    const getSortedThemes = () => {
+        // Create a copy of the themes array to sort
+        const sortedThemes = [...parentThemes];
+        
+        // Sort the themes array
+        sortedThemes.sort((a, b) => {
+            const aIsPopular = popularThemeIds.includes(Number(a.id));
+            const bIsPopular = popularThemeIds.includes(Number(b.id));
+            
+            if (aIsPopular && !bIsPopular) return -1;
+            if (!aIsPopular && bIsPopular) return 1;
+            
+            // If both are popular, sort by their order in popularThemeIds
+            if (aIsPopular && bIsPopular) {
+                return popularThemeIds.indexOf(Number(a.id)) - popularThemeIds.indexOf(Number(b.id));
+            }
+            
+            // If neither is popular, maintain alphabetical order
+            return a.name.localeCompare(b.name);
+        });
+        
+        return sortedThemes;
+    };
 
     const handleThemeClick = (themeId) => {
         navigate(`/themes/${themeId}`);
@@ -117,16 +151,18 @@ const Themes = () => {
             </form>
             {searchResults.length === 0 ? (
                 <div className="themes-list-container">
-                    {parentThemes.map(theme => (
+                    {getSortedThemes().map(theme => (
                         <button
                             key={theme.id}
-                            className={`theme-button ${priorityThemes.includes(Number(theme.id)) ? 'highlighted' : ''}`}
+                            className={`theme-button ${popularThemeIds.includes(Number(theme.id)) ? 'highlighted' : ''}`}
                             onClick={() => handleThemeClick(theme.id)}
-                        >
-                            {theme.name}
-                            {priorityThemes.includes(Number(theme.id)) && (
-                                <FontAwesomeIcon icon="fire" style={{ marginLeft: '8px' }} />
-                            )}
+                        >   
+                            <span>
+                                {theme.name}
+                                {popularThemeIds.includes(Number(theme.id)) && (
+                                    <FontAwesomeIcon icon="fire" style={{ marginLeft: '8px' }} />
+                                )}
+                            </span>
                         </button>
                     ))}
                 </div>

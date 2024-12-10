@@ -44,6 +44,10 @@
     margin: auto; /* Center horizontally */
 }
 
+#tooltip-minifigures {
+    z-index: 1000;
+}
+
 .stats-section {
     flex: 1; /* Take up equal space */
 }

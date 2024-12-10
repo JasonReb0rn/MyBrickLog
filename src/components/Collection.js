@@ -206,7 +206,7 @@ const Collection = () => {
                                             />
 
                                             <Tooltip id="tooltip-minifigures" place="bottom" type="dark" effect="solid">
-                                                <span>Please note that the minifigure count data is sourced from a third-party database, which may be incomplete.<br></br>We strive to supplement missing information, but the data may not always be accurate.</span>
+                                                <span>Minifigure count data is sourced from a third-party database, which may be incomplete.<br></br>We strive to supplement missing information, but the data may not always be accurate.</span>
                                             </Tooltip>
 
                                         </div>
