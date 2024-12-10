@@ -107,7 +107,12 @@ const Home = () => {
                 No more duplicates, no more forgotten favorites!
             </div>
 
+            <div className="home-footer">
+                Not affiliated with the LEGO&copy; Group.
+            </div>
+
             <div className="theme-header">Recently Added Sets</div>
+            <div className="theme-details">Discover the newest LEGO sets, freshly added to our database and ready to join your collection.</div>
             <div className="sets-list-container">
                 {recentSets.map(set => (
                     <div
@@ -200,6 +205,7 @@ const Home = () => {
             {/* Existing PopularThemes section */}
             <div className="popular-themes-container">
                 <div className="theme-header">Popular Themes</div>
+                <div className="theme-details"><span>See what types of sets other users love having in their collection.</span></div>
                 <div className="themes-list-container">
                     {popularThemes.map(theme => (
                         <div key={theme.id} className="theme-card" onClick={() => handleThemeClick(theme.id)}>

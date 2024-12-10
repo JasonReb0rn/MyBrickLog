@@ -48,7 +48,7 @@
 .home-footer {
     font-size: 0.9em;
     color: #999;
-    margin-top: 40px;
+    margin: 40px;
 }
 
 .popular-themes-container {
@@ -60,6 +60,10 @@
 .theme-header, .user-collections-header {
     font-size: 1.5rem;
     margin-bottom: 10px;
+}
+
+.theme-details {
+    color: #555;
 }
 
 .themes-list-container {
