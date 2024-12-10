@@ -1,6 +1,16 @@
 <?php
 
-@include '../vendor/autoload.php';
+// Try local development path first
+$localPath = __DIR__ . '/../vendor/autoload.php';
+$containerPath = __DIR__ . '/vendor/autoload.php';
+
+if (file_exists($containerPath)) {
+    require $containerPath;
+} elseif (file_exists($localPath)) {
+    require $localPath;
+} else {
+    die('Unable to find autoloader');
+}
 
 // Only try to load Dotenv if not in Docker environment and if autoload exists
 if (!isset($_ENV['MBL_SQL_HOST']) && class_exists('Dotenv\Dotenv')) {

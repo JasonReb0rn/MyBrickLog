@@ -14,19 +14,63 @@ const Register = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // First handle user redirect if logged in
         if (user) {
             logout();
             navigate('/');
+            return; // Exit early
         }
+    
+        // Load ReCAPTCHA only for registration
+        let recaptchaScript = document.querySelector('#recaptcha-script');
+        
+        if (!recaptchaScript) {
+            recaptchaScript = document.createElement('script');
+            recaptchaScript.src = `https://www.google.com/recaptcha/api.js?render=${process.env.REACT_APP_RECAPTCHA_SITE_KEY}`;
+            recaptchaScript.async = true;
+            recaptchaScript.defer = true;
+            recaptchaScript.id = 'recaptcha-script';
+            
+            recaptchaScript.onload = () => {
+                console.log('ReCAPTCHA script loaded');
+            };
+            
+            document.head.appendChild(recaptchaScript);
+        }
+    
+        // Cleanup function
+        return () => {
+            // Remove the script
+            const script = document.querySelector('#recaptcha-script');
+            if (script && script.parentNode) {
+                script.parentNode.removeChild(script);
+            }
+            
+            // Remove the ReCAPTCHA badge/elements
+            const recaptchaElements = document.getElementsByClassName('grecaptcha-badge');
+            while (recaptchaElements.length > 0) {
+                recaptchaElements[0].remove();
+            }
+        };
     }, [user, logout, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const response = await register(username, email, password);
-        if (response.success) {
-            setMessage('Registration successful! Please check your email to verify your account.');
-        } else {
-            setMessage(response.message || 'Registration failed');
+        try {
+            // Execute ReCAPTCHA and get token
+            const token = await window.grecaptcha.execute(process.env.REACT_APP_RECAPTCHA_SITE_KEY, {
+                action: 'register'
+            });
+
+            const response = await register(username, email, password, token);
+            if (response.success) {
+                setMessage('Registration successful! Please check your email to verify your account.');
+            } else {
+                setMessage(response.message || 'Registration failed');
+            }
+        } catch (error) {
+            setMessage('An error occurred during registration. Please try again.');
+            console.error('Registration error:', error);
         }
     };
 
@@ -41,6 +85,7 @@ const Register = () => {
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
+                            required
                         />
                     </div>
                     <div>
@@ -49,6 +94,7 @@ const Register = () => {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            required
                         />
                     </div>
                     <div>
@@ -57,9 +103,10 @@ const Register = () => {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                     </div>
-                    {message && <p>{message}</p>}
+                    {message && <p className={message.includes('successful') ? 'success-message' : 'error-message'}>{message}</p>}
                     <button type="submit">Register</button>
                 </form>
                 <div className="signup-link">

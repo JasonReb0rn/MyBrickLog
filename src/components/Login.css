@@ -79,6 +79,13 @@
     text-align: center;
 }
 
+.auth-container .error-message {
+    color: #9d3d3d;
+    border: 1px solid #9d3d3d;
+    border-radius: 5px;
+    background: #ff00002b;
+}
+
 .signup-link {
     text-align: center;
     margin-top: 10px;

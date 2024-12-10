@@ -58,20 +58,28 @@ export const AuthProvider = ({ children }) => {
         return data;
     };
 
-    const register = async (username, email, password) => {
+    const register = async (username, email, password, recaptchaToken) => {
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/register.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify({ 
+                    username, 
+                    email, 
+                    password,
+                    recaptcha_token: recaptchaToken 
+                }),
             });
     
             const data = await response.json();
             return data;
         } catch (error) {
-            return { success: false, message: 'An error occurred during registration. Please try again.' };
+            return { 
+                success: false, 
+                message: 'An error occurred during registration. Please try again.' 
+            };
         }
     };
 
