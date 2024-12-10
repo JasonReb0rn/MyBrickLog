@@ -1,4 +1,3 @@
-# backend Dockerfile
 FROM php:7.4-apache
 
 # Install necessary PHP extensions and tools
@@ -12,8 +11,21 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy PHP source code to the container FIRST
+# Configure PHP for file uploads
+RUN echo "file_uploads = On\n" \
+         "memory_limit = 128M\n" \
+         "upload_max_filesize = 10M\n" \
+         "post_max_size = 10M\n" \
+         "max_execution_time = 600\n" \
+         > /usr/local/etc/php/conf.d/uploads.ini
+
+# Copy PHP source code to the container
 COPY . /var/www/html/
+
+# Create uploads directory and set permissions
+RUN mkdir -p /var/www/html/public/images/users && \
+    chown -R www-data:www-data /var/www/html/public/images/users && \
+    chmod -R 755 /var/www/html/public/images/users
 
 # Set working directory
 WORKDIR /var/www/html

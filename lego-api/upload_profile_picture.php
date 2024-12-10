@@ -2,19 +2,9 @@
 require 'dbh.php';
 require 'cors_headers.php';
 
-// Determine environment and set appropriate session parameters
-$is_dev = strpos($_SERVER['HTTP_HOST'], 'localhost') !== false;
-
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'domain' => $is_dev ? null : '.mybricklog.com',
-    'secure' => !$is_dev,
-    'httponly' => true,
-    'samesite' => 'Strict'
-]);
-
 session_start();
+
+$is_dev = strpos($_SERVER['HTTP_HOST'], 'localhost') !== false;
 
 $response = ['success' => false];
 
@@ -44,26 +34,22 @@ if (isset($_FILES['profile_picture'])) {
         // Generate unique filename
         $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
         $filename = 'user_' . $user_id . '_' . time() . '.' . $extension;
-        
-        // Set path relative to project root
-        $project_root = dirname(dirname(__FILE__)); // Go up one level from lego-api
-        $upload_dir = $project_root . '/public/images/users/';
-        $upload_path = $upload_dir . $filename;
-        
-        // Debug logging in development
+
+        // Navigate to project root from current script location, then to uploads directory
+        $project_root = dirname(dirname(__FILE__));
+
         if ($is_dev) {
-            error_log('Project root: ' . $project_root);
-            error_log('Upload directory: ' . $upload_dir);
-            error_log('Full upload path: ' . $upload_path);
+            $upload_dir = 'C:/wamp64/www/mybricklog/public/images/users/';
+        } else {
+            $upload_dir = '/var/www/html/public/images/users/';
         }
         
-        // Ensure upload directory exists
+        // Create directory if it doesn't exist
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0755, true);
-            if ($is_dev) {
-                error_log('Created directory: ' . $upload_dir);
-            }
         }
+        
+        $upload_path = $upload_dir . $filename;
         
         // Move file and update database
         if (move_uploaded_file($file['tmp_name'], $upload_path)) {
@@ -74,9 +60,9 @@ if (isset($_FILES['profile_picture'])) {
                 $old_picture = $stmt->fetchColumn();
                 
                 if ($old_picture) {
-                    $old_file = $upload_dir . $old_picture;
-                    if (file_exists($old_file)) {
-                        unlink($old_file);
+                    $old_path = $upload_dir . $old_picture;
+                    if (file_exists($old_path)) {
+                        unlink($old_path);
                     }
                 }
                 
@@ -94,7 +80,7 @@ if (isset($_FILES['profile_picture'])) {
             }
         } else {
             $response['error'] = 'Failed to save file';
-            error_log('Failed to move uploaded file to: ' . $upload_path);
+            error_log('Failed to save file. Path: ' . $upload_path);
         }
     }
 } else {
