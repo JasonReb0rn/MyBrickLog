@@ -34,7 +34,7 @@ const Profile = () => {
             if (response.data.success) {
                 setProfileData(response.data.profile);
                 if (response.data.profile.profilePicture) {
-                    setPreviewImage(`/images/users/${response.data.profile.profilePicture}`);
+                    setPreviewImage(`https://mybricklog.s3.us-east-2.amazonaws.com/profile-pictures/${response.data.profile.profilePicture}`);
                 }
             }
         } catch (error) {
@@ -145,7 +145,7 @@ const Profile = () => {
                         <img
                             src={
                                 previewImage || 
-                                (profileData.profilePicture ? `/images/users/${profileData.profilePicture}` : '/images/lego_user.png')
+                                (profileData.profilePicture ? `https://mybricklog.s3.us-east-2.amazonaws.com/profile-pictures/${profileData.profilePicture}` : '/images/lego_user.png')
                             }
                             alt="Profile"
                             className="profile-picture"

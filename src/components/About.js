@@ -5,9 +5,9 @@ import './about.css';
 
 const About = () => {
     const cryptoWallets = [
-        { name: 'Bitcoin (BTC)', address: 'bc1qxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
-        { name: 'Ethereum (ETH)', address: '0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' },
-        { name: 'Dogecoin (DOGE)', address: 'DXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' }
+        { name: 'Bitcoin (BTC)', address: 'bc1qhclc8003jgk7cjz8f4hqtdw83qc0xmzh4p3sff' },
+        { name: 'Ethereum (ETH)', address: '0x0B1e5c79b1C6862b47391Ea13e9a2860f530b6a8' },
+        { name: 'Dogecoin (DOGE)', address: 'D5DJSKnAt2FXbjL2bTkZCR9JAP7vz8Py5r' }
     ];
 
     return (

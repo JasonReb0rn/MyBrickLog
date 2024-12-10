@@ -2,9 +2,29 @@
 require 'dbh.php';
 require 'cors_headers.php';
 
+// Add AWS SDK usage only in this file
+use Aws\S3\S3Client;
+
 session_start();
 
-$is_dev = strpos($_SERVER['HTTP_HOST'], 'localhost') !== false;
+// Initialize S3 client
+$s3Config = [
+    'version' => 'latest',
+    'region'  => 'us-east-2',
+    'credentials' => [
+        'key'    => $_ENV['AWS_SES_KEY'] ?? '',
+        'secret' => $_ENV['AWS_SES_SECRET'] ?? '',
+    ]
+];
+
+// Only disable SSL verify in local development
+if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) {
+    $s3Config['http'] = [
+        'verify' => false
+    ];
+}
+
+$s3 = new S3Client($s3Config);
 
 $response = ['success' => false];
 
@@ -35,52 +55,47 @@ if (isset($_FILES['profile_picture'])) {
         $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
         $filename = 'user_' . $user_id . '_' . time() . '.' . $extension;
 
-        // Navigate to project root from current script location, then to uploads directory
-        $project_root = dirname(dirname(__FILE__));
-
-        if ($is_dev) {
-            $upload_dir = 'C:/wamp64/www/mybricklog/public/images/users/';
-        } else {
-            $upload_dir = '/var/www/html/public/images/users/';
-        }
-        
-        // Create directory if it doesn't exist
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
-        
-        $upload_path = $upload_dir . $filename;
-        
-        // Move file and update database
-        if (move_uploaded_file($file['tmp_name'], $upload_path)) {
-            try {
-                // Delete old profile picture if exists
-                $stmt = $pdo->prepare("SELECT profile_picture FROM users WHERE user_id = ?");
-                $stmt->execute([$user_id]);
-                $old_picture = $stmt->fetchColumn();
-                
-                if ($old_picture) {
-                    $old_path = $upload_dir . $old_picture;
-                    if (file_exists($old_path)) {
-                        unlink($old_path);
-                    }
+        try {
+            // Delete old profile picture if exists
+            $stmt = $pdo->prepare("SELECT profile_picture FROM users WHERE user_id = ?");
+            $stmt->execute([$user_id]);
+            $old_picture = $stmt->fetchColumn();
+            
+            if ($old_picture) {
+                // Delete old file from S3
+                try {
+                    $s3->deleteObject([
+                        'Bucket' => 'mybricklog',
+                        'Key'    => 'profile-pictures/' . $old_picture
+                    ]);
+                } catch (Exception $e) {
+                    // Log error but continue with upload
+                    error_log('Failed to delete old S3 file: ' . $e->getMessage());
                 }
-                
-                // Update database with new filename
-                $stmt = $pdo->prepare("UPDATE users SET profile_picture = ? WHERE user_id = ?");
-                $stmt->execute([$filename, $user_id]);
-                
-                $response['success'] = true;
-                $response['filename'] = $filename;
-            } catch (PDOException $e) {
-                $response['error'] = 'Database error';
-                error_log('Database error: ' . $e->getMessage());
-                // Clean up uploaded file if database update fails
-                unlink($upload_path);
             }
-        } else {
-            $response['error'] = 'Failed to save file';
-            error_log('Failed to save file. Path: ' . $upload_path);
+            
+            // Upload new file to S3
+            $result = $s3->putObject([
+                'Bucket' => 'mybricklog',
+                'Key'    => 'profile-pictures/' . $filename,
+                'Body'   => fopen($file['tmp_name'], 'rb'),
+                'ContentType' => $file['type']
+            ]);
+            
+            // Get the public URL
+            $imageUrl = $result['ObjectURL'];
+            
+            // Update database with new filename
+            $stmt = $pdo->prepare("UPDATE users SET profile_picture = ? WHERE user_id = ?");
+            $stmt->execute([$filename, $user_id]);
+            
+            $response['success'] = true;
+            $response['filename'] = $filename;
+            $response['url'] = $imageUrl;
+            
+        } catch (Exception $e) {
+            $response['error'] = 'Upload failed: ' . $e->getMessage();
+            error_log('S3 upload error: ' . $e->getMessage());
         }
     }
 } else {
