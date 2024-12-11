@@ -13,10 +13,10 @@
 .sets-container, .themes-list-container, .sets-list-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 1rem;
     justify-content: center;
     margin-bottom: 20px;
-    margin: 10px auto;
+    margin: 1rem auto;
 }
 
 .theme-button {

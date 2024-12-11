@@ -5,7 +5,7 @@ require 'cors_headers.php';
 try {
     // SQL query to fetch 3 random users who have at least one item in their collection
     $query = "
-        SELECT u.user_id, u.username
+        SELECT u.user_id, u.username, u.profile_picture
         FROM users u
         JOIN collection c ON u.user_id = c.user_id
         GROUP BY u.user_id

@@ -3,10 +3,6 @@ body {
     background: #f5f5f5;
 }
 
-.content {
-    margin-top: 20px;
-}
-
 a {
     color: #ff6000;
 }
@@ -25,6 +21,7 @@ a:hover {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin: 2rem auto;
   }
 
 .collection-nouser-links-container {

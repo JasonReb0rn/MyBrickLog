@@ -11,7 +11,7 @@ const Footer = () => {
         <footer>
             <div className="footer-container">
                 <div className="about-group footer-item">
-                    <a className="header-logo-link" href="home.php">
+                    <a className="header-logo-link" href="/">
                         <img className="logo" src="/images/mybricklog_logo.png" alt="MyBrickLog logo" />
                     </a>
                     <p>Created by <a href="/collection/1">Jason</a></p>

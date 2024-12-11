@@ -264,11 +264,13 @@ const Home = () => {
                     {userCollections.map(user => (
                         <div key={user.user_id} className="user-card">
                             <Link to={`/collection/${user.user_id}`} className="user-link">
-                                <img 
-                                    src="../images/lego_user.png" 
-                                    alt="User Collection" 
-                                    className="user-image" 
-                                />
+                                <div className="user-image-container">
+                                    <img 
+                                        src={user.profile_picture ? `https://mybricklog.s3.us-east-2.amazonaws.com/profile-pictures/${user.profile_picture}` : '/images/lego_user.png'}
+                                        alt="User Collection" 
+                                        className="user-image" 
+                                    />
+                                </div>
                                 <div className="user-name">{user.username}</div>
                             </Link>
                         </div>
