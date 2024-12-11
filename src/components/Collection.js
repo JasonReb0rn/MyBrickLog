@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
-import './Themes.css';
 import './Collection.css';
-import './Styles.css';
 import { useAuth } from './AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Tooltip } from 'react-tooltip';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle, faMapMarkerAlt, faCube } from '@fortawesome/free-solid-svg-icons';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 const Collection = () => {
+    const [profileData, setProfileData] = useState(null);
     const [sets, setSets] = useState([]);
-    const [username, setUsername] = useState('');
     const [selectedSet, setSelectedSet] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [copiedUrl, setCopiedUrl] = useState(false);
@@ -21,6 +19,7 @@ const Collection = () => {
     const { userId } = useParams();
     const { user } = useAuth();
     const [loadedImages, setLoadedImages] = useState({});
+    const [collapsedThemes, setCollapsedThemes] = useState({});
 
     useEffect(() => {
         const fetchCollection = async () => {
@@ -36,7 +35,7 @@ const Collection = () => {
                     console.error('Error fetching user collection:', response.data.error);
                 } else {
                     setSets(response.data.sets);
-                    setUsername(response.data.username);
+                    setProfileData(response.data.profile);
                 }
             } catch (error) {
                 console.error('Error fetching user collection:', error);
@@ -47,14 +46,13 @@ const Collection = () => {
         fetchCollection();
     }, [userId]);
 
-    useEffect(() => {
-        if (copiedUrl) {
-            setTimeout(() => setCopiedUrl(false), 5000);
+    // Helper functions
+    const handleImageError = (e, type = 'set') => {
+        if (type === 'profile') {
+            e.target.src = '/images/lego_user.png';
+        } else {
+            e.target.src = '/images/lego_piece_questionmark.png';
         }
-    }, [copiedUrl]);
-
-    const handleImageError = (e) => {
-        e.target.src = '/images/lego_piece_questionmark.png';
     };
 
     const handleImageLoad = (setNum) => {
@@ -65,19 +63,24 @@ const Collection = () => {
         const url = window.location.href;
         navigator.clipboard.writeText(url).then(() => {
             setCopiedUrl(true);
+            setTimeout(() => setCopiedUrl(false), 5000);
         }).catch(err => {
             console.error('Error copying URL:', err);
         });
     };
 
+    // Collection management functions
     const updateQuantity = async (set_num, newQuantity) => {
         try {
-            axios.defaults.withCredentials = true;
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/update_set_quantity.php`, { user_id: Number(userId), set_num, quantity: newQuantity });
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL}/update_set_quantity.php`, 
+                { user_id: Number(userId), set_num, quantity: newQuantity },
+                { withCredentials: true }
+            );
             if (response.data.success) {
-                setSets(sets.map(set => (set.set_num === set_num ? { ...set, quantity: newQuantity } : set)));
-            } else {
-                console.error('Error updating quantity:', response.data.error);
+                setSets(sets.map(set => 
+                    set.set_num === set_num ? { ...set, quantity: newQuantity } : set
+                ));
             }
         } catch (error) {
             console.error('Error updating quantity:', error);
@@ -86,12 +89,13 @@ const Collection = () => {
 
     const removeSet = async (set_num) => {
         try {
-            axios.defaults.withCredentials = true;
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/remove_set_from_collection.php`, { user_id: Number(userId), set_num });
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL}/remove_set_from_collection.php`,
+                { user_id: Number(userId), set_num },
+                { withCredentials: true }
+            );
             if (response.data.success) {
                 setSets(sets.filter(set => set.set_num !== set_num));
-            } else {
-                console.error('Error removing set:', response.data.error);
             }
         } catch (error) {
             console.error('Error removing set:', error);
@@ -100,12 +104,15 @@ const Collection = () => {
 
     const toggleCompleteStatus = async (set_num, currentStatus) => {
         try {
-            axios.defaults.withCredentials = true;
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/toggle_set_complete_status.php`, { user_id: Number(userId), set_num, complete: currentStatus ? 0 : 1 });
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL}/toggle_set_complete_status.php`,
+                { user_id: Number(userId), set_num, complete: currentStatus ? 0 : 1 },
+                { withCredentials: true }
+            );
             if (response.data.success) {
-                setSets(sets.map(set => (set.set_num === set_num ? { ...set, complete: currentStatus ? 0 : 1 } : set)));
-            } else {
-                console.error('Error toggling complete status:', response.data.error);
+                setSets(sets.map(set => 
+                    set.set_num === set_num ? { ...set, complete: currentStatus ? 0 : 1 } : set
+                ));
             }
         } catch (error) {
             console.error('Error toggling complete status:', error);
@@ -115,17 +122,19 @@ const Collection = () => {
     const toggleSelectSet = (set_num) => {
         if (user && Number(user.user_id) === Number(userId)) {
             setSelectedSet(selectedSet === set_num ? null : set_num);
-        } else {
-            console.warn('User is not logged in or does not have permission to select this set.');
         }
     };
-
-    const [collapsedThemes, setCollapsedThemes] = useState({});
 
     const toggleCollapse = (themeId) => {
         setCollapsedThemes(prev => ({ ...prev, [themeId]: !prev[themeId] }));
     };
 
+    // Calculate statistics
+    const totalSets = sets.reduce((acc, set) => acc + Number(set.quantity), 0);
+    const totalParts = sets.reduce((acc, set) => acc + (set.num_parts * Number(set.quantity)), 0);
+    const totalMinifigures = sets.reduce((acc, set) => acc + (Number(set.num_minifigures) * Number(set.quantity)), 0);
+
+    // Group sets by theme
     const groupedSets = sets.reduce((acc, set) => {
         if (!acc[set.theme_id]) {
             acc[set.theme_id] = { theme_name: set.theme_name, sets: [] };
@@ -134,155 +143,241 @@ const Collection = () => {
         return acc;
     }, {});
 
-    const renderErrorMessage = () => {
-        if (!userExists && !isLoading) {
-            return <div className="error-message">Something went wrong! This user couldn't be found.</div>;
-        }
-    
-        if (userExists && sets.length === 0 && !isLoading) {
-            if (user && Number(user.user_id) === Number(userId)) {
-                return <div className="error-message">You haven't added any sets to your collection yet.</div>;
-            } else {
-                return <div className="error-message">This user hasn't added any sets to their collection yet.</div>;
+    const groupAndSortThemes = (sets, favoriteThemeId) => {
+        // First group the sets by theme
+        const grouped = sets.reduce((acc, set) => {
+            if (!acc[set.theme_id]) {
+                acc[set.theme_id] = { 
+                    theme_id: set.theme_id,
+                    theme_name: set.theme_name, 
+                    sets: [] 
+                };
             }
-        }
+            acc[set.theme_id].sets.push(set);
+            return acc;
+        }, {});
     
-        return null;
+        // Convert to array and add set count
+        const themesArray = Object.values(grouped).map(theme => ({
+            ...theme,
+            setCount: theme.sets.length
+        }));
+    
+        // Sort themes: favorite theme first, then by size
+        return themesArray.sort((a, b) => {
+            // If one is the favorite theme, it goes first
+            if (a.theme_id === favoriteThemeId) return -1;
+            if (b.theme_id === favoriteThemeId) return 1;
+    
+            // Otherwise sort by set count
+            return b.setCount - a.setCount;
+        });
     };
 
-    const totalSets = sets.reduce((acc, set) => acc + Number(set.quantity), 0);
-    const totalParts = sets.reduce((acc, set) => acc + (set.num_parts * Number(set.quantity)), 0);
-    const totalMinifigures = sets.reduce((acc, set) => acc + (Number(set.num_minifigures) * Number(set.quantity)), 0);
+    // Render helper functions
+    const renderProfileSection = () => {
+        if (!profileData) return null;
 
-    return (
-        <div className="content">
-            {!userId ? (
+        const displayName = profileData.display_name || profileData.username;
+        
+        return (
+            <div className="collection-profile-section">
+                <div className="collection-profile-header">
+                    <div className="profile-image-container">
+                        <img 
+                            src={profileData.profile_picture ? `https://mybricklog.s3.us-east-2.amazonaws.com/profile-pictures/${profileData.profile_picture}` : '/images/lego_user.png'}
+                            alt={displayName}
+                            className="profile-image"
+                            onError={(e) => handleImageError(e, 'profile')}
+                        />
+                    </div>
+                    <div className="profile-info">
+                        <h1 className="profile-name">{displayName}</h1>
+                        {profileData.location && (
+                            <div className="profile-location">
+                                <FontAwesomeIcon icon={faMapMarkerAlt} /> {profileData.location}
+                            </div>
+                        )}
+                        {profileData.favorite_theme_name && (
+                            <div className="profile-favorite-theme">
+                                <FontAwesomeIcon icon={faCube} /> Favorite Theme: {profileData.favorite_theme_name}
+                            </div>
+                        )}
+                        {profileData.bio && (
+                            <p className="profile-bio">{profileData.bio}</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderCollectionStats = () => (
+        <div className="stats-container">
+            <div className="collection-stats">
+                <div className="stats-section">
+                    <div className="stats-header">Sets</div>
+                    <div className="stats-value">{totalSets}</div>
+                </div>
+                <div className="stats-section">
+                    <div className="stats-header">Parts</div>
+                    <div className="stats-value">{totalParts.toLocaleString()}</div>
+                </div>
+                <div className="stats-section">
+                    <div className="stats-header">
+                        Minifigures
+                        <FontAwesomeIcon
+                            icon={faInfoCircle}
+                            className="info-icon"
+                            data-tooltip-id="tooltip-minifigures"
+                        />
+                    </div>
+                    <div className="stats-value">{totalMinifigures.toLocaleString()}</div>
+                    <Tooltip id="tooltip-minifigures" place="bottom" type="dark" effect="solid">
+                        <span>Minifigure count data is sourced from a third-party database and may be incomplete.</span>
+                    </Tooltip>
+                </div>
+            </div>
+        </div>
+    );
+
+    if (!userId) {
+        return (
+            <div className="content">
                 <div className="centered-message">
                     <h2>Create an account and start your collection today!</h2>
                     <div className="collection-nouser-links-container">
-                        <Link to="/register">
-                            <button className="register-button">Register</button>
-                        </Link>
-                        <Link to="/login">
-                            <button className="login-button">Log In</button>
-                        </Link>
+                        <Link to="/register" className="register-button">Register</Link>
+                        <Link to="/login" className="login-button">Log In</Link>
                     </div>
                 </div>
-            ) : (
+            </div>
+        );
+    }
+
+    if (isLoading) {
+        return <div className="loading">Loading...</div>;
+    }
+
+    if (!userExists) {
+        return <div className="error-message">User not found.</div>;
+    }
+
+    return (
+        <div className="content">
+            {renderProfileSection()}
+            
+            <div className="collection-header">
+                <h2>{user && Number(user.user_id) === Number(userId) ? 'My Collection' : `${profileData?.display_name || profileData?.username}'s Collection`}</h2>
+                <button onClick={shareCollection} className="share-button">
+                    <FontAwesomeIcon 
+                        icon={copiedUrl ? "check" : "share"} 
+                        className="share-icon" 
+                    />
+                    {copiedUrl ? 'Link Copied!' : 'Share Collection'}
+                </button>
+            </div>
+
+            {sets.length > 0 ? (
                 <>
-                    <div>
-                        {renderErrorMessage()}
-                    </div>
-
-                    {!isLoading && sets.length > 0 && (
-                        <>
-                            <button onClick={shareCollection} className="share-button">
-                                {copiedUrl ? <FontAwesomeIcon icon="thumbs-up" style={{ marginRight: '8px' }} /> : <FontAwesomeIcon icon="share" style={{ marginRight: '8px' }} />}
-                                {copiedUrl ? 'Successfully copied link!' : 'Share Collection'}
-                            </button>
-
-                            <div className="theme-header">{user && Number(user.user_id) === Number(userId) ? 'My Collection' : `${username}'s Collection`}</div>
-
-                            <div className="stats-container">
-                                <div className="collection-stats">
-                                    <div className="stats-section">
-                                        <div className="stats-header">Number of Sets</div>
-                                        <div className="stats-value">{totalSets}</div>
-                                    </div>
-                                    <div className="stats-section">
-                                        <div className="stats-header">Number of Parts</div>
-                                        <div className="stats-value">{totalParts}</div>
-                                    </div>
-                                    <div className="stats-section">
-                                        <div className="stats-header">Number of Minifigures</div>
-                                        <div className="stats-value">
-                                            {totalMinifigures}
-                                            
-                                            <FontAwesomeIcon
-                                                icon={faInfoCircle}
-                                                className="info-icon"
-                                                style={{ marginLeft: '8px' }}
-                                                data-tooltip-id="tooltip-minifigures"
-                                            />
-
-                                            <Tooltip id="tooltip-minifigures" place="bottom" type="dark" effect="solid">
-                                                <span>Minifigure count data is sourced from a third-party database, which may be incomplete.<br></br>We strive to supplement missing information, but the data may not always be accurate.</span>
-                                            </Tooltip>
-
-                                        </div>
-                                    </div>
+                    {renderCollectionStats()}
+                    
+                    <div className="collection-themes-container">
+                        {groupAndSortThemes(sets, profileData?.favorite_theme).map(theme => (
+                            <div 
+                                key={theme.theme_id} 
+                                className={`collection-theme-section ${
+                                    collapsedThemes[theme.theme_id] ? 'collapsed' : ''
+                                } ${theme.setCount < 7 ? 'half' : ''}`}
+                            >
+                                <div className="theme-title" onClick={() => toggleCollapse(theme.theme_id)}>
+                                    {theme.theme_name}
+                                    <FontAwesomeIcon 
+                                        icon={collapsedThemes[theme.theme_id] ? "chevron-right" : "chevron-down"} 
+                                        className="theme-icon"
+                                    />
                                 </div>
-                            </div>
+                                {!collapsedThemes[theme.theme_id] && (
+                                    <div className="sets-container">
+                                        {theme.sets.map(set => (
+                                            <div
+                                                key={set.set_num}
+                                                className={`set-card ${
+                                                    Number(set.complete) === 0 ? 'incomplete' : ''
+                                                } ${selectedSet === set.set_num ? 'selected' : ''}`}
+                                                onClick={() => toggleSelectSet(set.set_num)}
+                                            >
+                                                <div className="set-image-container">
+                                                    {!loadedImages[set.set_num] && <Skeleton height={100} />}
+                                                    <img
+                                                        src={set.img_url}
+                                                        alt={set.name}
+                                                        className={`set-image collection ${loadedImages[set.set_num] ? 'loaded' : ''}`}
+                                                        onError={handleImageError}
+                                                        onLoad={() => handleImageLoad(set.set_num)}
+                                                        style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
+                                                    />
+                                                </div>
 
-                            <div className="themes-container">
-                                {Object.keys(groupedSets).map(themeId => (
-                                    <div key={themeId} className="theme-section">
-                                        <div className="theme-title" onClick={() => toggleCollapse(themeId)}>
-                                            {groupedSets[themeId].theme_name}
-                                            <FontAwesomeIcon icon={collapsedThemes[themeId] ? "chevron-right" : "chevron-down"} style={{ marginLeft: '8px' }} />
-                                        </div>
-                                        {!collapsedThemes[themeId] && (
-                                            <div className="sets-container">
-                                                {groupedSets[themeId].sets.map(set => (
-                                                    <div
-                                                        key={set.set_num}
-                                                        className={`set-card ${Number(set.complete) === 0 ? 'incomplete' : ''} ${selectedSet === set.set_num ? 'selected' : ''}`}
-                                                        onClick={() => toggleSelectSet(set.set_num)}
-                                                    >
-
-
-                                                        <div className="set-image-container">
-                                                            {!loadedImages[set.set_num] && (
-                                                                <Skeleton height={100} />
-                                                            )}
-                                                            <img
-                                                                src={set.img_url}
-                                                                alt={set.name}
-                                                                className={`set-image ${loadedImages[set.set_num] ? 'loaded' : 'loading'}`}
-                                                                onError={handleImageError}
-                                                                onLoad={() => handleImageLoad(set.set_num)}
-                                                                style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
-                                                            />
-                                                        </div>
-
-
-
-                                                        <div className="set-name">{set.name} ({set.year})</div>
-                                                        {user && Number(user.user_id) === Number(userId) && selectedSet === set.set_num ? (
-                                                            <div className="set-actions">
-                                                                <button className="quantity-button" onClick={() => updateQuantity(set.set_num, Number(set.quantity) - 1)} disabled={set.quantity <= 1}>-</button>
-                                                                <span className="quantity-input">{set.quantity}</span>
-                                                                <button className="quantity-button" onClick={() => updateQuantity(set.set_num, Number(set.quantity) + 1)}>+</button>
-
-                                                                <div className="button-container collection">
-                                                                    <button className={`${Number(set.complete) === 0 ? 'incomplete-button' : 'complete-button'}`} onClick={() => toggleCompleteStatus(set.set_num, set.complete)}>
-                                                                        {Number(set.complete) ? 'Incomplete' : 'Complete'}
-                                                                    </button>
-
-                                                                    <button className="remove-button" onClick={() => removeSet(set.set_num)}>Remove</button>
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="set-num">{set.set_num}</div>
-                                                        )}
-
-                                                        {set.quantity > 1 && (
-                                                            <div className="badge">x{set.quantity}</div>
-                                                        )}
+                                                <div className="set-info">
+                                                    <div className="set-name">{set.name}</div>
+                                                    <div className="set-details">
+                                                        <span className="set-year">({set.year})</span>
+                                                        <span className="set-number">{set.set_num}</span>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </>
-                    )}
+                                                </div>
 
-                    {isLoading && (
-                        <div className="loading">Loading...</div>
-                    )}
+                                                {user && Number(user.user_id) === Number(userId) && 
+                                                 selectedSet === set.set_num && (
+                                                    <div className="set-actions">
+                                                        <div className="quantity-controls">
+                                                            <button 
+                                                                className="quantity-button"
+                                                                onClick={() => updateQuantity(set.set_num, Number(set.quantity) - 1)}
+                                                                disabled={set.quantity <= 1}
+                                                            >-</button>
+                                                            <span className="quantity-display">{set.quantity}</span>
+                                                            <button 
+                                                                className="quantity-button"
+                                                                onClick={() => updateQuantity(set.set_num, Number(set.quantity) + 1)}
+                                                            >+</button>
+                                                        </div>
+                                                        <div className="set-action-buttons">
+                                                            <button
+                                                                className={`status-button ${Number(set.complete) === 1 ? 'complete' : 'incomplete'}`}
+                                                                onClick={() => toggleCompleteStatus(set.set_num, set.complete)}
+                                                            >
+                                                                {Number(set.complete) === 1 ? 'Mark Incomplete' : 'Mark Complete'}
+                                                            </button>
+                                                            <button
+                                                                className="remove-button"
+                                                                onClick={() => removeSet(set.set_num)}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {set.quantity > 1 && (
+                                                    <div className="quantity-badge">×{set.quantity}</div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </>
+            ) : (
+                <div className="empty-collection">
+                    {user && Number(user.user_id) === Number(userId) ? (
+                        <p>You haven't added any sets to your collection yet.</p>
+                    ) : (
+                        <p>This user hasn't added any sets to their collection yet.</p>
+                    )}
+                </div>
             )}
         </div>
     );

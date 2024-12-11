@@ -21,14 +21,14 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.profile-section {
+.about-content .profile-section {
     display: flex;
     align-items: center;
     margin-bottom: 40px;
     gap: 20px;
 }
 
-.profile-image {
+.profile-section .profile-image {
     width: 150px;
     height: 150px;
     border-radius: 50%;

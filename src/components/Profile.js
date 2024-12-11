@@ -125,7 +125,7 @@ const Profile = () => {
 
     return (
         <div className="profile-container">
-            <div className="profile-header">
+            <div className="profile-page-header">
                 <h1>My Profile</h1>
                 <button 
                     className="edit-button"

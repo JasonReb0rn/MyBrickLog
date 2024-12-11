@@ -103,7 +103,7 @@ CREATE TABLE `log` (
   `log_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `log_ip` varchar(45) NOT NULL,
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=119 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -213,12 +213,20 @@ CREATE TABLE `users` (
   `last_login` timestamp NULL DEFAULT NULL,
   `verified` tinyint(1) DEFAULT '0',
   `verification_token` varchar(255) DEFAULT NULL,
+  `profile_picture` varchar(255) DEFAULT NULL,
+  `bio` text,
+  `location` varchar(100) DEFAULT NULL,
+  `favorite_theme` int DEFAULT NULL,
+  `display_name` varchar(100) DEFAULT NULL,
+  `join_date` date DEFAULT (curdate()),
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`),
   KEY `idx_users_username` (`username`),
   KEY `idx_users_email` (`email`),
-  KEY `idx_users_last_login` (`last_login`)
+  KEY `idx_users_last_login` (`last_login`),
+  KEY `favorite_theme` (`favorite_theme`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`favorite_theme`) REFERENCES `themes` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -236,7 +244,7 @@ CREATE TABLE `wishlist` (
   PRIMARY KEY (`id`),
   KEY `set_num` (`set_num`(250)),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -248,4 +256,4 @@ CREATE TABLE `wishlist` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-10 11:09:45
+-- Dump completed on 2024-12-10 20:36:15

@@ -4,41 +4,91 @@ require 'cors_headers.php';
 
 $userId = isset($_GET['user_id']) ? intval($_GET['user_id']) : null;
 
-if ($userId !== null) {
-    try {
-        $stmt = $pdo->prepare("
-            SELECT u.username, s.set_num, s.name, s.num_parts, s.img_url, s.theme_id, t.name AS theme_name,
-                COALESCE((
-                    SELECT SUM(im.quantity)
-                    FROM inventory_minifigs im
-                    JOIN inventories i ON im.inventory_id = i.id
-                    WHERE i.set_num = s.set_num
-                ), 0) AS num_minifigures
-            FROM users u
-            JOIN wishlist w ON u.user_id = w.user_id
-            JOIN sets s ON s.set_num = w.set_num
-            JOIN themes t ON s.theme_id = t.id
-            WHERE u.user_id = :user_id
-        ");
-        $stmt->execute(['user_id' => $userId]);
-        $sets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+if ($userId === null) {
+    echo json_encode(['error' => 'Invalid user ID provided.']);
+    exit;
+}
 
-        if (!empty($sets)) {
-            $username = $sets[0]['username'];
-            $response = [
-                'username' => $username,
-                'sets' => $sets
-            ];
-            echo json_encode($response);
-        } else {
-            echo json_encode(['error' => 'No sets found in wishlist for this user.']);
-        }
-    } catch (PDOException $e) {
-        error_log('Error fetching user collection: ' . $e->getMessage());
-        echo json_encode(['error' => 'An error occurred while fetching the collection.']);
+try {
+    // First, get the user's profile information
+    $userStmt = $pdo->prepare("
+        SELECT 
+            u.username,
+            u.display_name,
+            u.profile_picture,
+            u.bio,
+            u.location,
+            u.favorite_theme,
+            u.join_date,
+            t.name as favorite_theme_name
+        FROM users u
+        LEFT JOIN themes t ON u.favorite_theme = t.id
+        WHERE u.user_id = :user_id
+    ");
+    
+    $userStmt->execute(['user_id' => $userId]);
+    $userData = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$userData) {
+        echo json_encode(['error' => 'User not found.']);
+        exit;
     }
-} else {
-    echo json_encode(['error' => 'Invalid user ID.']);
+
+    // Clean and prepare the profile data
+    $profile = [
+        'username' => $userData['username'],
+        'display_name' => $userData['display_name'],
+        'profile_picture' => $userData['profile_picture'],
+        'bio' => $userData['bio'],
+        'location' => $userData['location'],
+        'favorite_theme' => $userData['favorite_theme'],
+        'favorite_theme_name' => $userData['favorite_theme_name'],
+        'join_date' => $userData['join_date']
+    ];
+
+    // Get the user's wishlist
+    $setsStmt = $pdo->prepare("
+        SELECT 
+            s.set_num,
+            s.name,
+            s.year,
+            s.num_parts,
+            s.img_url,
+            s.theme_id,
+            t.name AS theme_name,
+            pt.name AS parent_theme_name,
+            pt.id AS parent_theme_id
+        FROM wishlist w
+        JOIN sets s ON s.set_num = w.set_num
+        JOIN themes t ON s.theme_id = t.id
+        LEFT JOIN themes pt ON t.parent_id = pt.id
+        WHERE w.user_id = :user_id
+        ORDER BY 
+            COALESCE(pt.name, t.name),
+            t.name,
+            s.year DESC,
+            s.name
+    ");
+
+    $setsStmt->execute(['user_id' => $userId]);
+    $sets = $setsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Prepare the response
+    $response = [
+        'profile' => $profile,
+        'sets' => $sets
+    ];
+
+    // Set cache headers
+    header('Cache-Control: max-age=300, public');
+    header('ETag: "' . md5(json_encode($response)) . '"');
+
+    echo json_encode($response);
+
+} catch (PDOException $e) {
+    error_log('Database error in get_user_wishlist.php: ' . $e->getMessage());
+    echo json_encode([
+        'error' => 'An error occurred while fetching the wishlist.',
+    ]);
 }
 ?>
-
