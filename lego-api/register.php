@@ -95,6 +95,19 @@ if (!empty($username) && !empty($email) && !empty($password) && !empty($recaptch
         $mailSent = false;
         $mail = new PHPMailer(true);
         try {
+            // Enable detailed debug output
+            $mail->SMTPDebug = 3;  // Enable verbose debug output
+            $mail->Debugoutput = function($str, $level) {
+                error_log("PHPMailer [$level] : $str");
+            };
+
+            // Log configuration before setting up SMTP
+            error_log("PHPMailer Configuration:");
+            error_log("Host: email-smtp.us-east-2.amazonaws.com");
+            error_log("Port: 587");
+            error_log("Username length: " . strlen($_ENV['AWS_SES_KEY']));
+            error_log("Password length: " . strlen($_ENV['AWS_SES_SECRET']));
+
             $mail->isSMTP();
             $mail->Host       = 'email-smtp.us-east-2.amazonaws.com';
             $mail->SMTPAuth   = true;
@@ -102,6 +115,9 @@ if (!empty($username) && !empty($email) && !empty($password) && !empty($recaptch
             $mail->Password   = $_ENV['AWS_SES_SECRET'];
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
+
+            // Log successful SMTP setup
+            error_log("SMTP configuration complete");
 
             $mail->setFrom('no-reply@mybricklog.com', 'MyBrickLog');
             $mail->addAddress($email, $username);
@@ -111,13 +127,19 @@ if (!empty($username) && !empty($email) && !empty($password) && !empty($recaptch
             $mail->Body    = "Click the following link to verify your account: <a href=\"$verificationURL\">$verificationURL</a>";
             $mail->AltBody = "Click the following link to verify your account: $verificationURL";
 
+            // Log before sending
+            error_log("Attempting to send email...");
+            
             $mail->send();
             $mailSent = true;
             error_log("Verification email sent successfully");
             
         } catch (Exception $e) {
-            error_log("Failed to send verification email: " . $mail->ErrorInfo);
-            throw $e; // Re-throw to be caught by outer try block
+            error_log("Detailed PHPMailer Error: " . $e->getMessage());
+            error_log("Full PHPMailer Error Info: " . print_r($mail->ErrorInfo, true));
+            error_log("SMTP Status: " . $mail->getSMTPInstance()->getError()['error']);
+            error_log("Failed to send verification email");
+            throw $e;
         }
 
         // Only commit if email was sent successfully

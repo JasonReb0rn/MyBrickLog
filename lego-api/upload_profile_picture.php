@@ -12,8 +12,8 @@ $s3Config = [
     'version' => 'latest',
     'region'  => 'us-east-2',
     'credentials' => [
-        'key'    => $_ENV['AWS_SES_KEY'] ?? '',
-        'secret' => $_ENV['AWS_SES_SECRET'] ?? '',
+        'key'    => $_ENV['AWS_S3_KEY'] ?? '',
+        'secret' => $_ENV['AWS_S3_SECRET'] ?? '',
     ]
 ];
 
