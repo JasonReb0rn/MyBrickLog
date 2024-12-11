@@ -25,30 +25,27 @@ const About = () => {
                         <h2>Hi, I'm the Creator!</h2>
                         <p>Thanks for using MyBrickLog! I created this platform to help LEGO® enthusiasts 
                         keep track of their collections and connect with other builders.</p>
+                        <p>This website was created with React, PHP and SQL. It's entirely self-hosted from my home server (aka an old dusty PC sat in a corner of the dog room), aside from AWS S3 bucket for storing profile pictures.</p>
                     </div>
                 </div>
 
                 <div className="social-section">
                     <h3>Connect With Me</h3>
                     <div className="social-links">
-                        <a href="https://github.com/yourusername" className="social-link">
+                        <a href="https://github.com/JasonReb0rn" className="social-link">
                             <FontAwesomeIcon icon={['fab', 'github']} />
                             <span>GitHub</span>
                         </a>
-                        <a href="https://twitter.com/yourusername" className="social-link">
+                        <a href="https://twitter.com/itsjasonreborn" className="social-link">
                             <FontAwesomeIcon icon={['fab', 'twitter']} />
                             <span>Twitter</span>
-                        </a>
-                        <a href="https://linkedin.com/in/yourusername" className="social-link">
-                            <FontAwesomeIcon icon={['fab', 'linkedin']} />
-                            <span>LinkedIn</span>
                         </a>
                     </div>
                 </div>
 
                 <div className="support-section">
                     <h3>Support the Project</h3>
-                    <p>If you're enjoying MyBrickLog and would like to support its development, 
+                    <p>If you're enjoying MyBrickLog and would like to support its development or running costs, 
                     you can contribute using any of these cryptocurrency addresses:</p>
                     
                     <div className="crypto-list">

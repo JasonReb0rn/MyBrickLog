@@ -1,36 +1,59 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faFire } from '@fortawesome/free-solid-svg-icons';
-import { faHouse } from '@fortawesome/free-solid-svg-icons';
-import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
-import { faFolderPlus } from '@fortawesome/free-solid-svg-icons';
-import { faHeart } from '@fortawesome/free-solid-svg-icons';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { faShare } from '@fortawesome/free-solid-svg-icons';
-import { faThumbsUp } from '@fortawesome/free-solid-svg-icons';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
-import { faXmark } from '@fortawesome/free-solid-svg-icons';
-import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
-import { faCamera, faTimes, faEdit, faSave } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faFire, 
+  faHouse,
+  faFolderOpen,
+  faFolderPlus,
+  faHeart,
+  faUser,
+  faRightFromBracket,
+  faMagnifyingGlass,
+  faShare,
+  faThumbsUp,
+  faPlus,
+  faChevronDown,
+  faChevronRight,
+  faBars,
+  faXmark,
+  faCircleInfo,
+  faCamera,
+  faTimes,
+  faEdit,
+  faSave,
+  faCopy
+} from '@fortawesome/free-solid-svg-icons';
 
-library.add(faFire);
-library.add(faHouse);
-library.add(faFolderOpen);
-library.add(faFolderPlus);
-library.add(faHeart);
-library.add(faUser);
-library.add(faRightFromBracket);
-library.add(faMagnifyingGlass);
-library.add(faShare);
-library.add(faThumbsUp);
-library.add(faPlus);
-library.add(faXmark);
-library.add(faChevronDown);
-library.add(faChevronRight);
-library.add(faBars);
-library.add(faCircleInfo);
-library.add(faCamera, faTimes, faEdit, faSave);
+import {
+  faGithub,
+  faTwitter
+} from '@fortawesome/free-brands-svg-icons';  // Changed from free-solid-svg-icons
+
+// Add all icons in a single call
+library.add(
+  // Solid icons
+  faFire,
+  faHouse,
+  faFolderOpen,
+  faFolderPlus,
+  faHeart,
+  faUser,
+  faRightFromBracket,
+  faMagnifyingGlass,
+  faShare,
+  faThumbsUp,
+  faPlus,
+  faXmark,
+  faChevronDown,
+  faChevronRight,
+  faBars,
+  faCircleInfo,
+  faCamera,
+  faTimes,
+  faEdit,
+  faSave,
+  faCopy,
+  
+  // Brand icons
+  faGithub,
+  faTwitter
+);
