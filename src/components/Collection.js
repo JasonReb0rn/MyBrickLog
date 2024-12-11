@@ -310,7 +310,9 @@ const Collection = () => {
                         {groupAndSortThemes(sets, profileData?.favorite_theme).map(theme => (
                             <div 
                                 key={theme.theme_id} 
-                                className={`collection-theme-section ${theme.isFullWidth ? '' : 'half'}`}
+                                className={`collection-theme-section ${theme.isFullWidth ? '' : 'half'} ${
+                                    collapsedThemes[theme.theme_id] ? 'collapsed' : ''
+                                }`}
                             >
                                 <div className="theme-title" onClick={() => toggleCollapse(theme.theme_id)}>
                                     {theme.theme_name}
