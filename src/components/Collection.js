@@ -134,43 +134,67 @@ const Collection = () => {
     const totalParts = sets.reduce((acc, set) => acc + (set.num_parts * Number(set.quantity)), 0);
     const totalMinifigures = sets.reduce((acc, set) => acc + (Number(set.num_minifigures) * Number(set.quantity)), 0);
 
-    // Group sets by theme
-    const groupedSets = sets.reduce((acc, set) => {
-        if (!acc[set.theme_id]) {
-            acc[set.theme_id] = { theme_name: set.theme_name, sets: [] };
-        }
-        acc[set.theme_id].sets.push(set);
-        return acc;
-    }, {});
-
     const groupAndSortThemes = (sets, favoriteThemeId) => {
         // First group the sets by theme
         const grouped = sets.reduce((acc, set) => {
             if (!acc[set.theme_id]) {
-                acc[set.theme_id] = { 
+                acc[set.theme_id] = {
                     theme_id: set.theme_id,
-                    theme_name: set.theme_name, 
-                    sets: [] 
+                    theme_name: set.theme_name,
+                    sets: []
                 };
             }
             acc[set.theme_id].sets.push(set);
             return acc;
         }, {});
-    
-        // Convert to array and add set count
-        const themesArray = Object.values(grouped).map(theme => ({
-            ...theme,
-            setCount: theme.sets.length
-        }));
-    
-        // Sort themes: favorite theme first, then by size
-        return themesArray.sort((a, b) => {
-            // If one is the favorite theme, it goes first
+
+        // Convert to array and calculate layout properties
+        const themesArray = Object.values(grouped);
+
+        // Sort: favorite theme first, then by number of sets
+        themesArray.sort((a, b) => {
             if (a.theme_id === favoriteThemeId) return -1;
             if (b.theme_id === favoriteThemeId) return 1;
-    
-            // Otherwise sort by set count
-            return b.setCount - a.setCount;
+            return b.sets.length - a.sets.length;
+        });
+
+        // Calculate layout classes
+        const FULL_WIDTH_THRESHOLD = 7;
+        return themesArray.map((theme, index, array) => {
+            // Single theme in collection is always full width
+            if (array.length === 1) {
+                return { ...theme, isFullWidth: true };
+            }
+
+            // Themes with many sets are full width
+            if (theme.sets.length >= FULL_WIDTH_THRESHOLD) {
+                return { ...theme, isFullWidth: true };
+            }
+
+            // Find nearest full-width themes
+            const prevFullWidth = array.slice(0, index).findLast(t => 
+                t.sets.length >= FULL_WIDTH_THRESHOLD
+            );
+            const nextFullWidth = array.slice(index + 1).find(t => 
+                t.sets.length >= FULL_WIDTH_THRESHOLD
+            );
+
+            // If between two full-width themes, make it full width
+            if (prevFullWidth && nextFullWidth) {
+                return { ...theme, isFullWidth: true };
+            }
+
+            // Handle potential orphans
+            const isOdd = index % 2 === 1;
+            const isLast = index === array.length - 1;
+            
+            // Make it full width if it would be orphaned
+            if (isLast && (isOdd || !array[index - 1]?.isFullWidth)) {
+                return { ...theme, isFullWidth: true };
+            }
+
+            // Default to half width
+            return { ...theme, isFullWidth: false };
         });
     };
 
@@ -286,9 +310,7 @@ const Collection = () => {
                         {groupAndSortThemes(sets, profileData?.favorite_theme).map(theme => (
                             <div 
                                 key={theme.theme_id} 
-                                className={`collection-theme-section ${
-                                    collapsedThemes[theme.theme_id] ? 'collapsed' : ''
-                                } ${theme.setCount < 7 ? 'half' : ''}`}
+                                className={`collection-theme-section ${theme.isFullWidth ? '' : 'half'}`}
                             >
                                 <div className="theme-title" onClick={() => toggleCollapse(theme.theme_id)}>
                                     {theme.theme_name}

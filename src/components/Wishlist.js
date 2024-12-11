@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import './Collection.css';
 import { useAuth } from './AuthContext';
+import CollectionThemeLayout from './CollectionThemeLayout';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt, faCube } from '@fortawesome/free-solid-svg-icons';
 import Skeleton from 'react-loading-skeleton';
@@ -113,7 +114,8 @@ const Wishlist = () => {
                 acc[set.theme_id] = { 
                     theme_id: set.theme_id,
                     theme_name: set.theme_name, 
-                    sets: [] 
+                    sets: [],
+                    collapsed: collapsedThemes[set.theme_id] || false // Add this line
                 };
             }
             acc[set.theme_id].sets.push(set);
@@ -207,14 +209,11 @@ const Wishlist = () => {
             </div>
 
             {sets.length > 0 ? (
-                <div className="collection-themes-container">
-                    {groupAndSortThemes(sets, profileData?.favorite_theme).map(theme => (
-                        <div 
-                            key={theme.theme_id} 
-                            className={`collection-theme-section ${
-                                collapsedThemes[theme.theme_id] ? 'collapsed' : ''
-                            } ${theme.setCount < 7 ? 'half' : ''}`}
-                        >
+                <CollectionThemeLayout
+                    themes={groupAndSortThemes(sets, profileData?.favorite_theme)}
+                    favoriteThemeId={profileData?.favorite_theme}
+                    renderThemeContent={(theme) => (
+                        <>
                             <div className="theme-title" onClick={() => toggleCollapse(theme.theme_id)}>
                                 {theme.theme_name}
                                 <FontAwesomeIcon 
@@ -241,7 +240,7 @@ const Wishlist = () => {
                                                     style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
                                                 />
                                             </div>
-
+                                    
                                             <div className="set-info">
                                                 <div className="set-name">{set.name}</div>
                                                 <div className="set-details">
@@ -249,7 +248,7 @@ const Wishlist = () => {
                                                     <span className="set-number">{set.set_num}</span>
                                                 </div>
                                             </div>
-
+                                    
                                             {user && Number(user.user_id) === Number(userId) && 
                                              selectedSet === set.set_num && (
                                                 <div className="set-actions">
@@ -273,9 +272,9 @@ const Wishlist = () => {
                                     ))}
                                 </div>
                             )}
-                        </div>
-                    ))}
-                </div>
+                        </>
+                    )}
+                />
             ) : (
                 <div className="empty-collection">
                     {user && Number(user.user_id) === Number(userId) ? (
