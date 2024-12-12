@@ -8,6 +8,7 @@
     background-color: #007bff;
     color: white;
     border: none;
+    border-radius: 5px;
     padding: 5px 10px;
     cursor: pointer;
 }
@@ -41,7 +42,7 @@
 }
 
 
-.add-to-collection-button, .remove-button, .incomplete-button, .complete-button, .wishlist-button {
+.add-to-collection-button, .incomplete-button, .complete-button, .wishlist-button {
     color: white;
     border: none;
     padding: 5px 10px;

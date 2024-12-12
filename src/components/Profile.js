@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCamera, faTimes, faEdit, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faCamera, faTimes, faEdit, faSave, faTwitter, faYoutube } from '@fortawesome/free-solid-svg-icons';
 import './Profile.css';
 
 const Profile = () => {
@@ -14,7 +14,10 @@ const Profile = () => {
         bio: '',
         location: '',
         favoriteTheme: '',
-        profilePicture: null
+        profilePicture: null,
+        twitterHandle: '',
+        youtubeChannel: '',
+        showEmail: false
     });
     const [themes, setThemes] = useState([]);
     const [previewImage, setPreviewImage] = useState(null);
@@ -32,7 +35,12 @@ const Profile = () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL}/get_profile.php?user_id=${user.user_id}`);
             if (response.data.success) {
-                setProfileData(response.data.profile);
+                setProfileData({
+                    ...response.data.profile,
+                    twitterHandle: response.data.profile.twitterHandle || '',
+                    youtubeChannel: response.data.profile.youtubeChannel || '',
+                    showEmail: response.data.profile.showEmail || false
+                });
                 if (response.data.profile.profilePicture) {
                     setPreviewImage(`https://mybricklog.s3.us-east-2.amazonaws.com/profile-pictures/${response.data.profile.profilePicture}`);
                 }
@@ -260,6 +268,91 @@ const Profile = () => {
                         )}
                     </div>
 
+                    <div className="social-media-section">
+                        <h3 className="section-title">Social Media</h3>
+                        
+                        <div className="profile-field">
+                            <label>Twitter Handle</label>
+                            {isEditing ? (
+                                <div className="input-with-prefix">
+                                    <span className="input-prefix">@</span>
+                                    <input
+                                        type="text"
+                                        value={profileData.twitterHandle || ''}
+                                        onChange={(e) => setProfileData({
+                                            ...profileData,
+                                            twitterHandle: e.target.value
+                                        })}
+                                        maxLength="50"
+                                        placeholder="username"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="field-value">
+                                    {profileData.twitterHandle ? (
+                                        <a href={`https://twitter.com/${profileData.twitterHandle}`} 
+                                           target="_blank" 
+                                           rel="noopener noreferrer">
+                                            @{profileData.twitterHandle}
+                                        </a>
+                                    ) : (
+                                        'Not linked'
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="profile-field">
+                            <label>YouTube Channel</label>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    value={profileData.youtubeChannel || ''}
+                                    onChange={(e) => setProfileData({
+                                        ...profileData,
+                                        youtubeChannel: e.target.value
+                                    })}
+                                    maxLength="100"
+                                    placeholder="Channel URL or ID"
+                                />
+                            ) : (
+                                <div className="field-value">
+                                    {profileData.youtubeChannel ? (
+                                        <a href={`https://youtube.com/${profileData.youtubeChannel}`} 
+                                           target="_blank" 
+                                           rel="noopener noreferrer">
+                                            {profileData.youtubeChannel}
+                                        </a>
+                                    ) : (
+                                        'Not linked'
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="profile-field">
+                            <label className="checkbox-label">
+                                {isEditing ? (
+                                    <div className="checkbox-container">
+                                        <input
+                                            type="checkbox"
+                                            checked={profileData.showEmail}
+                                            onChange={(e) => setProfileData({
+                                                ...profileData,
+                                                showEmail: e.target.checked
+                                            })}
+                                        />
+                                        <span>Show email on public profile</span>
+                                    </div>
+                                ) : (
+                                    <div className="field-value">
+                                        Email visibility: {profileData.showEmail ? 'Public' : 'Private'}
+                                    </div>
+                                )}
+                            </label>
+                        </div>
+                    </div>
+
                     {isEditing && (
                         <button 
                             className="save-button"
@@ -269,6 +362,7 @@ const Profile = () => {
                         </button>
                     )}
                 </div>
+
             </div>
         </div>
     );

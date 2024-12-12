@@ -20,11 +20,16 @@ try {
             u.location,
             u.favorite_theme,
             u.join_date,
-            t.name as favorite_theme_name
+            t.name as favorite_theme_name,
+            u.twitter_handle,
+            u.youtube_channel,
+            u.email,
+            u.show_email
         FROM users u
         LEFT JOIN themes t ON u.favorite_theme = t.id
         WHERE u.user_id = :user_id
     ");
+    
     
     $userStmt->execute(['user_id' => $userId]);
     $userData = $userStmt->fetch(PDO::FETCH_ASSOC);
@@ -43,7 +48,10 @@ try {
         'location' => $userData['location'],
         'favorite_theme' => $userData['favorite_theme'],
         'favorite_theme_name' => $userData['favorite_theme_name'],
-        'join_date' => $userData['join_date']
+        'join_date' => $userData['join_date'],
+        'twitter_handle' => $userData['twitter_handle'],
+        'youtube_channel' => $userData['youtube_channel'],
+        'email' => $userData['show_email'] ? $userData['email'] : null
     ];
 
     // Get the user's collection with detailed information

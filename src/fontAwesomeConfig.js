@@ -20,13 +20,16 @@ import {
   faTimes,
   faEdit,
   faSave,
-  faCopy
+  faCopy,
+  faCircleHalfStroke,
+  faEnvelope
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
   faGithub,
-  faTwitter
-} from '@fortawesome/free-brands-svg-icons';  // Changed from free-solid-svg-icons
+  faTwitter,
+  faYoutube
+} from '@fortawesome/free-brands-svg-icons';
 
 // Add all icons in a single call
 library.add(
@@ -52,8 +55,11 @@ library.add(
   faEdit,
   faSave,
   faCopy,
+  faCircleHalfStroke,
+  faEnvelope,
   
   // Brand icons
   faGithub,
-  faTwitter
+  faTwitter,
+  faYoutube
 );

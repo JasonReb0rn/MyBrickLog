@@ -34,6 +34,9 @@ if ($data) {
         $bio = trim($data['bio'] ?? '');
         $location = trim($data['location'] ?? '');
         $favorite_theme = $data['favoriteTheme'] ?? null;
+        $twitter_handle = trim($data['twitterHandle'] ?? '');
+        $youtube_channel = trim($data['youtubeChannel'] ?? '');
+        $show_email = isset($data['showEmail']) ? (bool)$data['showEmail'] : false;
         
         // Validation checks
         if (strlen($bio) > 1000) {
@@ -53,6 +56,25 @@ if ($data) {
             echo json_encode($response);
             exit;
         }
+
+        // Validate Twitter handle
+        if (strlen($twitter_handle) > 50) {
+            $response['error'] = 'Twitter handle must be less than 50 characters';
+            echo json_encode($response);
+            exit;
+        }
+        
+        // Remove @ symbol if present at start of Twitter handle
+        if (strlen($twitter_handle) > 0 && $twitter_handle[0] === '@') {
+            $twitter_handle = substr($twitter_handle, 1);
+        }
+
+        // Validate YouTube channel
+        if (strlen($youtube_channel) > 100) {
+            $response['error'] = 'YouTube channel must be less than 100 characters';
+            echo json_encode($response);
+            exit;
+        }
         
         // Verify theme exists if provided
         if ($favorite_theme) {
@@ -65,13 +87,16 @@ if ($data) {
             }
         }
         
-        // Update profile
+        // Update profile with new fields
         $stmt = $pdo->prepare("
             UPDATE users 
             SET display_name = ?,
                 bio = ?,
                 location = ?,
                 favorite_theme = ?,
+                twitter_handle = ?,
+                youtube_channel = ?,
+                show_email = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
         ");
@@ -81,6 +106,9 @@ if ($data) {
             $bio ?: null,
             $location ?: null,
             $favorite_theme ?: null,
+            $twitter_handle ?: null,
+            $youtube_channel ?: null,
+            $show_email,
             $data['user_id']
         ]);
         

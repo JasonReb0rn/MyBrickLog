@@ -19,7 +19,37 @@
     padding: 20px;
 }
 
+.profile-social {
+    margin-left: auto;
+    padding-left: 24px;
+    border-left: 1px solid #eee;
+    min-width: 200px;
+}
 
+.social-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 14px;
+}
+
+.social-link:hover {
+    color: #007bff;
+}
+
+.social-link svg {
+    width: 16px;
+    height: 16px;
+}
 
 .profile-image-container {
     flex-shrink: 0;
@@ -221,7 +251,7 @@
 }
 
 /* Set Card */
-.sets-container .set-card.selected {
+.set-card.selected {
     background-color: #e5f0fd;
     border-color: #2b91ff;
     box-shadow: 0 0 0 2px #2b91ff;
@@ -276,9 +306,9 @@
 
 /* Set Actions */
 .set-actions {
-    margin-top: 12px;
+    margin-top: 8px;
     border-top: 1px solid #979797;
-    padding-top: 12px;
+    padding-top: 8px;
 }
 
 
@@ -288,7 +318,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 
@@ -313,6 +343,7 @@
 
 .set-action-buttons {
     display: flex;
+    flex-direction: column;
     gap: 8px;
 }
 
@@ -411,6 +442,20 @@
         flex-direction: column;
         align-items: center !important;
         text-align: center;
+    }
+
+    .profile-social {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: none;
+        border-top: 1px solid #eee;
+        padding-top: 16px;
+        margin-top: 16px;
+        width: 100%;
+    }
+
+    .social-links {
+        align-items: center;
     }
 
     .profile-info {

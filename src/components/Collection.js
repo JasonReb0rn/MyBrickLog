@@ -3,11 +3,22 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import './Collection.css';
 import { useAuth } from './AuthContext';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Tooltip } from 'react-tooltip';
-import { faInfoCircle, faMapMarkerAlt, faCube } from '@fortawesome/free-solid-svg-icons';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+    faInfoCircle, 
+    faMapMarkerAlt, 
+    faCube, 
+    faCircleHalfStroke, 
+    faTrash,
+    faEnvelope 
+} from '@fortawesome/free-solid-svg-icons';
+import { 
+    faTwitter,
+    faYoutube 
+} from '@fortawesome/free-brands-svg-icons';
 
 const Collection = () => {
     const [profileData, setProfileData] = useState(null);
@@ -147,17 +158,17 @@ const Collection = () => {
             acc[set.theme_id].sets.push(set);
             return acc;
         }, {});
-
+    
         // Convert to array and calculate layout properties
         const themesArray = Object.values(grouped);
-
+    
         // Sort: favorite theme first, then by number of sets
         themesArray.sort((a, b) => {
             if (a.theme_id === favoriteThemeId) return -1;
             if (b.theme_id === favoriteThemeId) return 1;
             return b.sets.length - a.sets.length;
         });
-
+    
         // Calculate layout classes
         const FULL_WIDTH_THRESHOLD = 7;
         return themesArray.map((theme, index, array) => {
@@ -165,25 +176,26 @@ const Collection = () => {
             if (array.length === 1) {
                 return { ...theme, isFullWidth: true };
             }
-
+    
             // Themes with many sets are full width
             if (theme.sets.length >= FULL_WIDTH_THRESHOLD) {
                 return { ...theme, isFullWidth: true };
             }
-
-            // Find nearest full-width themes
-            const prevFullWidth = array.slice(0, index).findLast(t => 
+    
+            // Find nearest full-width themes (replace findLast with reverse().find())
+            const previousThemes = array.slice(0, index);
+            const prevFullWidth = previousThemes.reverse().find(t => 
                 t.sets.length >= FULL_WIDTH_THRESHOLD
             );
             const nextFullWidth = array.slice(index + 1).find(t => 
                 t.sets.length >= FULL_WIDTH_THRESHOLD
             );
-
+    
             // If between two full-width themes, make it full width
             if (prevFullWidth && nextFullWidth) {
                 return { ...theme, isFullWidth: true };
             }
-
+    
             // Handle potential orphans
             const isOdd = index % 2 === 1;
             const isLast = index === array.length - 1;
@@ -192,7 +204,7 @@ const Collection = () => {
             if (isLast && (isOdd || !array[index - 1]?.isFullWidth)) {
                 return { ...theme, isFullWidth: true };
             }
-
+    
             // Default to half width
             return { ...theme, isFullWidth: false };
         });
@@ -201,7 +213,7 @@ const Collection = () => {
     // Render helper functions
     const renderProfileSection = () => {
         if (!profileData) return null;
-
+    
         const displayName = profileData.display_name || profileData.username;
         
         return (
@@ -229,6 +241,43 @@ const Collection = () => {
                         )}
                         {profileData.bio && (
                             <p className="profile-bio">{profileData.bio}</p>
+                        )}
+                    </div>
+                    <div className="profile-social">
+                        {(profileData.twitter_handle || profileData.youtube_channel || profileData.email) && (
+                            <div className="social-links">
+                                {profileData.twitter_handle && (
+                                    <a 
+                                        href={`https://twitter.com/${profileData.twitter_handle}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="social-link"
+                                    >
+                                        <FontAwesomeIcon icon={faTwitter} />
+                                        <span>@{profileData.twitter_handle}</span>
+                                    </a>
+                                )}
+                                {profileData.youtube_channel && (
+                                    <a 
+                                        href={`https://youtube.com/${profileData.youtube_channel}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="social-link"
+                                    >
+                                        <FontAwesomeIcon icon={faYoutube} />
+                                        <span>{profileData.youtube_channel}</span>
+                                    </a>
+                                )}
+                                {profileData.email && (
+                                    <a 
+                                        href={`mailto:${profileData.email}`}
+                                        className="social-link"
+                                    >
+                                        <FontAwesomeIcon icon={faEnvelope} />
+                                        <span>{profileData.email}</span>
+                                    </a>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>
@@ -371,13 +420,22 @@ const Collection = () => {
                                                                 className={`status-button ${Number(set.complete) === 1 ? 'complete' : 'incomplete'}`}
                                                                 onClick={() => toggleCompleteStatus(set.set_num, set.complete)}
                                                             >
-                                                                {Number(set.complete) === 1 ? 'Mark Incomplete' : 'Mark Complete'}
+                                                                {Number(set.complete) === 1 ? (
+                                                                    <>
+                                                                        <FontAwesomeIcon icon={faCircleHalfStroke} />
+                                                                        <span className="incomplete-btn-span"> Incomplete</span>
+                                                                    </>
+                                                                ) : <>
+                                                                        <FontAwesomeIcon icon={faCircleHalfStroke} />
+                                                                        <span className="complete-btn-span"> Complete</span>
+                                                                    </>}
                                                             </button>
                                                             <button
                                                                 className="remove-button"
                                                                 onClick={() => removeSet(set.set_num)}
                                                             >
-                                                                Remove
+                                                                <FontAwesomeIcon icon={faTrash} />
+                                                                <span className="remove-btn-span"> Remove</span>
                                                             </button>
                                                         </div>
                                                     </div>
