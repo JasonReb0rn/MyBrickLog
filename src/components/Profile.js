@@ -1,4 +1,3 @@
-// src/components/Profile.js
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import axios from 'axios';
@@ -17,12 +16,24 @@ const Profile = () => {
         profilePicture: null,
         twitterHandle: '',
         youtubeChannel: '',
+        bricklinkStore: '',
         showEmail: false
     });
+    const [validationErrors, setValidationErrors] = useState({});
     const [themes, setThemes] = useState([]);
     const [previewImage, setPreviewImage] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    // Character limits based on DB schema
+    const LIMITS = {
+        displayName: 99,
+        bio: 1000,
+        location: 50,
+        twitterHandle: 50,
+        youtubeChannel: 100,
+        bricklinkStore: 100 // Add this line
+    };
 
     useEffect(() => {
         if (user) {
@@ -30,6 +41,108 @@ const Profile = () => {
             fetchThemes();
         }
     }, [user]);
+
+    const validateField = (name, value) => {
+        const errors = {};
+        
+        switch (name) {
+            case 'displayName':
+                if (value && value.length > LIMITS.displayName) {
+                    errors[name] = `Display name must be ${LIMITS.displayName} characters or less`;
+                }
+                if (/[\u{1F300}-\u{1F9FF}]/u.test(value)) {
+                    errors[name] = 'Display name cannot contain emojis';
+                }
+                break;
+                
+            case 'bio':
+                if (value && value.length > LIMITS.bio) {
+                    errors[name] = `Bio must be ${LIMITS.bio} characters or less`;
+                }
+                break;
+                
+            case 'location':
+                if (value && value.length > LIMITS.location) {
+                    errors[name] = `Location must be ${LIMITS.location} characters or less`;
+                }
+                if (/[\u{1F300}-\u{1F9FF}]/u.test(value)) {
+                    errors[name] = 'Location cannot contain emojis';
+                }
+                break;
+                
+            case 'twitterHandle':
+                if (value && value.length > LIMITS.twitterHandle) {
+                    errors[name] = `Twitter handle must be ${LIMITS.twitterHandle} characters or less`;
+                }
+                if (/[\u{1F300}-\u{1F9FF}]/u.test(value)) {
+                    errors[name] = 'Twitter handle cannot contain emojis';
+                }
+                break;
+                
+            case 'youtubeChannel':
+                if (value && value.length > LIMITS.youtubeChannel) {
+                    errors[name] = `YouTube channel must be ${LIMITS.youtubeChannel} characters or less`;
+                }
+                if (/[\u{1F300}-\u{1F9FF}]/u.test(value)) {
+                    errors[name] = 'YouTube channel cannot contain emojis';
+                }
+                break;
+
+            case 'bricklinkStore':
+                if (value && value.length > LIMITS.bricklinkStore) {
+                    errors[name] = `Bricklink store must be ${LIMITS.bricklinkStore} characters or less`;
+                }
+                if (/[\u{1F300}-\u{1F9FF}]/u.test(value)) {
+                    errors[name] = 'Bricklink store cannot contain emojis';
+                }
+                // Optional: Add validation for valid store URL format
+                if (value && !/^[a-zA-Z0-9-_]+$/.test(value)) {
+                    errors[name] = 'Bricklink store can only contain letters, numbers, hyphens, and underscores';
+                }
+                break;
+        }
+        
+        return errors;
+    };
+
+    const handleInputChange = (name, value) => {
+        const errors = validateField(name, value);
+        
+        setProfileData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        
+        setValidationErrors(prev => ({
+            ...prev,
+            ...errors
+        }));
+    };
+
+    const validateAllFields = () => {
+        const errors = {};
+        Object.keys(profileData).forEach(key => {
+            if (LIMITS[key]) {
+                const fieldErrors = validateField(key, profileData[key]);
+                Object.assign(errors, fieldErrors);
+            }
+        });
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+    const normalizeLineBreaks = (text) => {
+        if (!text) return text;
+        
+        // First, standardize all types of line breaks to \n
+        const standardized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        
+        // Replace 3 or more line breaks with 2 line breaks
+        const normalized = standardized.replace(/\n{3,}/g, '\n\n');
+        
+        // Trim any leading/trailing whitespace and line breaks
+        return normalized.trim();
+    };
 
     const fetchProfileData = async () => {
         try {
@@ -39,6 +152,7 @@ const Profile = () => {
                     ...response.data.profile,
                     twitterHandle: response.data.profile.twitterHandle || '',
                     youtubeChannel: response.data.profile.youtubeChannel || '',
+                    bricklinkStore: response.data.profile.bricklinkStore || '',
                     showEmail: response.data.profile.showEmail || false
                 });
                 if (response.data.profile.profilePicture) {
@@ -47,6 +161,7 @@ const Profile = () => {
             }
         } catch (error) {
             console.error('Error fetching profile:', error);
+            setError('Failed to load profile data');
         }
     };
 
@@ -56,6 +171,7 @@ const Profile = () => {
             setThemes(response.data);
         } catch (error) {
             console.error('Error fetching themes:', error);
+            setError('Failed to load themes');
         }
     };
 
@@ -109,17 +225,32 @@ const Profile = () => {
     };
 
     const handleProfileUpdate = async () => {
+        if (!validateAllFields()) {
+            setError('Please correct the validation errors before saving');
+            return;
+        }
+
         try {
+            // Create a copy of profileData with normalized bio
+            const normalizedData = {
+                ...profileData,
+                bio: normalizeLineBreaks(profileData.bio)
+            };
+
+            // Update the state with normalized bio
+            setProfileData(normalizedData);
+
             const response = await axios.post(`${process.env.REACT_APP_API_URL}/update_profile.php`, {
                 user_id: user.user_id,
-                ...profileData
+                ...normalizedData
             });
 
             if (response.data.success) {
                 setSuccess('Profile updated successfully!');
                 setIsEditing(false);
+                setValidationErrors({});
             } else {
-                setError('Failed to update profile');
+                setError(response.data.error || 'Failed to update profile');
             }
         } catch (error) {
             setError('Error updating profile');
@@ -139,7 +270,7 @@ const Profile = () => {
                     className="edit-button"
                     onClick={() => setIsEditing(!isEditing)}
                 >
-                    <FontAwesomeIcon icon={isEditing ? "times" : "edit"} />
+                    <FontAwesomeIcon icon={isEditing ? faTimes : faEdit} />
                     {isEditing ? ' Cancel' : ' Edit Profile'}
                 </button>
             </div>
@@ -158,15 +289,14 @@ const Profile = () => {
                             alt="Profile"
                             className="profile-picture"
                             onError={(e) => {
-                                e.target.onerror = null; // Prevent infinite loops
+                                e.target.onerror = null;
                                 e.target.src = '/images/lego_user.png';
                             }}
                         />
                         {isEditing && (
                             <label className="profile-picture-upload">
                                 <FontAwesomeIcon 
-                                    icon="camera" 
-                                    size="lg"
+                                    icon={faCamera}
                                     className="camera-icon" 
                                 />
                                 <input
@@ -190,15 +320,21 @@ const Profile = () => {
                     <div className="profile-field">
                         <label>Display Name</label>
                         {isEditing ? (
-                            <input
-                                type="text"
-                                value={profileData.displayName || ''}
-                                onChange={(e) => setProfileData({
-                                    ...profileData,
-                                    displayName: e.target.value
-                                })}
-                                maxLength="100"
-                            />
+                            <>
+                                <input
+                                    type="text"
+                                    value={profileData.displayName || ''}
+                                    onChange={(e) => handleInputChange('displayName', e.target.value)}
+                                    maxLength={LIMITS.displayName}
+                                    className={validationErrors.displayName ? 'error' : ''}
+                                />
+                                {validationErrors.displayName && (
+                                    <div className="validation-error">{validationErrors.displayName}</div>
+                                )}
+                                <div className="character-count">
+                                    {(profileData.displayName?.length || 0)}/{LIMITS.displayName}
+                                </div>
+                            </>
                         ) : (
                             <div className="field-value">
                                 {profileData.displayName || user.username}
@@ -209,15 +345,21 @@ const Profile = () => {
                     <div className="profile-field">
                         <label>Bio</label>
                         {isEditing ? (
-                            <textarea
-                                value={profileData.bio || ''}
-                                onChange={(e) => setProfileData({
-                                    ...profileData,
-                                    bio: e.target.value
-                                })}
-                                maxLength="1000"
-                                placeholder="Tell us about yourself..."
-                            />
+                            <>
+                                <textarea
+                                    value={profileData.bio || ''}
+                                    onChange={(e) => handleInputChange('bio', e.target.value)}
+                                    maxLength={LIMITS.bio}
+                                    placeholder="Tell us about yourself... Emojis are welcome! 😊"
+                                    className={validationErrors.bio ? 'error' : ''}
+                                />
+                                {validationErrors.bio && (
+                                    <div className="validation-error">{validationErrors.bio}</div>
+                                )}
+                                <div className="character-count">
+                                    {(profileData.bio?.length || 0)}/{LIMITS.bio}
+                                </div>
+                            </>
                         ) : (
                             <div className="field-value bio">
                                 {profileData.bio || 'No bio yet'}
@@ -228,15 +370,21 @@ const Profile = () => {
                     <div className="profile-field">
                         <label>Location</label>
                         {isEditing ? (
-                            <input
-                                type="text"
-                                value={profileData.location || ''}
-                                onChange={(e) => setProfileData({
-                                    ...profileData,
-                                    location: e.target.value
-                                })}
-                                maxLength="100"
-                            />
+                            <>
+                                <input
+                                    type="text"
+                                    value={profileData.location || ''}
+                                    onChange={(e) => handleInputChange('location', e.target.value)}
+                                    maxLength={LIMITS.location}
+                                    className={validationErrors.location ? 'error' : ''}
+                                />
+                                {validationErrors.location && (
+                                    <div className="validation-error">{validationErrors.location}</div>
+                                )}
+                                <div className="character-count">
+                                    {(profileData.location?.length || 0)}/{LIMITS.location}
+                                </div>
+                            </>
                         ) : (
                             <div className="field-value">
                                 {profileData.location || 'Not specified'}
@@ -249,10 +397,7 @@ const Profile = () => {
                         {isEditing ? (
                             <select
                                 value={profileData.favoriteTheme || ''}
-                                onChange={(e) => setProfileData({
-                                    ...profileData,
-                                    favoriteTheme: e.target.value
-                                })}
+                                onChange={(e) => handleInputChange('favoriteTheme', e.target.value)}
                             >
                                 <option value="">Select a theme</option>
                                 {themes.map(theme => (
@@ -274,19 +419,25 @@ const Profile = () => {
                         <div className="profile-field">
                             <label>Twitter Handle</label>
                             {isEditing ? (
-                                <div className="input-with-prefix">
-                                    <span className="input-prefix">@</span>
-                                    <input
-                                        type="text"
-                                        value={profileData.twitterHandle || ''}
-                                        onChange={(e) => setProfileData({
-                                            ...profileData,
-                                            twitterHandle: e.target.value
-                                        })}
-                                        maxLength="50"
-                                        placeholder="username"
-                                    />
-                                </div>
+                                <>
+                                    <div className="input-with-prefix">
+                                        <span className="input-prefix">@</span>
+                                        <input
+                                            type="text"
+                                            value={profileData.twitterHandle || ''}
+                                            onChange={(e) => handleInputChange('twitterHandle', e.target.value)}
+                                            maxLength={LIMITS.twitterHandle}
+                                            placeholder="username"
+                                            className={validationErrors.twitterHandle ? 'error' : ''}
+                                        />
+                                    </div>
+                                    {validationErrors.twitterHandle && (
+                                        <div className="validation-error">{validationErrors.twitterHandle}</div>
+                                    )}
+                                    <div className="character-count">
+                                        {(profileData.twitterHandle?.length || 0)}/{LIMITS.twitterHandle}
+                                    </div>
+                                </>
                             ) : (
                                 <div className="field-value">
                                     {profileData.twitterHandle ? (
@@ -305,16 +456,22 @@ const Profile = () => {
                         <div className="profile-field">
                             <label>YouTube Channel</label>
                             {isEditing ? (
+                                <>
                                 <input
-                                    type="text"
-                                    value={profileData.youtubeChannel || ''}
-                                    onChange={(e) => setProfileData({
-                                        ...profileData,
-                                        youtubeChannel: e.target.value
-                                    })}
-                                    maxLength="100"
-                                    placeholder="Channel URL or ID"
-                                />
+                                        type="text"
+                                        value={profileData.youtubeChannel || ''}
+                                        onChange={(e) => handleInputChange('youtubeChannel', e.target.value)}
+                                        maxLength={LIMITS.youtubeChannel}
+                                        placeholder="Channel URL or ID"
+                                        className={validationErrors.youtubeChannel ? 'error' : ''}
+                                    />
+                                    {validationErrors.youtubeChannel && (
+                                        <div className="validation-error">{validationErrors.youtubeChannel}</div>
+                                    )}
+                                    <div className="character-count">
+                                        {(profileData.youtubeChannel?.length || 0)}/{LIMITS.youtubeChannel}
+                                    </div>
+                                </>
                             ) : (
                                 <div className="field-value">
                                     {profileData.youtubeChannel ? (
@@ -331,16 +488,50 @@ const Profile = () => {
                         </div>
 
                         <div className="profile-field">
+                            <label>Bricklink Store</label>
+                            {isEditing ? (
+                                <>
+                                    <div className="input-with-prefix">
+                                        <span className="input-prefix">store.bricklink.com/</span>
+                                        <input
+                                            type="text"
+                                            value={profileData.bricklinkStore || ''}
+                                            onChange={(e) => handleInputChange('bricklinkStore', e.target.value)}
+                                            maxLength={LIMITS.bricklinkStore}
+                                            placeholder="storename"
+                                            className={validationErrors.bricklinkStore ? 'error' : ''}
+                                        />
+                                    </div>
+                                    {validationErrors.bricklinkStore && (
+                                        <div className="validation-error">{validationErrors.bricklinkStore}</div>
+                                    )}
+                                    <div className="character-count">
+                                        {(profileData.bricklinkStore?.length || 0)}/{LIMITS.bricklinkStore}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="field-value">
+                                    {profileData.bricklinkStore ? (
+                                        <a href={`https://store.bricklink.com/${profileData.bricklinkStore}`}
+                                           target="_blank"
+                                           rel="noopener noreferrer">
+                                            {profileData.bricklinkStore}
+                                        </a>
+                                    ) : (
+                                        'Not linked'
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="profile-field">
                             <label className="checkbox-label">
                                 {isEditing ? (
                                     <div className="checkbox-container">
                                         <input
                                             type="checkbox"
                                             checked={profileData.showEmail}
-                                            onChange={(e) => setProfileData({
-                                                ...profileData,
-                                                showEmail: e.target.checked
-                                            })}
+                                            onChange={(e) => handleInputChange('showEmail', e.target.checked)}
                                         />
                                         <span>Show email on public profile</span>
                                     </div>
@@ -357,12 +548,12 @@ const Profile = () => {
                         <button 
                             className="save-button"
                             onClick={handleProfileUpdate}
+                            disabled={Object.keys(validationErrors).length > 0}
                         >
-                            <FontAwesomeIcon icon="save" /> Save Changes
+                            <FontAwesomeIcon icon={faSave} /> Save Changes
                         </button>
                     )}
                 </div>
-
             </div>
         </div>
     );

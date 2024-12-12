@@ -182,6 +182,11 @@
     border-radius: 0 4px 4px 0;
 }
 
+.character-count {
+    color: gray;
+    font-size: 0.8rem;
+}
+
 .checkbox-container {
     display: flex;
     align-items: center;

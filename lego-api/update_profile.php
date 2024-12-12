@@ -36,6 +36,7 @@ if ($data) {
         $favorite_theme = $data['favoriteTheme'] ?? null;
         $twitter_handle = trim($data['twitterHandle'] ?? '');
         $youtube_channel = trim($data['youtubeChannel'] ?? '');
+        $bricklink_store = trim($data['bricklinkStore'] ?? '');
         $show_email = isset($data['showEmail']) ? (bool)$data['showEmail'] : false;
         
         // Validation checks
@@ -75,6 +76,20 @@ if ($data) {
             echo json_encode($response);
             exit;
         }
+
+        // Validate Bricklink store
+        if (strlen($bricklink_store) > 100) {
+            $response['error'] = 'Bricklink store must be less than 100 characters';
+            echo json_encode($response);
+            exit;
+        }
+
+        // Validate Bricklink store format
+        if ($bricklink_store && !preg_match('/^[a-zA-Z0-9-_]+$/', $bricklink_store)) {
+            $response['error'] = 'Bricklink store can only contain letters, numbers, hyphens, and underscores';
+            echo json_encode($response);
+            exit;
+        }
         
         // Verify theme exists if provided
         if ($favorite_theme) {
@@ -96,6 +111,7 @@ if ($data) {
                 favorite_theme = ?,
                 twitter_handle = ?,
                 youtube_channel = ?,
+                bricklink_store = ?,
                 show_email = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
@@ -108,8 +124,23 @@ if ($data) {
             $favorite_theme ?: null,
             $twitter_handle ?: null,
             $youtube_channel ?: null,
+            $bricklink_store ?: null,
             $show_email,
             $data['user_id']
+        ]);
+        
+        // Log the profile update
+        $stmt = $pdo->prepare("
+            INSERT INTO log 
+            (log_user, log_action, log_useragent, log_ip) 
+            VALUES 
+            (?, 'Profile updated', ?, ?)
+        ");
+        
+        $stmt->execute([
+            $data['user_id'],
+            $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
+            $_SERVER['REMOTE_ADDR'] ?? 'Unknown'
         ]);
         
         $response['success'] = true;

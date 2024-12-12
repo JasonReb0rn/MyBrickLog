@@ -11,7 +11,7 @@ if ($user_id) {
         $stmt = $pdo->prepare("
             SELECT u.username, u.display_name, u.bio, u.location, 
                    u.favorite_theme, u.profile_picture, u.join_date,
-                   u.twitter_handle, u.youtube_channel, u.show_email,
+                   u.twitter_handle, u.youtube_channel, u.bricklink_store, u.show_email,
                    (SELECT COUNT(*) FROM collection WHERE user_id = u.user_id) as total_sets
             FROM users u
             WHERE u.user_id = ?
@@ -34,6 +34,7 @@ if ($user_id) {
                     'totalSets' => $profile['total_sets'],
                     'twitterHandle' => $profile['twitter_handle'],
                     'youtubeChannel' => $profile['youtube_channel'],
+                    'bricklinkStore' => $profile['bricklink_store'],
                     'showEmail' => (bool)$profile['show_email']
                 ]
             ];

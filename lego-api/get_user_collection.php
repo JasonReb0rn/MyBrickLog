@@ -23,6 +23,7 @@ try {
             t.name as favorite_theme_name,
             u.twitter_handle,
             u.youtube_channel,
+            u.bricklink_store,
             u.email,
             u.show_email
         FROM users u
@@ -51,6 +52,7 @@ try {
         'join_date' => $userData['join_date'],
         'twitter_handle' => $userData['twitter_handle'],
         'youtube_channel' => $userData['youtube_channel'],
+        'bricklink_store' => $userData['bricklink_store'],
         'email' => $userData['show_email'] ? $userData['email'] : null
     ];
 

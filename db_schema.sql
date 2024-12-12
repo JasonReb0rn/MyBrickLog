@@ -103,7 +103,7 @@ CREATE TABLE `log` (
   `log_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `log_ip` varchar(45) NOT NULL,
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=143 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=151 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -222,6 +222,7 @@ CREATE TABLE `users` (
   `twitter_handle` varchar(50) DEFAULT NULL,
   `youtube_channel` varchar(100) DEFAULT NULL,
   `show_email` tinyint(1) DEFAULT '0',
+  `bricklink_store` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`),
@@ -229,6 +230,7 @@ CREATE TABLE `users` (
   KEY `idx_users_email` (`email`),
   KEY `idx_users_last_login` (`last_login`),
   KEY `favorite_theme` (`favorite_theme`),
+  KEY `idx_users_bricklink_store` (`bricklink_store`),
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`favorite_theme`) REFERENCES `themes` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -259,4 +261,4 @@ CREATE TABLE `wishlist` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-11 21:37:57
+-- Dump completed on 2024-12-12 16:31:39

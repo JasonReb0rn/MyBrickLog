@@ -13,7 +13,8 @@ import {
     faCube, 
     faCircleHalfStroke, 
     faTrash,
-    faEnvelope 
+    faEnvelope,
+    faStore
 } from '@fortawesome/free-solid-svg-icons';
 import { 
     faTwitter,
@@ -266,6 +267,17 @@ const Collection = () => {
                                     >
                                         <FontAwesomeIcon icon={faYoutube} />
                                         <span>{profileData.youtube_channel}</span>
+                                    </a>
+                                )}
+                                {profileData.bricklink_store && (
+                                    <a 
+                                        href={`https://store.bricklink.com/${profileData.bricklink_store}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="social-link"
+                                    >
+                                        <FontAwesomeIcon icon={faStore} />
+                                        <span>{profileData.bricklink_store}</span>
                                     </a>
                                 )}
                                 {profileData.email && (

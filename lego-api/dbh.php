@@ -26,10 +26,12 @@ $user = $_ENV['MBL_SQL_USER'] ?: 'not found';
 $pass = $_ENV['MBL_SQL_PASS'] ?: 'not found';
 $port = $_ENV['MBL_SQL_PORT'] ?: 'not found';
 
-$dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8";
+$dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
 try {
-    $pdo = new PDO($dsn, $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = new PDO($dsn, $user, $pass, array(
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+    ));
 } catch (PDOException $e) {
     header('Content-Type: application/json');
     http_response_code(500);
