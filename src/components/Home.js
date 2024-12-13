@@ -6,6 +6,8 @@ import './Styles.css';
 import './Sets.css';
 import { useAuth } from './AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const Home = () => {
     const [popularThemes, setPopularThemes] = useState([]);
@@ -15,6 +17,8 @@ const Home = () => {
     const [selectedSets, setSelectedSets] = useState({});
     const [submittedSets, setSubmittedSets] = useState({});
     const [showAllRecentSets, setShowAllRecentSets] = useState(false);
+    const [loadedImages, setLoadedImages] = useState({});
+    const [loadedThemeImages, setLoadedThemeImages] = useState({});
     const navigate = useNavigate();
     const { user } = useAuth();
 
@@ -99,6 +103,14 @@ const Home = () => {
             .catch(error => console.error('Error adding set to wishlist:', error));
     };
 
+    const handleImageLoad = (setNum) => {
+        setLoadedImages(prev => ({ ...prev, [setNum]: true }));
+    };
+
+    const handleThemeImageLoad = (themeId) => {
+        setLoadedThemeImages(prev => ({ ...prev, [themeId]: true }));
+    };
+
     const displayedSets = showAllRecentSets ? recentSets : recentSets.slice(0, INITIAL_SETS_TO_SHOW);
     const hasMoreSets = recentSets.length > INITIAL_SETS_TO_SHOW;
 
@@ -127,11 +139,16 @@ const Home = () => {
                         onClick={() => user && toggleSelectSet(set.set_num)}
                     >
                         <div className="set-image-container">
+                            {!loadedImages[set.set_num] && (
+                                <Skeleton height={100} />
+                            )}
                             <img
                                 src={set.img_url || '/images/lego_piece_questionmark.png'}
                                 alt={set.name}
-                                className="set-image"
+                                className={`set-image ${loadedImages[set.set_num] ? 'loaded' : 'loading'}`}
                                 onError={(e) => e.target.src = '/images/lego_piece_questionmark.png'}
+                                onLoad={() => handleImageLoad(set.set_num)}
+                                style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
                             />
                         </div>
                         <div className="set-name">{set.name} ({set.year})</div>
@@ -231,13 +248,19 @@ const Home = () => {
                 <div className="themes-list-container">
                     {popularThemes.map(theme => (
                         <div key={theme.id} className="theme-card" onClick={() => handleThemeClick(theme.id)}>
-                            <img 
-                                src={theme.theme_image_url || '/images/lego_piece_questionmark.png'} 
-                                alt={theme.name} 
-                                className="theme-image" 
-                                onError={(e) => e.target.src = '/images/lego_piece_questionmark.png'}
-                                loading="lazy"
-                            />
+                            <div className="theme-image-container">
+                                {!loadedThemeImages[theme.id] && (
+                                    <Skeleton height={150} />
+                                )}
+                                <img 
+                                    src={theme.theme_image_url || '/images/lego_piece_questionmark.png'} 
+                                    alt={theme.name} 
+                                    className={`theme-image ${loadedThemeImages[theme.id] ? 'loaded' : 'loading'}`}
+                                    onError={(e) => e.target.src = '/images/lego_piece_questionmark.png'}
+                                    onLoad={() => handleThemeImageLoad(theme.id)}
+                                    style={{ display: loadedThemeImages[theme.id] ? 'block' : 'none' }}
+                                />
+                            </div>
                             <div className="theme-name">
                                 <strong>{theme.name}</strong>
                                 <div className="theme-count">
