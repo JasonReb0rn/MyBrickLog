@@ -25,9 +25,8 @@ try {
             ON pt.theme_id = s.theme_id 
             AND pt.snapshot_date = (SELECT latest_date FROM LatestSnapshot)
         ORDER BY 
-            pt.collection_count DESC,  -- First sort by theme popularity
-            r.added_date DESC          -- Then by recency within each theme
-        LIMIT 10
+            pt.collection_count DESC,
+            r.added_date DESC
     ";
     
     $stmt = $pdo->prepare($query);

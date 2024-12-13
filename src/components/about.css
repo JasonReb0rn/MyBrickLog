@@ -59,9 +59,10 @@
     margin-bottom: 20px;
 }
 
-.social-links {
+.about-social-links {
     display: flex;
-    gap: 20px;
+    flex-direction: row;
+    gap: 1rem;
     justify-content: flex-start;
 }
 

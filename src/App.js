@@ -6,6 +6,7 @@ import Header from './components/Header';
 import Home from './components/Home';
 import Collection from './components/Collection';
 import Wishlist from './components/Wishlist';
+import UserSetsView from './components/UserSetsView';
 import Login from './components/Login';
 import Register from './components/Register';
 import Verify from './components/Verify';
@@ -34,10 +35,10 @@ const App = () => {
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/register" element={<Register />} />
                                 <Route path="/profile" element={<Profile />} />
-                                <Route path="/collection/:userId" element={<Collection />} />
-                                <Route path="/collection" element={<Collection />} />
-                                <Route path="/wishlist/:userId" element={<Wishlist />} />
-                                <Route path="/wishlist" element={<Wishlist />} />
+                                <Route path="/collection/:userId" element={<UserSetsView />} />
+                                <Route path="/wishlist/:userId" element={<UserSetsView />} />
+                                <Route path="/collection" element={<UserSetsView />} />
+                                <Route path="/wishlist" element={<UserSetsView />} />
                                 <Route path="/themes" element={<Themes />} />
                                 <Route path="/themes/:themeId" element={<SubThemes />} />
                                 <Route path="/verify/:verificationToken" element={<Verify />} />
