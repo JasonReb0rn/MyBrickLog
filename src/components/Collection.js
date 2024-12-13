@@ -170,47 +170,18 @@ const Collection = () => {
             return b.sets.length - a.sets.length;
         });
     
-        // Calculate layout classes
         const FULL_WIDTH_THRESHOLD = 7;
-        return themesArray.map((theme, index, array) => {
-            // Single theme in collection is always full width
-            if (array.length === 1) {
-                return { ...theme, isFullWidth: true };
-            }
     
-            // Themes with many sets are full width
+        return themesArray.map((theme, index) => {
+            // Theme is full width if it has many sets
             if (theme.sets.length >= FULL_WIDTH_THRESHOLD) {
                 return { ...theme, isFullWidth: true };
             }
-    
-            // Find nearest full-width themes (replace findLast with reverse().find())
-            const previousThemes = array.slice(0, index);
-            const prevFullWidth = previousThemes.reverse().find(t => 
-                t.sets.length >= FULL_WIDTH_THRESHOLD
-            );
-            const nextFullWidth = array.slice(index + 1).find(t => 
-                t.sets.length >= FULL_WIDTH_THRESHOLD
-            );
-    
-            // If between two full-width themes, make it full width
-            if (prevFullWidth && nextFullWidth) {
-                return { ...theme, isFullWidth: true };
-            }
-    
-            // Handle potential orphans
-            const isOdd = index % 2 === 1;
-            const isLast = index === array.length - 1;
             
-            // Make it full width if it would be orphaned
-            if (isLast && (isOdd || !array[index - 1]?.isFullWidth)) {
-                return { ...theme, isFullWidth: true };
-            }
-    
-            // Default to half width
+            // Otherwise it's half width
             return { ...theme, isFullWidth: false };
         });
     };
-
     // Render helper functions
     const renderProfileSection = () => {
         if (!profileData) return null;

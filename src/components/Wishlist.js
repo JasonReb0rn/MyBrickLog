@@ -3,11 +3,22 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import './Collection.css';
 import { useAuth } from './AuthContext';
-import CollectionThemeLayout from './CollectionThemeLayout';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faCube } from '@fortawesome/free-solid-svg-icons';
+import { Tooltip } from 'react-tooltip';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+    faInfoCircle, 
+    faMapMarkerAlt, 
+    faCube, 
+    faTrash,
+    faEnvelope,
+    faStore
+} from '@fortawesome/free-solid-svg-icons';
+import { 
+    faTwitter,
+    faYoutube 
+} from '@fortawesome/free-brands-svg-icons';
 
 const Wishlist = () => {
     const [profileData, setProfileData] = useState(null);
@@ -109,34 +120,45 @@ const Wishlist = () => {
     };
 
     const groupAndSortThemes = (sets, favoriteThemeId) => {
+        // First group the sets by theme
         const grouped = sets.reduce((acc, set) => {
             if (!acc[set.theme_id]) {
-                acc[set.theme_id] = { 
+                acc[set.theme_id] = {
                     theme_id: set.theme_id,
-                    theme_name: set.theme_name, 
-                    sets: [],
-                    collapsed: collapsedThemes[set.theme_id] || false // Add this line
+                    theme_name: set.theme_name,
+                    sets: []
                 };
             }
             acc[set.theme_id].sets.push(set);
             return acc;
         }, {});
     
-        const themesArray = Object.values(grouped).map(theme => ({
-            ...theme,
-            setCount: theme.sets.length
-        }));
+        // Convert to array and calculate layout properties
+        const themesArray = Object.values(grouped);
     
-        return themesArray.sort((a, b) => {
+        // Sort: favorite theme first, then by number of sets
+        themesArray.sort((a, b) => {
             if (a.theme_id === favoriteThemeId) return -1;
             if (b.theme_id === favoriteThemeId) return 1;
-            return b.setCount - a.setCount;
+            return b.sets.length - a.sets.length;
+        });
+    
+        const FULL_WIDTH_THRESHOLD = 7;
+    
+        return themesArray.map((theme, index) => {
+            // Theme is full width if it has many sets
+            if (theme.sets.length >= FULL_WIDTH_THRESHOLD) {
+                return { ...theme, isFullWidth: true };
+            }
+            
+            // Otherwise it's half width
+            return { ...theme, isFullWidth: false };
         });
     };
 
     const renderProfileSection = () => {
         if (!profileData) return null;
-
+    
         const displayName = profileData.display_name || profileData.username;
         
         return (
@@ -164,6 +186,54 @@ const Wishlist = () => {
                         )}
                         {profileData.bio && (
                             <p className="profile-bio">{profileData.bio}</p>
+                        )}
+                    </div>
+                    <div className="profile-social">
+                        {(profileData.twitter_handle || profileData.youtube_channel || profileData.email || profileData.bricklink_store) && (
+                            <div className="social-links">
+                                {profileData.twitter_handle && (
+                                    <a 
+                                        href={`https://twitter.com/${profileData.twitter_handle}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="social-link"
+                                    >
+                                        <FontAwesomeIcon icon={faTwitter} />
+                                        <span>@{profileData.twitter_handle}</span>
+                                    </a>
+                                )}
+                                {profileData.youtube_channel && (
+                                    <a 
+                                        href={`https://youtube.com/${profileData.youtube_channel}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="social-link"
+                                    >
+                                        <FontAwesomeIcon icon={faYoutube} />
+                                        <span>{profileData.youtube_channel}</span>
+                                    </a>
+                                )}
+                                {profileData.bricklink_store && (
+                                    <a 
+                                        href={`https://store.bricklink.com/${profileData.bricklink_store}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="social-link"
+                                    >
+                                        <FontAwesomeIcon icon={faStore} />
+                                        <span>{profileData.bricklink_store}</span>
+                                    </a>
+                                )}
+                                {profileData.email && (
+                                    <a 
+                                        href={`mailto:${profileData.email}`}
+                                        className="social-link"
+                                    >
+                                        <FontAwesomeIcon icon={faEnvelope} />
+                                        <span>{profileData.email}</span>
+                                    </a>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>
@@ -209,11 +279,14 @@ const Wishlist = () => {
             </div>
 
             {sets.length > 0 ? (
-                <CollectionThemeLayout
-                    themes={groupAndSortThemes(sets, profileData?.favorite_theme)}
-                    favoriteThemeId={profileData?.favorite_theme}
-                    renderThemeContent={(theme) => (
-                        <>
+                <div className="collection-themes-container">
+                    {groupAndSortThemes(sets, profileData?.favorite_theme).map(theme => (
+                        <div 
+                            key={theme.theme_id} 
+                            className={`collection-theme-section ${theme.isFullWidth ? '' : 'half'} ${
+                                collapsedThemes[theme.theme_id] ? 'collapsed' : ''
+                            }`}
+                        >
                             <div className="theme-title" onClick={() => toggleCollapse(theme.theme_id)}>
                                 {theme.theme_name}
                                 <FontAwesomeIcon 
@@ -263,7 +336,8 @@ const Wishlist = () => {
                                                             className="remove-button"
                                                             onClick={() => removeSet(set.set_num)}
                                                         >
-                                                            Remove
+                                                            <FontAwesomeIcon icon={faTrash} />
+                                                            <span className="remove-btn-span"> Remove</span>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -272,9 +346,9 @@ const Wishlist = () => {
                                     ))}
                                 </div>
                             )}
-                        </>
-                    )}
-                />
+                        </div>
+                    ))}
+                </div>
             ) : (
                 <div className="empty-collection">
                     {user && Number(user.user_id) === Number(userId) ? (

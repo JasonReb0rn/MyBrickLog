@@ -74,7 +74,7 @@ const Login = () => {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    {message && <p className="message">{message}</p>}
+                    {message && <p className="error-message">{message}</p>}
 
                     {unverified && (
                     <button className="resend-verification-button" onClick={handleResendVerification}>Resend Verification Email</button>
