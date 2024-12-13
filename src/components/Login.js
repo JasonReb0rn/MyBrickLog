@@ -11,6 +11,7 @@ const Login = () => {
     const [unverified, setUnverified] = useState(false);
     const [email, setEmail] = useState('');
     const [verificationToken, setVerificationToken] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { login, logout, user } = useAuth();
     const navigate = useNavigate();
 
@@ -23,16 +24,24 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const response = await login(username, password);
-        if (response.success) {
-            navigate('/');
-        } else if (response.unverified) {
-            setUnverified(true);
-            setEmail(response.email);
-            setVerificationToken(response.verification_token);
-            setMessage('Your account is not verified. Would you like to resend the verification email?');
-        } else {
-            setMessage(response.error || 'Invalid credentials');
+        setIsSubmitting(true);
+        
+        try {
+            const response = await login(username, password);
+            if (response.success) {
+                navigate('/');
+            } else if (response.unverified) {
+                setUnverified(true);
+                setEmail(response.email);
+                setVerificationToken(response.verification_token);
+                setMessage('Your account is not verified. Would you like to resend the verification email?');
+            } else {
+                setMessage(response.error || 'Invalid credentials');
+            }
+        } catch (error) {
+            setMessage('An error occurred during login. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -47,7 +56,7 @@ const Login = () => {
         const data = await response.json();
         if (data.success) {
             setMessage('Verification email has been resent. Please check your inbox.');
-            setUnverified(false); // Hide the resend button
+            setUnverified(false);
         } else {
             setMessage('Failed to resend verification email.');
         }
@@ -76,10 +85,17 @@ const Login = () => {
                     </div>
                     {message && <p className="error-message">{message}</p>}
 
+                    <div className="signup-link">
+                        <p>Forgot your password? <Link to="/forgot-password">Reset it here</Link></p>
+                    </div>
+
                     {unverified && (
                     <button className="resend-verification-button" onClick={handleResendVerification}>Resend Verification Email</button>
                     )}
-                    <button type="submit">Login</button>
+
+                    <button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Logging in...' : 'Login'}
+                    </button>
 
                 </form>
                 

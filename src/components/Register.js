@@ -13,6 +13,7 @@ const Register = () => {
     });
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { register, logout, user } = useAuth();
     const navigate = useNavigate();
 
@@ -135,6 +136,8 @@ const Register = () => {
             return;
         }
 
+        setIsSubmitting(true);
+        
         try {
             const token = await window.grecaptcha.execute(process.env.REACT_APP_RECAPTCHA_SITE_KEY, {
                 action: 'register'
@@ -149,6 +152,8 @@ const Register = () => {
         } catch (error) {
             setMessage('An error occurred during registration. Please try again.');
             console.error('Registration error:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -191,7 +196,9 @@ const Register = () => {
                         {errors.password && <p className="error-message">{errors.password}</p>}
                     </div>
                     {message && <p className={message.includes('successful') ? 'success-message' : 'error-message'}>{message}</p>}
-                    <button type="submit">Register</button>
+                    <button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Registering...' : 'Register'}
+                    </button>
                 </form>
                 <div className="signup-link">
                     <p>Already a member? <Link to="/login">Login instead.</Link></p>

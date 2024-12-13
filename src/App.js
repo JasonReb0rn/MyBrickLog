@@ -9,6 +9,8 @@ import Wishlist from './components/Wishlist';
 import UserSetsView from './components/UserSetsView';
 import Login from './components/Login';
 import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
+import PasswordReset from './components/PasswordReset';
 import Verify from './components/Verify';
 import Profile from './components/Profile';
 import Themes from './components/Themes';
@@ -34,6 +36,8 @@ const App = () => {
                                 <Route path="/" element={<Home />} />
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/register" element={<Register />} />
+                                <Route path="/forgot-password" element={<ForgotPassword />} />
+                                <Route path="/password-reset/:token" element={<PasswordReset />} />
                                 <Route path="/profile" element={<Profile />} />
                                 <Route path="/collection/:userId" element={<UserSetsView />} />
                                 <Route path="/wishlist/:userId" element={<UserSetsView />} />
