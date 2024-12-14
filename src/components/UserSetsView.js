@@ -464,13 +464,25 @@ const UserSetsView = () => {
                         : `${profileData?.display_name || profileData?.username}'s ${isWishlist ? 'Wishlist' : 'Collection'}`
                     }
                 </h2>
-                <button onClick={shareUrl} className="share-button">
-                    <FontAwesomeIcon 
-                        icon={copiedUrl ? "check" : "share"} 
-                        className="share-icon" 
-                    />
-                    {copiedUrl ? 'Link Copied!' : `Share ${isWishlist ? 'Wishlist' : 'Collection'}`}
-                </button>
+                <div className="collection-actions">
+                    {!isWishlist && profileData?.has_wishlist && (
+                        <button className="wishlist-link-button">
+                            <Link 
+                                to={`/wishlist/${userId}`} 
+                            >
+                                <FontAwesomeIcon icon="gift" className="button-icon" />
+                                View {user && Number(user.user_id) === Number(userId) ? 'My' : `${profileData?.display_name || profileData?.username}'s`} Wishlist
+                            </Link>
+                        </button>
+                    )}
+                    <button onClick={shareUrl} className="share-button">
+                        <FontAwesomeIcon 
+                            icon={copiedUrl ? "check" : "share"} 
+                            className="share-icon" 
+                        />
+                        {copiedUrl ? 'Link Copied!' : `Share ${isWishlist ? 'Wishlist' : 'Collection'}`}
+                    </button>
+                </div>
             </div>
 
             {sets.length > 0 ? (

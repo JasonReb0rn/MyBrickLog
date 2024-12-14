@@ -109,6 +109,8 @@
     align-items: center;
     max-width: 90%;
     margin: 2rem auto;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 
@@ -227,14 +229,6 @@
 .theme-icon {
     font-size: 16px;
     color: #666;
-}
-
-.sets-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
-    transition: max-height 0.3s ease-out;
 }
 
 .collection-theme-section.collapsed .sets-container {
@@ -394,8 +388,14 @@
     border: 2px solid white;
 }
 
+.collection-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
 /* Share Button */
-.share-button {
+.share-button, .wishlist-link-button {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -409,8 +409,13 @@
     transition: background-color 0.2s;
 }
 
-.share-button:hover {
+.wishlist-link-button a {
+    color: #333;
+}
+
+.share-button:hover, .wishlist-link-button:hover {
     background-color: #FFC800;
+    color: #333;
 }
 
 .share-icon {
@@ -445,6 +450,10 @@
         text-align: center;
     }
 
+    .collection-header h2 {
+        margin: auto;
+    }
+
     .profile-social {
         margin-left: 0;
         padding-left: 0;
@@ -459,6 +468,11 @@
         align-items: center;
     }
 
+    .collection-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
     .profile-info {
         width: 100%;
     }
@@ -466,10 +480,6 @@
     .profile-location,
     .profile-favorite-theme {
         justify-content: center;
-    }
-
-    .sets-container {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
 
     .collection-stats {
@@ -483,10 +493,6 @@
 }
 
 @media (max-width: 480px) {
-    .sets-container {
-        grid-template-columns: 1fr;
-    }
-
     .set-action-buttons {
         flex-direction: column;
     }

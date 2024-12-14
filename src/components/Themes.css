@@ -85,7 +85,8 @@
 
 @media (max-width: 768px) {
     .set-card {
-        width: 140px;
+        width: 130px;
+        padding: 0.5rem;
     }
 
     .themes-list-container {
@@ -225,4 +226,214 @@ a {
     width: 50px;
     height: 50px;
     margin-right: 10px;
+}
+
+/* NEW SubThemes Section */
+/* Theme Navigation Section */
+.theme-navigation-section {
+    max-width: 90%;
+    margin: 2rem auto;
+}
+
+.theme-header-container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.theme-subtheme-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.navigation-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #da291c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.navigation-button:hover {
+    background-color: #c82333;
+}
+
+.button-icon {
+    font-size: 14px;
+}
+
+/* Subthemes Section */
+.subthemes-section {
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtheme-section-header {
+    font-size: 20px;
+    color: #333;
+    margin: 0;
+}
+
+.subthemes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.subtheme-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.subtheme-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.subtheme-name {
+    font-size: 14px;
+    color: #333;
+}
+
+.chevron-icon {
+    color: #666;
+    font-size: 12px;
+}
+
+/* Sets Section */
+.sets-section {
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sets-header {
+    padding: 15px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    background-color: #f8f8f8;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.selected-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.wishlist-action-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #f0c51c;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.wishlist-action-button:hover {
+    background-color: #e0b710;
+}
+
+.collection-action-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.collection-action-button:hover {
+    background-color: #0056b3;
+}
+
+.selected-count {
+    font-size: 14px;
+    color: #666;
+    padding: 0.5rem 1rem;
+    background-color: #f5f5f5;
+    border-radius: 20px;
+}
+
+.sets-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1rem auto;
+    padding: 1rem;
+}
+
+.loading-indicator {
+    margin-top: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .theme-header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .sets-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .selected-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .collection-action-button,
+    .wishlist-action-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .sets-container, .sets-list-container, .themes-list-container {
+        gap: 0.5rem;
+        margin: 0.5rem auto;
+    }
 }

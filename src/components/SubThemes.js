@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import './Themes.css';
-import './Styles.css';
-import './Sets.css';
 import { useAuth } from './AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Skeleton from 'react-loading-skeleton';
@@ -115,34 +112,51 @@ const SubThemes = () => {
 
     const toggleSelectSet = (setNum) => {
         if (user) {
-            setSelectedSets(prevSelectedSets =>
-                prevSelectedSets[setNum]
-                    ? { ...prevSelectedSets, [setNum]: undefined }
-                    : { ...prevSelectedSets, [setNum]: 1 }
-            );
+            setSelectedSets(prevSelectedSets => {
+                const newSelectedSets = { ...prevSelectedSets };
+                if (newSelectedSets[setNum]) {
+                    delete newSelectedSets[setNum];  // Remove the set completely
+                } else {
+                    newSelectedSets[setNum] = 1;  // Add the set with quantity 1
+                }
+                return newSelectedSets;
+            });
         }
     };
 
-    const addToCollection = (setNum, quantity) => {
-        const setToAdd = [{ setNum, quantity }];
+    const addToCollection = (setNum = null) => {
+        // If setNum is provided, add single set, otherwise add all selected sets
+        const setsToAdd = setNum 
+            ? [{ setNum, quantity: selectedSets[setNum] }]
+            : Object.entries(selectedSets).map(([setNum, quantity]) => ({ 
+                setNum, 
+                quantity 
+            }));
     
-        axios.post(`${process.env.REACT_APP_API_URL}/add_to_collection.php`, { sets: setToAdd })
+        axios.post(`${process.env.REACT_APP_API_URL}/add_to_collection.php`, { sets: setsToAdd })
             .then(response => {
                 if (response.data.success) {
-                    setSubmittedSets(prev => ({ ...prev, [setNum]: true }));
-                    setSelectedSets(prev => {
-                        const newSelected = { ...prev };
-                        delete newSelected[setNum];
-                        return newSelected;
+                    // Update submitted state for all added sets
+                    const newSubmittedSets = {};
+                    setsToAdd.forEach(set => {
+                        newSubmittedSets[set.setNum] = true;
                     });
+                    setSubmittedSets(prev => ({ ...prev, ...newSubmittedSets }));
+    
+                    // Clear selected sets
+                    setSelectedSets({});
+    
+                    // Remove added sets from the display
                     setSets(prevSets => 
-                        prevSets.filter(set => set.set_num !== setNum)
+                        prevSets.filter(set => !setsToAdd.some(addedSet => 
+                            addedSet.setNum === set.set_num
+                        ))
                     );
                 } else {
-                    alert('Failed to add set to collection.');
+                    alert('Failed to add sets to collection.');
                 }
             })
-            .catch(error => console.error('Error adding set to collection:', error));
+            .catch(error => console.error('Error adding sets to collection:', error));
     };
 
     const addToWishlist = () => {
@@ -175,124 +189,161 @@ const SubThemes = () => {
     };
 
     return (
-        <div>
-            {subThemes.length > 0 && (
-                <button onClick={goBack} className="back-button">Return to themes</button>
-            )}
-            {subThemes.length > 0 && (
-                <>
-                    <div className="theme-header">Sub-Themes</div>
-                    <div className="themes-list-container">
-                        {subThemes.map(theme => (
-                            <button key={theme.id} className="theme-button" onClick={() => handleThemeClick(theme.id)}>
-                                {theme.name}
-                            </button>
-                        ))}
+        <div className="content">
+            <div className="theme-navigation-section">
+                <div className="theme-header-container">
+                    <button onClick={goBack} className="navigation-button">
+                        <FontAwesomeIcon icon="arrow-left" className="button-icon" />
+                        Back to Themes
+                    </button>
+                    <h1 className="theme-subtheme-title">{parentThemeName}</h1>
+                </div>
+    
+                {subThemes.length > 0 && (
+                    <div className="subthemes-section">
+                        <h2 className="section-header">Sub-Themes</h2>
+                        <div className="subthemes-grid">
+                            {subThemes.map(theme => (
+                                <button 
+                                    key={theme.id} 
+                                    className="subtheme-button"
+                                    onClick={() => handleThemeClick(theme.id)}
+                                >
+                                    <span className="subtheme-name">{theme.name}</span>
+                                    <FontAwesomeIcon icon="chevron-right" className="chevron-icon" />
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </>
-            )}
-            {!subThemes.length && (
-                <button onClick={goBack} className="back-button">Return to themes</button>
-            )}
-
-            <div className="theme-header">{parentThemeName} Sets</div>
-
-            <div className="sets-list-container">
-            {sets.map(set => (
-                <div
-                    key={set.set_num}
-                    className={`set-card ${selectedSets[set.set_num] ? 'selected' : ''}`}
-                    onClick={() => toggleSelectSet(set.set_num)}
-                >
-                    <div className="set-image-container">
-                        {!loadedImages[set.set_num] && (
-                            <Skeleton height={100} />
+                )}
+    
+                <div className="sets-section">
+                    <div className="sets-header">
+                        <h2 className="theme-subtheme-title">Sets</h2>
+                        {Object.keys(selectedSets).length > 0 && (
+                            <div className="selected-actions">
+                                <button 
+                                    className="collection-action-button"
+                                    onClick={() => addToCollection()}
+                                >
+                                    <FontAwesomeIcon icon="plus" className="button-icon" />
+                                    Add Selected to Collection
+                                </button>
+                                <button 
+                                    className="wishlist-action-button"
+                                    onClick={addToWishlist}
+                                >
+                                    <FontAwesomeIcon icon="star" className="button-icon" />
+                                    Add Selected to Wishlist
+                                </button>
+                                <span className="selected-count">
+                                    {Object.keys(selectedSets).length} selected
+                                </span>
+                            </div>
                         )}
-                        <img
-                            src={set.img_url}
-                            alt={set.name}
-                            className={`set-image ${loadedImages[set.set_num] ? 'loaded' : 'loading'}`}
-                            onError={handleImageError}
-                            onLoad={() => handleImageLoad(set.set_num)}
-                            style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
-                        />
                     </div>
-                    
-                    <div className="set-name">{set.name} ({set.year})</div>
-                    <div className="set-num">
-                        {selectedSets[set.set_num] !== undefined ? (
-                            <div className="quantity-controls">
-                                <button
-                                    className="quantity-button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleQuantityChange(set.set_num, Math.max(1, selectedSets[set.set_num] - 1));
-                                    }}
-                                >
-                                    -
-                                </button>
-                                <input
-                                    type="text"
-                                    className="quantity-input"
-                                    value={selectedSets[set.set_num]}
-                                    onChange={(e) => {
-                                        const quantity = parseInt(e.target.value, 10);
-                                        if (!isNaN(quantity) && quantity > 0) {
-                                            handleQuantityChange(set.set_num, quantity);
-                                        }
-                                    }}
-                                    onClick={(e) => e.stopPropagation()}
-                                />
-                                <button
-                                    className="quantity-button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleQuantityChange(set.set_num, selectedSets[set.set_num] + 1);
-                                    }}
-                                >
-                                    +
-                                </button>
-                                <div className="button-container">
-                                    <button
-                                        className="add-to-collection-button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            addToCollection(set.set_num, selectedSets[set.set_num]);
-                                        }}
-                                    >
-                                        {submittedSets[set.set_num] ? (
-                                            <>
-                                                <FontAwesomeIcon icon="thumbs-up" style={{ marginRight: '8px' }} />
-                                                Added!
-                                            </>
-                                        ) : (
-                                            <>
-                                                <FontAwesomeIcon icon="plus" style={{ marginRight: '8px' }} />
-                                                Add To Collection
-                                            </>
-                                        )}
-                                    </button>
-                                    <button
-                                        className="wishlist-button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            addToWishlist();
-                                        }}
-                                    >
-                                        <FontAwesomeIcon icon="plus" style={{ marginRight: '8px' }} />
-                                        Add to Wishlist
-                                    </button>
+    
+                    <div className="sets-grid">
+                        {sets.map(set => (
+                            <div
+                                key={set.set_num}
+                                className={`set-card ${selectedSets[set.set_num] ? 'selected' : ''}`}
+                                onClick={() => toggleSelectSet(set.set_num)}
+                            >
+                                <div className="set-image-container">
+                                    {!loadedImages[set.set_num] && (
+                                        <Skeleton height={100} />
+                                    )}
+                                    <img
+                                        src={set.img_url}
+                                        alt={set.name}
+                                        className={`set-image ${loadedImages[set.set_num] ? 'loaded' : 'loading'}`}
+                                        onError={handleImageError}
+                                        onLoad={() => handleImageLoad(set.set_num)}
+                                        style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
+                                    />
+                                </div>
+                                
+                                <div className="set-name">{set.name} ({set.year})</div>
+                                <div className="set-num">
+                                    {selectedSets[set.set_num] !== undefined ? (
+                                        <div className="quantity-controls">
+                                            <button
+                                                className="quantity-button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleQuantityChange(set.set_num, Math.max(1, selectedSets[set.set_num] - 1));
+                                                }}
+                                            >
+                                                -
+                                            </button>
+                                            <input
+                                                type="text"
+                                                className="quantity-input"
+                                                value={selectedSets[set.set_num]}
+                                                onChange={(e) => {
+                                                    const quantity = parseInt(e.target.value, 10);
+                                                    if (!isNaN(quantity) && quantity > 0) {
+                                                        handleQuantityChange(set.set_num, quantity);
+                                                    }
+                                                }}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                            <button
+                                                className="quantity-button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleQuantityChange(set.set_num, selectedSets[set.set_num] + 1);
+                                                }}
+                                            >
+                                                +
+                                            </button>
+                                            <div className="button-container">
+                                                <button
+                                                    className="add-to-collection-button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        addToCollection(set.set_num, selectedSets[set.set_num]);
+                                                    }}
+                                                >
+                                                    {submittedSets[set.set_num] ? (
+                                                        <>
+                                                            <FontAwesomeIcon icon="thumbs-up" style={{ marginRight: '8px' }} />
+                                                            Added!
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <FontAwesomeIcon icon="plus" style={{ marginRight: '8px' }} />
+                                                            Add To Collection
+                                                        </>
+                                                    )}
+                                                </button>
+                                                <button
+                                                    className="wishlist-button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        addToWishlist();
+                                                    }}
+                                                >
+                                                    <FontAwesomeIcon icon="plus" style={{ marginRight: '8px' }} />
+                                                    Add to Wishlist
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        set.set_num
+                                    )}
                                 </div>
                             </div>
-                        ) : (
-                            set.set_num
-                        )}
+                        ))}
                     </div>
+    
+                    {isLoading && (
+                        <div className="loading-indicator">
+                            <Skeleton count={3} />
+                        </div>
+                    )}
                 </div>
-            ))}
-                {isLoading && (
-                    <div className="loading">Loading more sets...</div>
-                )}
             </div>
         </div>
     );

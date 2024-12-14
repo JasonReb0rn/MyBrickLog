@@ -40,6 +40,15 @@ try {
         exit;
     }
 
+    $wishlistStmt = $pdo->prepare("
+        SELECT COUNT(*) as wishlist_count
+        FROM wishlist
+        WHERE user_id = :user_id
+    ");
+    
+    $wishlistStmt->execute(['user_id' => $userId]);
+    $wishlistData = $wishlistStmt->fetch(PDO::FETCH_ASSOC);
+
     // Clean and prepare the profile data
     $profile = [
         'username' => $userData['username'],
@@ -53,7 +62,8 @@ try {
         'twitter_handle' => $userData['twitter_handle'],
         'youtube_channel' => $userData['youtube_channel'],
         'bricklink_store' => $userData['bricklink_store'],
-        'email' => $userData['show_email'] ? $userData['email'] : null
+        'email' => $userData['show_email'] ? $userData['email'] : null,
+        'has_wishlist' => $wishlistData['wishlist_count'] > 0
     ];
 
     // Get the user's collection with detailed information
