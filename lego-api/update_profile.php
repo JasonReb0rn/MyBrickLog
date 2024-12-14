@@ -2,26 +2,27 @@
 require 'dbh.php';
 require 'cors_headers.php';
 
-// Determine environment and set appropriate session parameters
-$is_dev = strpos($_SERVER['HTTP_HOST'], 'localhost') !== false;
-
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'domain' => $is_dev ? null : '.mybricklog.com',  // null for localhost
-    'secure' => !$is_dev,  // false for localhost, true for production
-    'httponly' => true,
-    'samesite' => 'Strict'
-]);
+// Enable error logging
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+error_log("Update profile endpoint hit");
 
 session_start();
 
 $response = ['success' => false];
-$data = json_decode(file_get_contents('php://input'), true);
+$raw_data = file_get_contents('php://input');
+error_log("Raw input data: " . $raw_data);
 
-// Verify user is logged in and matches the user_id
+$data = json_decode($raw_data, true);
+error_log("Decoded data: " . print_r($data, true));
+
+// Debug session
+error_log("Session user_id: " . $_SESSION['user_id']);
+error_log("Request user_id: " . $data['user_id']);
+
 if (!isset($_SESSION['user_id']) || !isset($data['user_id']) || 
     $_SESSION['user_id'] != $data['user_id']) {
+    error_log("Authorization failed");
     $response['error'] = 'Unauthorized';
     echo json_encode($response);
     exit;
@@ -29,128 +30,73 @@ if (!isset($_SESSION['user_id']) || !isset($data['user_id']) ||
 
 if ($data) {
     try {
-        // Validate input
-        $display_name = trim($data['displayName'] ?? '');
-        $bio = trim($data['bio'] ?? '');
-        $location = trim($data['location'] ?? '');
-        $favorite_theme = $data['favoriteTheme'] ?? null;
-        $twitter_handle = trim($data['twitterHandle'] ?? '');
-        $youtube_channel = trim($data['youtubeChannel'] ?? '');
-        $bricklink_store = trim($data['bricklinkStore'] ?? '');
-        $show_email = isset($data['showEmail']) ? (bool)$data['showEmail'] : false;
+        $pdo->beginTransaction();
         
-        // Validation checks
-        if (strlen($bio) > 1000) {
-            $response['error'] = 'Bio must be less than 1000 characters';
-            echo json_encode($response);
-            exit;
-        }
+        // Convert and log show_email value at each stage
+        $show_email_raw = $data['showEmail'];
+        $show_email = filter_var($show_email_raw, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         
-        if (strlen($display_name) > 100) {
-            $response['error'] = 'Display name must be less than 100 characters';
-            echo json_encode($response);
-            exit;
-        }
-        
-        if (strlen($location) > 100) {
-            $response['error'] = 'Location must be less than 100 characters';
-            echo json_encode($response);
-            exit;
-        }
+        error_log("Show email processing:");
+        error_log("Raw value: " . var_export($show_email_raw, true));
+        error_log("Converted value: " . var_export($show_email, true));
 
-        // Validate Twitter handle
-        if (strlen($twitter_handle) > 50) {
-            $response['error'] = 'Twitter handle must be less than 50 characters';
-            echo json_encode($response);
-            exit;
-        }
-        
-        // Remove @ symbol if present at start of Twitter handle
-        if (strlen($twitter_handle) > 0 && $twitter_handle[0] === '@') {
-            $twitter_handle = substr($twitter_handle, 1);
-        }
-
-        // Validate YouTube channel
-        if (strlen($youtube_channel) > 100) {
-            $response['error'] = 'YouTube channel must be less than 100 characters';
-            echo json_encode($response);
-            exit;
-        }
-
-        // Validate Bricklink store
-        if (strlen($bricklink_store) > 100) {
-            $response['error'] = 'Bricklink store must be less than 100 characters';
-            echo json_encode($response);
-            exit;
-        }
-
-        // Validate Bricklink store format
-        if ($bricklink_store && !preg_match('/^[a-zA-Z0-9-_]+$/', $bricklink_store)) {
-            $response['error'] = 'Bricklink store can only contain letters, numbers, hyphens, and underscores';
-            echo json_encode($response);
-            exit;
-        }
-        
-        // Verify theme exists if provided
-        if ($favorite_theme) {
-            $stmt = $pdo->prepare("SELECT id FROM themes WHERE id = ?");
-            $stmt->execute([$favorite_theme]);
-            if (!$stmt->fetch()) {
-                $response['error'] = 'Invalid theme selected';
-                echo json_encode($response);
-                exit;
-            }
-        }
-        
-        // Update profile with new fields
-        $stmt = $pdo->prepare("
+        // Prepare the query
+        $query = "
             UPDATE users 
-            SET display_name = ?,
-                bio = ?,
-                location = ?,
-                favorite_theme = ?,
-                twitter_handle = ?,
-                youtube_channel = ?,
-                bricklink_store = ?,
-                show_email = ?,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = ?
-        ");
+            SET show_email = :show_email
+            WHERE user_id = :user_id
+        ";
         
-        $stmt->execute([
-            $display_name ?: null,
-            $bio ?: null,
-            $location ?: null,
-            $favorite_theme ?: null,
-            $twitter_handle ?: null,
-            $youtube_channel ?: null,
-            $bricklink_store ?: null,
-            $show_email,
-            $data['user_id']
-        ]);
+        // Log the query
+        error_log("Query: " . $query);
         
-        // Log the profile update
-        $stmt = $pdo->prepare("
-            INSERT INTO log 
-            (log_user, log_action, log_useragent, log_ip) 
-            VALUES 
-            (?, 'Profile updated', ?, ?)
-        ");
+        // Prepare and execute just the show_email update first
+        $stmt = $pdo->prepare($query);
+        $stmt->bindValue(':show_email', $show_email, PDO::PARAM_INT);
+        $stmt->bindValue(':user_id', $data['user_id'], PDO::PARAM_INT);
         
-        $stmt->execute([
-            $data['user_id'],
-            $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
-            $_SERVER['REMOTE_ADDR'] ?? 'Unknown'
-        ]);
+        error_log("Bound parameters:");
+        error_log("show_email: " . var_export($show_email, true));
+        error_log("user_id: " . var_export($data['user_id'], true));
         
-        $response['success'] = true;
+        $result = $stmt->execute();
+        
+        // Log the result
+        error_log("Execute result: " . var_export($result, true));
+        error_log("Rows affected: " . $stmt->rowCount());
+        
+        // Verify the current value
+        $verifyStmt = $pdo->prepare("SELECT show_email FROM users WHERE user_id = ?");
+        $verifyStmt->execute([$data['user_id']]);
+        $currentValue = $verifyStmt->fetchColumn();
+        error_log("Value in database after update: " . var_export($currentValue, true));
+        
+        if ($result) {
+            $pdo->commit();
+            $response['success'] = true;
+            $response['debug'] = [
+                'original_value' => $show_email_raw,
+                'converted_value' => $show_email,
+                'final_db_value' => $currentValue,
+                'rows_affected' => $stmt->rowCount()
+            ];
+        } else {
+            $pdo->rollBack();
+            error_log("PDO Error Info: " . print_r($stmt->errorInfo(), true));
+            $response['error'] = 'Update failed';
+        }
+        
     } catch (PDOException $e) {
-        $response['error'] = 'Database error';
-        error_log('Database error: ' . $e->getMessage());
+        $pdo->rollBack();
+        error_log("PDO Exception: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
+        $response['error'] = 'Database error: ' . $e->getMessage();
     }
 } else {
+    error_log("No valid data received");
     $response['error'] = 'Invalid data';
 }
 
+error_log("Final response: " . json_encode($response));
 echo json_encode($response);
 ?>

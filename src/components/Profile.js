@@ -176,6 +176,10 @@ const Profile = () => {
     };
 
     const handleImageChange = (e) => {
+        // Clear any existing messages
+        setError('');
+        setSuccess('');
+
         const file = e.target.files[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) { // 5MB limit
@@ -225,6 +229,10 @@ const Profile = () => {
     };
 
     const handleProfileUpdate = async () => {
+        // Clear any existing messages
+        setError('');
+        setSuccess('');
+
         if (!validateAllFields()) {
             setError('Please correct the validation errors before saving');
             return;
@@ -232,18 +240,19 @@ const Profile = () => {
 
         try {
             // Create a copy of profileData with normalized bio
-            const normalizedData = {
+            const requestData = {
                 ...profileData,
-                bio: normalizeLineBreaks(profileData.bio)
+                bio: normalizeLineBreaks(profileData.bio),
+                showEmail: Number(profileData.showEmail),  // Explicitly convert to number
+                user_id: user.user_id
             };
 
-            // Update the state with normalized bio
-            setProfileData(normalizedData);
+            console.log('Sending profile data:', requestData); // Debug log
 
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/update_profile.php`, {
-                user_id: user.user_id,
-                ...normalizedData
-            });
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL}/update_profile.php`,
+                requestData
+            );
 
             if (response.data.success) {
                 setSuccess('Profile updated successfully!');
@@ -253,8 +262,8 @@ const Profile = () => {
                 setError(response.data.error || 'Failed to update profile');
             }
         } catch (error) {
+            console.error('Profile update error:', error);
             setError('Error updating profile');
-            console.error('Error:', error);
         }
     };
 
@@ -262,13 +271,19 @@ const Profile = () => {
         return <div className="login-prompt">Please log in to view your profile.</div>;
     }
 
+    const toggleEditMode = () => {
+        setError('');
+        setSuccess('');
+        setIsEditing(!isEditing);
+    };
+
     return (
         <div className="profile-container">
             <div className="profile-page-header">
                 <h1>My Profile</h1>
                 <button 
                     className="edit-button"
-                    onClick={() => setIsEditing(!isEditing)}
+                    onClick={toggleEditMode}
                 >
                     <FontAwesomeIcon icon={isEditing ? faTimes : faEdit} />
                     {isEditing ? ' Cancel' : ' Edit Profile'}
