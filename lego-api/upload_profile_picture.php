@@ -2,7 +2,6 @@
 require 'dbh.php';
 require 'cors_headers.php';
 
-// Add AWS SDK usage only in this file
 use Aws\S3\S3Client;
 
 session_start();
@@ -11,6 +10,7 @@ session_start();
 $s3Config = [
     'version' => 'latest',
     'region'  => 'us-east-2',
+    'signature_version' => 'v4',
     'credentials' => [
         'key'    => $_ENV['AWS_S3_KEY'] ?? '',
         'secret' => $_ENV['AWS_S3_SECRET'] ?? '',
@@ -51,12 +51,16 @@ if (isset($_FILES['profile_picture'])) {
     } elseif ($file['error'] !== UPLOAD_ERR_OK) {
         $response['error'] = 'Upload failed. Please try again.';
     } else {
-        // Generate unique filename
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'user_' . $user_id . '_' . time() . '.' . $extension;
-
         try {
-            // Delete old profile picture if exists
+            // Start transaction
+            $pdo->beginTransaction();
+            
+            // Generate filename at the start
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $timestamp = time();
+            $filename = 'user_' . $user_id . '_' . $timestamp . '.' . $extension;
+            
+            // Get current profile picture
             $stmt = $pdo->prepare("SELECT profile_picture FROM users WHERE user_id = ?");
             $stmt->execute([$user_id]);
             $old_picture = $stmt->fetchColumn();
@@ -73,6 +77,12 @@ if (isset($_FILES['profile_picture'])) {
                     error_log('Failed to delete old S3 file: ' . $e->getMessage());
                 }
             }
+
+            // Update database with new filename
+            $stmt = $pdo->prepare("UPDATE users SET profile_picture = ? WHERE user_id = ?");
+            if (!$stmt->execute([$filename, $user_id])) {
+                throw new Exception("Failed to update database");
+            }
             
             // Upload new file to S3
             $result = $s3->putObject([
@@ -82,20 +92,19 @@ if (isset($_FILES['profile_picture'])) {
                 'ContentType' => $file['type']
             ]);
             
-            // Get the public URL
-            $imageUrl = $result['ObjectURL'];
-            
-            // Update database with new filename
-            $stmt = $pdo->prepare("UPDATE users SET profile_picture = ? WHERE user_id = ?");
-            $stmt->execute([$filename, $user_id]);
+            // If we got here, both database update and S3 upload worked, so commit
+            $pdo->commit();
             
             $response['success'] = true;
             $response['filename'] = $filename;
-            $response['url'] = $imageUrl;
+            $response['url'] = $result['ObjectURL'];
             
         } catch (Exception $e) {
+            // Rollback the transaction if anything failed
+            $pdo->rollBack();
             $response['error'] = 'Upload failed: ' . $e->getMessage();
-            error_log('S3 upload error: ' . $e->getMessage());
+            error_log('Error during upload process: ' . $e->getMessage());
+            
         }
     }
 } else {

@@ -33,7 +33,7 @@ CREATE TABLE `collection` (
   PRIMARY KEY (`id`),
   KEY `set_num` (`set_num`(250)),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=111 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -103,7 +103,7 @@ CREATE TABLE `log` (
   `log_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `log_ip` varchar(45) NOT NULL,
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=151 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=212 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -123,6 +123,27 @@ CREATE TABLE `minifigs` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `password_reset_tokens`
+--
+
+DROP TABLE IF EXISTS `password_reset_tokens`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `password_reset_tokens` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `used` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `token` (`token`),
+  CONSTRAINT `password_reset_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `popular_themes`
 --
 
@@ -138,7 +159,7 @@ CREATE TABLE `popular_themes` (
   KEY `theme_id` (`theme_id`),
   KEY `snapshot_date` (`snapshot_date`),
   CONSTRAINT `popular_themes_ibfk_1` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,7 +179,34 @@ CREATE TABLE `recent_set_additions` (
   KEY `theme_id` (`theme_id`),
   CONSTRAINT `recent_set_additions_ibfk_1` FOREIGN KEY (`set_num`) REFERENCES `sets` (`set_num`),
   CONSTRAINT `recent_set_additions_ibfk_2` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=202 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `set_prices`
+--
+
+DROP TABLE IF EXISTS `set_prices`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `set_prices` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `set_num` varchar(20) NOT NULL,
+  `retail_price` decimal(10,2) DEFAULT NULL,
+  `market_price` decimal(10,2) DEFAULT NULL,
+  `market_price_difference` decimal(5,2) DEFAULT NULL,
+  `sealed_value` decimal(10,2) DEFAULT NULL,
+  `used_value` decimal(10,2) DEFAULT NULL,
+  `used_value_range_low` decimal(10,2) DEFAULT NULL,
+  `used_value_range_high` decimal(10,2) DEFAULT NULL,
+  `last_updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` varchar(50) DEFAULT 'success',
+  `status_message` text,
+  PRIMARY KEY (`id`),
+  KEY `idx_set_num` (`set_num`),
+  KEY `idx_last_updated` (`last_updated`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB AUTO_INCREMENT=9269 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -232,7 +280,7 @@ CREATE TABLE `users` (
   KEY `favorite_theme` (`favorite_theme`),
   KEY `idx_users_bricklink_store` (`bricklink_store`),
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`favorite_theme`) REFERENCES `themes` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -249,7 +297,7 @@ CREATE TABLE `wishlist` (
   PRIMARY KEY (`id`),
   KEY `set_num` (`set_num`(250)),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -261,4 +309,4 @@ CREATE TABLE `wishlist` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-12 16:31:39
+-- Dump completed on 2024-12-27 10:28:59
