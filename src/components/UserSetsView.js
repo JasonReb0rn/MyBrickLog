@@ -532,6 +532,36 @@ const UserSetsView = () => {
                                                         <span className="set-year">({set.year})</span>
                                                         <span className="set-number">{set.set_num}</span>
                                                     </div>
+
+                                                    {(set.retail_price || set.sealed_value || set.used_value) && (
+                                                        <div className="set-prices">
+                                                            {set.retail_price && (
+                                                                <div className="price-row">
+                                                                    <span className="price-label">Retail:</span>
+                                                                    <span className="price-value retail">
+                                                                        ${Number(set.retail_price).toFixed(2)}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            {set.sealed_value && (
+                                                                <div className="price-row">
+                                                                    <span className="price-label">Sealed:</span>
+                                                                    <span className="price-value sealed">
+                                                                        ${Number(set.sealed_value).toFixed(2)}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            {set.used_value && (
+                                                                <div className="price-row">
+                                                                    <span className="price-label">Used:</span>
+                                                                    <span className="price-value used">
+                                                                        ${Number(set.used_value).toFixed(2)}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+
                                                 </div>
 
                                                 {renderSetActions(set)}

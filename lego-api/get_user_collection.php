@@ -31,7 +31,6 @@ try {
         WHERE u.user_id = :user_id
     ");
     
-    
     $userStmt->execute(['user_id' => $userId]);
     $userData = $userStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -84,6 +83,9 @@ try {
                 JOIN inventories i ON im.inventory_id = i.id
                 WHERE i.set_num = s.set_num
             ), 0) AS num_minifigures,
+            sp.retail_price,
+            sp.sealed_value,
+            sp.used_value,
             -- Get parent theme information
             pt.name AS parent_theme_name,
             pt.id AS parent_theme_id
@@ -91,6 +93,7 @@ try {
         JOIN sets s ON s.set_num = c.set_num
         JOIN themes t ON s.theme_id = t.id
         LEFT JOIN themes pt ON t.parent_id = pt.id
+        LEFT JOIN set_prices sp ON s.set_num = sp.set_num
         WHERE c.user_id = :user_id
         ORDER BY 
             COALESCE(pt.name, t.name),
@@ -173,7 +176,6 @@ try {
     echo json_encode($response);
 
 } catch (PDOException $e) {
-    // Log the error but don't expose details to the client
     error_log('Database error in get_user_collection.php: ' . $e->getMessage());
     echo json_encode([
         'error' => 'An error occurred while fetching the collection.',

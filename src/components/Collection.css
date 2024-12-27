@@ -297,7 +297,48 @@
     justify-content: space-between;
 }
 
+.set-details {
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    justify-content: space-between;
+}
 
+.set-prices {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+    font-size: 13px;
+    color: #666;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.price-label {
+    color: #888;
+}
+
+.price-value {
+    font-weight: 500;
+    color: #333;
+}
+
+.price-value.retail {
+    color: #666;
+}
+
+.price-value.sealed {
+    color: #2e7d32;
+}
+
+.price-value.used {
+    color: #1976d2;
+}
 
 /* Set Actions */
 .set-actions {
