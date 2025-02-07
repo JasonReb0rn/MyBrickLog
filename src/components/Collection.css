@@ -259,9 +259,7 @@
 }
 
 .set-card.show-prices {
-    width: 320px;
-    flex-direction: row;
-    align-items: flex-end;
+    width: 240px;
     text-align: left;
 }
 
@@ -269,8 +267,8 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
     height: 100%;
+    width: 100%;
 }
 
 .set-card.selected {
@@ -303,6 +301,11 @@
     width: 50%;
     margin-right: 12px;
     margin-bottom: unset;
+}
+
+.set-info-container {
+    display: flex;
+    flex-direction: row;
 }
 
 .set-info {
@@ -341,7 +344,8 @@
 }
 
 .set-prices-container {
-    padding: 0 1rem;
+    padding-left: 10px;
+    margin-left: 10px;
     border-left: 1px solid #eee;
     opacity: 0;
     transform: translateX(-20px);

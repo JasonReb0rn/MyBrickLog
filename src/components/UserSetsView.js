@@ -356,58 +356,63 @@ const UserSetsView = () => {
                        ${showPrices ? 'show-prices' : ''}`}
             onClick={() => toggleSelectSet(set.set_num)}
         >
+
+            <div className="set-image-container">
+                {!loadedImages[set.set_num] && <Skeleton height={120} />}
+                <img
+                    src={set.img_url}
+                    alt={set.name}
+                    className={`set-image ${loadedImages[set.set_num] ? 'loaded' : ''}`}
+                    onError={handleImageError}
+                    onLoad={() => handleImageLoad(set.set_num)}
+                    style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
+                />
+            </div>
+
             <div className="set-card-main">
-                <div className="set-image-container">
-                    {!loadedImages[set.set_num] && <Skeleton height={120} />}
-                    <img
-                        src={set.img_url}
-                        alt={set.name}
-                        className={`set-image ${loadedImages[set.set_num] ? 'loaded' : ''}`}
-                        onError={handleImageError}
-                        onLoad={() => handleImageLoad(set.set_num)}
-                        style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
-                    />
-                </div>
-    
-                <div className="set-info">
-                    <div className="set-name">{set.name}</div>
-                    <div className="set-details">
-                        <span className="set-year">({set.year})</span>
-                        <span className="set-number">{set.set_num}</span>
+
+                <div className='set-info-container'>
+                    <div className="set-info">
+                        <div className="set-name">{set.name}</div>
+                        <div className="set-details">
+                            <span className="set-year">({set.year})</span>
+                            <span className="set-number">{set.set_num}</span>
+                        </div>
+                        
                     </div>
+
+                    {showPrices && (
+                        <div className="set-prices-container">
+                            {set.retail_price && (
+                                <div className="price-row">
+                                    <span className="price-label">Retail</span>
+                                    <span className="price-value retail">
+                                        ${Number(set.retail_price).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            {set.sealed_value && (
+                                <div className="price-row">
+                                    <span className="price-label">Sealed</span>
+                                    <span className="price-value sealed">
+                                        ${Number(set.sealed_value).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            {set.used_value && (
+                                <div className="price-row">
+                                    <span className="price-label">Used</span>
+                                    <span className="price-value used">
+                                        ${Number(set.used_value).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
-                
+
                 {renderSetActions(set)}
             </div>
-    
-            {showPrices && (
-                <div className="set-prices-container">
-                    {set.retail_price && (
-                        <div className="price-row">
-                            <span className="price-label">Retail</span>
-                            <span className="price-value retail">
-                                ${Number(set.retail_price).toFixed(2)}
-                            </span>
-                        </div>
-                    )}
-                    {set.sealed_value && (
-                        <div className="price-row">
-                            <span className="price-label">Sealed</span>
-                            <span className="price-value sealed">
-                                ${Number(set.sealed_value).toFixed(2)}
-                            </span>
-                        </div>
-                    )}
-                    {set.used_value && (
-                        <div className="price-row">
-                            <span className="price-label">Used</span>
-                            <span className="price-value used">
-                                ${Number(set.used_value).toFixed(2)}
-                            </span>
-                        </div>
-                    )}
-                </div>
-            )}
     
             {!isWishlist && set.quantity > 1 && (
                 <div className="quantity-badge">×{set.quantity}</div>

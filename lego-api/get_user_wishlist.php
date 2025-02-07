@@ -46,7 +46,15 @@ try {
         'join_date' => $userData['join_date']
     ];
 
-    // Get the user's wishlist
+    // First, remove any wishlist items that are already in the collection
+    $removeStmt = $pdo->prepare("
+        DELETE w FROM wishlist w
+        INNER JOIN collection c ON w.set_num = c.set_num AND w.user_id = c.user_id
+        WHERE w.user_id = :user_id
+    ");
+    $removeStmt->execute(['user_id' => $userId]);
+
+    // Then get the remaining wishlist items
     $setsStmt = $pdo->prepare("
         SELECT 
             s.set_num,
@@ -57,12 +65,21 @@ try {
             s.theme_id,
             t.name AS theme_name,
             pt.name AS parent_theme_name,
-            pt.id AS parent_theme_id
+            pt.id AS parent_theme_id,
+            sp.retail_price,
+            sp.sealed_value,
+            sp.used_value
         FROM wishlist w
         JOIN sets s ON s.set_num = w.set_num
         JOIN themes t ON s.theme_id = t.id
         LEFT JOIN themes pt ON t.parent_id = pt.id
+        LEFT JOIN set_prices sp ON s.set_num = sp.set_num
         WHERE w.user_id = :user_id
+        AND NOT EXISTS (
+            SELECT 1 FROM collection c 
+            WHERE c.set_num = w.set_num 
+            AND c.user_id = w.user_id
+        )
         ORDER BY 
             COALESCE(pt.name, t.name),
             t.name,
@@ -73,13 +90,11 @@ try {
     $setsStmt->execute(['user_id' => $userId]);
     $sets = $setsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Prepare the response
     $response = [
         'profile' => $profile,
         'sets' => $sets
     ];
 
-    // Set cache headers
     header('Cache-Control: max-age=300, public');
     header('ETag: "' . md5(json_encode($response)) . '"');
 
