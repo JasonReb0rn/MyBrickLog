@@ -3,8 +3,8 @@ require 'dbh.php';
 require 'cors_headers.php';
 require 'create_log.php';
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+use Aws\Ses\SesClient;
+use Aws\Exception\AwsException;
 
 $data = json_decode(file_get_contents('php://input'), true);
 $username = $data['username'] ?? '';
@@ -91,54 +91,59 @@ if (!empty($username) && !empty($email) && !empty($password) && !empty($recaptch
         $stmt->execute([$username, $email, $hashedPassword, $verificationToken]);
         error_log("User inserted into database");
 
+        // Setup AWS SES client
+        $config = [
+            'version' => 'latest',
+            'region' => 'us-east-1',
+            'credentials' => [
+                'key' => $_ENV['AWS_S3_KEY'],
+                'secret' => $_ENV['AWS_S3_SECRET'],
+            ]
+        ];
+
+        // For local development with SSL verification
+        if ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['REMOTE_ADDR'] === '127.0.0.1') {
+            $config['http'] = [
+                'verify' => false  // You might need to set the path to your cacert.pem for local dev
+            ];
+        }
+
         // Attempt to send email
         $mailSent = false;
-        $mail = new PHPMailer(true);
         try {
-            // Enable detailed debug output
-            $mail->SMTPDebug = 3;  // Enable verbose debug output
-            $mail->Debugoutput = function($str, $level) {
-                error_log("PHPMailer [$level] : $str");
-            };
+            $client = SesClient::factory($config);
+            $result = $client->sendEmail([
+                'Source' => 'no-reply@mybricklog.com',
+                'Destination' => [
+                    'ToAddresses' => [$email],
+                ],
+                'Message' => [
+                    'Subject' => [
+                        'Data' => 'Verify your MyBrickLog account',
+                        'Charset' => 'UTF-8',
+                    ],
+                    'Body' => [
+                        'Html' => [
+                            'Data' => "Click the following link to verify your account: <a href=\"$verificationURL\">$verificationURL</a>",
+                            'Charset' => 'UTF-8',
+                        ],
+                        'Text' => [
+                            'Data' => "Click the following link to verify your account: $verificationURL",
+                            'Charset' => 'UTF-8',
+                        ],
+                    ],
+                ],
+            ]);
 
-            // Log configuration before setting up SMTP
-            error_log("PHPMailer Configuration:");
-            error_log("Host: email-smtp.us-east-2.amazonaws.com");
-            error_log("Port: 587");
-            error_log("Username length: " . strlen($_ENV['AWS_SES_KEY']));
-            error_log("Password length: " . strlen($_ENV['AWS_SES_SECRET']));
-
-            $mail->isSMTP();
-            $mail->Host       = 'email-smtp.us-east-2.amazonaws.com';
-            $mail->SMTPAuth   = true;
-            $mail->Username   = $_ENV['AWS_SES_KEY'];
-            $mail->Password   = $_ENV['AWS_SES_SECRET'];
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = 587;
-
-            // Log successful SMTP setup
-            error_log("SMTP configuration complete");
-
-            $mail->setFrom('no-reply@mybricklog.com', 'MyBrickLog');
-            $mail->addAddress($email, $username);
-
-            $mail->isHTML(true);
-            $mail->Subject = 'Verify your account';
-            $mail->Body    = "Click the following link to verify your account: <a href=\"$verificationURL\">$verificationURL</a>";
-            $mail->AltBody = "Click the following link to verify your account: $verificationURL";
-
-            // Log before sending
-            error_log("Attempting to send email...");
+            if (isset($result['MessageId'])) {
+                $mailSent = true;
+                error_log("Verification email sent successfully");
+            }
             
-            $mail->send();
-            $mailSent = true;
-            error_log("Verification email sent successfully");
-            
-        } catch (Exception $e) {
-            error_log("Detailed PHPMailer Error: " . $e->getMessage());
-            error_log("Full PHPMailer Error Info: " . print_r($mail->ErrorInfo, true));
-            error_log("SMTP Status: " . $mail->getSMTPInstance()->getError()['error']);
-            error_log("Failed to send verification email");
+        } catch (AwsException $e) {
+            error_log("AWS SES Error: " . $e->getMessage());
+            error_log("AWS Error Code: " . $e->getAwsErrorCode());
+            error_log("AWS Error Type: " . $e->getAwsErrorType());
             throw $e;
         }
 

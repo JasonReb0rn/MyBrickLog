@@ -2,8 +2,8 @@
 require 'dbh.php';
 require 'cors_headers.php';
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+use Aws\Ses\SesClient;
+use Aws\Exception\AwsException;
 
 $data = json_decode(file_get_contents('php://input'), true);
 $email = $data['email'] ?? '';
@@ -12,37 +12,54 @@ $verificationToken = $data['verificationToken'] ?? '';
 $response = ['success' => false];
 
 if (!empty($email) && !empty($verificationToken)) {
-    $verificationURL = "https://www.mybricklog.com/verify/$verificationToken"; // Update with your website URL
+    $verificationURL = "https://www.mybricklog.com/verify/$verificationToken";
 
-    // Send verification email
-    $mail = new PHPMailer(true);
+    $config = [
+        'version' => 'latest',
+        'region'  => 'us-east-1',
+        'credentials' => [
+            'key'    => $_ENV['AWS_S3_KEY'],
+            'secret' => $_ENV['AWS_S3_SECRET'],
+        ]
+    ];
+
+    if ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['REMOTE_ADDR'] === '127.0.0.1') {
+        $config['http'] = ['verify' => false];
+    }
+
     try {
-        // Server settings
-        $mail->isSMTP();
-        $mail->Host       = 'email-smtp.us-east-2.amazonaws.com'; // Set the SMTP server to send through
-        $mail->SMTPAuth   = true;
-        $mail->SMTPSecure = 'tls'; // Enable TLS encryption
-        $mail->Username   = $_ENV['AWS_SES_KEY']; // SMTP username
-        $mail->Password   = $_ENV['AWS_SES_SECRET']; // SMTP password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $client = SesClient::factory($config);
+        $result = $client->sendEmail([
+            'Source' => 'no-reply@mybricklog.com',
+            'Destination' => [
+                'ToAddresses' => [$email],
+            ],
+            'Message' => [
+                'Subject' => [
+                    'Data' => 'Verify your MyBrickLog account',
+                    'Charset' => 'UTF-8',
+                ],
+                'Body' => [
+                    'Html' => [
+                        'Data' => "Click the following link to verify your account: <a href=\"$verificationURL\">$verificationURL</a>",
+                        'Charset' => 'UTF-8',
+                    ],
+                    'Text' => [
+                        'Data' => "Click the following link to verify your account: $verificationURL",
+                        'Charset' => 'UTF-8',
+                    ],
+                ],
+            ],
+        ]);
 
-        // Recipients
-        $mail->setFrom('no-reply@mybricklog.com', 'MyBrickLog');
-        $mail->addAddress($email);
-
-        // Content
-        $mail->isHTML(true);
-        $mail->Subject = 'Verify your account';
-        $mail->Body    = "Click the following link to verify your account: <a href=\"$verificationURL\">$verificationURL</a>";
-        $mail->AltBody = "Click the following link to verify your account: $verificationURL";
-
-        $mail->send();
-        $response['success'] = true;
-    } catch (Exception $e) {
-        $response['error'] = 'Mailer Error: ' . $mail->ErrorInfo;
+        if (isset($result['MessageId'])) {
+            $response['success'] = true;
+            error_log("Verification email resent successfully");
+        }
+    } catch (AwsException $e) {
+        error_log("AWS SES Error: " . $e->getMessage());
+        $response['error'] = 'Failed to send verification email';
     }
 }
 
 echo json_encode($response);
-?>

@@ -83,6 +83,13 @@
     position: relative;
 }
 
+.set-card.horizontal {
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 @media (max-width: 768px) {
     .set-card {
         width: 130px;
@@ -138,7 +145,7 @@
 }
 
 .set-name {
-    margin-top: 10px;
+    margin: 10px;
     font-size: 14px;
     font-weight: bold;
 }

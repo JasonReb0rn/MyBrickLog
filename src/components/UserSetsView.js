@@ -14,7 +14,10 @@ import {
     faCircleHalfStroke, 
     faTrash,
     faEnvelope,
-    faStore
+    faStore,
+    faDollarSign,
+    faEyeSlash,
+    faEye
 } from '@fortawesome/free-solid-svg-icons';
 import { 
     faTwitter,
@@ -45,6 +48,21 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, set, isWishlist }) => 
     );
 };
 
+const PriceToggle = ({ showPrices, onToggle }) => (
+    <button 
+        onClick={onToggle}
+        className="price-toggle-button"
+        data-tooltip-id="price-toggle-tooltip"
+    >
+        <FontAwesomeIcon icon={showPrices ? faEyeSlash : faEye} />
+        <FontAwesomeIcon icon={faDollarSign} className="price-icon" />
+        <span className="toggle-text">{showPrices ? 'Hide' : 'Show'} Prices</span>
+        <Tooltip id="price-toggle-tooltip" place="bottom" type="dark" effect="solid">
+            <span>{showPrices ? 'Hide' : 'Show'} set prices</span>
+        </Tooltip>
+    </button>
+);
+
 const UserSetsView = () => {
     const [profileData, setProfileData] = useState(null);
     const [sets, setSets] = useState([]);
@@ -54,6 +72,10 @@ const UserSetsView = () => {
     const [userExists, setUserExists] = useState(true);
     const [loadedImages, setLoadedImages] = useState({});
     const [collapsedThemes, setCollapsedThemes] = useState({});
+    const [showPrices, setShowPrices] = useState(() => {
+        const stored = localStorage.getItem('showPrices');
+        return stored !== null ? JSON.parse(stored) : false;
+    });
     const [confirmDialog, setConfirmDialog] = useState({
         isOpen: false,
         set: null
@@ -71,6 +93,10 @@ const UserSetsView = () => {
         updateQuantity: 'update_set_quantity.php',
         toggleComplete: 'toggle_set_complete_status.php'
     };
+
+    useEffect(() => {
+        localStorage.setItem('showPrices', JSON.stringify(showPrices));
+    }, [showPrices]);
 
     useEffect(() => {
         const fetchSets = async () => {
@@ -322,42 +348,72 @@ const UserSetsView = () => {
         );
     };
 
-    const renderCollectionStats = () => {
-        if (isWishlist) return null;
-
-        const totalSets = sets.reduce((acc, set) => acc + Number(set.quantity), 0);
-        const totalParts = sets.reduce((acc, set) => acc + (set.num_parts * Number(set.quantity)), 0);
-        const totalMinifigures = sets.reduce((acc, set) => acc + (Number(set.num_minifigures) * Number(set.quantity)), 0);
-
-        return (
-            <div className="stats-container">
-                <div className="collection-stats">
-                    <div className="stats-section">
-                        <div className="stats-header">Sets</div>
-                        <div className="stats-value">{totalSets}</div>
-                    </div>
-                    <div className="stats-section">
-                        <div className="stats-header">Parts</div>
-                        <div className="stats-value">{totalParts.toLocaleString()}</div>
-                    </div>
-                    <div className="stats-section">
-                        <div className="stats-header">
-                            Minifigures
-                            <FontAwesomeIcon
-                                icon={faInfoCircle}
-                                className="info-icon"
-                                data-tooltip-id="tooltip-minifigures"
-                            />
-                        </div>
-                        <div className="stats-value">{totalMinifigures.toLocaleString()}</div>
-                        <Tooltip id="tooltip-minifigures" place="bottom" type="dark" effect="solid">
-                            <span>Minifigure count data is sourced from a third-party database and may be incomplete.</span>
-                        </Tooltip>
+    const renderSetCard = (set) => (
+        <div
+            key={set.set_num}
+            className={`set-card ${!isWishlist && Number(set.complete) === 0 ? 'incomplete' : ''} 
+                       ${selectedSet === set.set_num ? 'selected' : ''}
+                       ${showPrices ? 'show-prices' : ''}`}
+            onClick={() => toggleSelectSet(set.set_num)}
+        >
+            <div className="set-card-main">
+                <div className="set-image-container">
+                    {!loadedImages[set.set_num] && <Skeleton height={120} />}
+                    <img
+                        src={set.img_url}
+                        alt={set.name}
+                        className={`set-image ${loadedImages[set.set_num] ? 'loaded' : ''}`}
+                        onError={handleImageError}
+                        onLoad={() => handleImageLoad(set.set_num)}
+                        style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
+                    />
+                </div>
+    
+                <div className="set-info">
+                    <div className="set-name">{set.name}</div>
+                    <div className="set-details">
+                        <span className="set-year">({set.year})</span>
+                        <span className="set-number">{set.set_num}</span>
                     </div>
                 </div>
+                
+                {renderSetActions(set)}
             </div>
-        );
-    };
+    
+            {showPrices && (
+                <div className="set-prices-container">
+                    {set.retail_price && (
+                        <div className="price-row">
+                            <span className="price-label">Retail</span>
+                            <span className="price-value retail">
+                                ${Number(set.retail_price).toFixed(2)}
+                            </span>
+                        </div>
+                    )}
+                    {set.sealed_value && (
+                        <div className="price-row">
+                            <span className="price-label">Sealed</span>
+                            <span className="price-value sealed">
+                                ${Number(set.sealed_value).toFixed(2)}
+                            </span>
+                        </div>
+                    )}
+                    {set.used_value && (
+                        <div className="price-row">
+                            <span className="price-label">Used</span>
+                            <span className="price-value used">
+                                ${Number(set.used_value).toFixed(2)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+    
+            {!isWishlist && set.quantity > 1 && (
+                <div className="quantity-badge">×{set.quantity}</div>
+            )}
+        </div>
+    );
 
     const renderSetActions = (set) => {
         if (!user || Number(user.user_id) !== Number(userId) || selectedSet !== set.set_num) {
@@ -423,6 +479,76 @@ const UserSetsView = () => {
         );
     };
 
+    const renderCollectionStats = () => {
+        if (isWishlist) return null;
+
+        const totalSets = sets.reduce((acc, set) => acc + Number(set.quantity), 0);
+        const totalParts = sets.reduce((acc, set) => acc + (set.num_parts * Number(set.quantity)), 0);
+        const totalMinifigures = sets.reduce((acc, set) => acc + (Number(set.num_minifigures) * Number(set.quantity)), 0);
+
+        return (
+            <div className="stats-container">
+                <div className="collection-stats">
+                    <div className="stats-section">
+                        <div className="stats-header">Sets</div>
+                        <div className="stats-value">{totalSets}</div>
+                    </div>
+                    <div className="stats-section">
+                        <div className="stats-header">Parts</div>
+                        <div className="stats-value">{totalParts.toLocaleString()}</div>
+                    </div>
+                    <div className="stats-section">
+                        <div className="stats-header">
+                            Minifigures
+                            <FontAwesomeIcon
+                                icon={faInfoCircle}
+                                className="info-icon"
+                                data-tooltip-id="tooltip-minifigures"
+                            />
+                        </div>
+                        <div className="stats-value">{totalMinifigures.toLocaleString()}</div>
+                        <Tooltip id="tooltip-minifigures" place="bottom" type="dark" effect="solid">
+                            <span>Minifigure count data is sourced from a third-party database and may be incomplete.</span>
+                        </Tooltip>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderPriceSection = (set) => {
+        if (!showPrices || (!set.retail_price && !set.sealed_value && !set.used_value)) return null;
+
+        return (
+            <div className={`set-prices ${showPrices ? 'visible' : ''}`}>
+                {set.retail_price && (
+                    <div className="price-row">
+                        <span className="price-label">Retail:</span>
+                        <span className="price-value retail">
+                            ${Number(set.retail_price).toFixed(2)}
+                        </span>
+                    </div>
+                )}
+                {set.sealed_value && (
+                    <div className="price-row">
+                        <span className="price-label">Sealed:</span>
+                        <span className="price-value sealed">
+                            ${Number(set.sealed_value).toFixed(2)}
+                        </span>
+                    </div>
+                )}
+                {set.used_value && (
+                    <div className="price-row">
+                        <span className="price-label">Used:</span>
+                        <span className="price-value used">
+                            ${Number(set.used_value).toFixed(2)}
+                        </span>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     if (!userId) {
         return (
             <div className="content">
@@ -458,18 +584,22 @@ const UserSetsView = () => {
             {renderProfileSection()}
             
             <div className="collection-header">
-                <h2>
-                    {user && Number(user.user_id) === Number(userId) 
-                        ? `My ${isWishlist ? 'Wishlist' : 'Collection'}`
-                        : `${profileData?.display_name || profileData?.username}'s ${isWishlist ? 'Wishlist' : 'Collection'}`
-                    }
-                </h2>
+                <div className="collection-title-container">
+                    <h2>
+                        {user && Number(user.user_id) === Number(userId) 
+                            ? `My ${isWishlist ? 'Wishlist' : 'Collection'}`
+                            : `${profileData?.display_name || profileData?.username}'s ${isWishlist ? 'Wishlist' : 'Collection'}`
+                        }
+                    </h2>
+                    <PriceToggle 
+                        showPrices={showPrices} 
+                        onToggle={() => setShowPrices(!showPrices)} 
+                    />
+                </div>
                 <div className="collection-actions">
                     {!isWishlist && profileData?.has_wishlist && (
                         <button className="wishlist-link-button">
-                            <Link 
-                                to={`/wishlist/${userId}`} 
-                            >
+                            <Link to={`/wishlist/${userId}`}>
                                 <FontAwesomeIcon icon="gift" className="button-icon" />
                                 View {user && Number(user.user_id) === Number(userId) ? 'My' : `${profileData?.display_name || profileData?.username}'s`} Wishlist
                             </Link>
@@ -506,71 +636,7 @@ const UserSetsView = () => {
                                 </div>
                                 {!collapsedThemes[theme.theme_id] && (
                                     <div className="sets-container">
-                                        {theme.sets.map(set => (
-                                            <div
-                                                key={set.set_num}
-                                                className={`set-card ${
-                                                    !isWishlist && Number(set.complete) === 0 ? 'incomplete' : ''
-                                                } ${selectedSet === set.set_num ? 'selected' : ''}`}
-                                                onClick={() => toggleSelectSet(set.set_num)}
-                                            >
-                                                <div className="set-image-container">
-                                                    {!loadedImages[set.set_num] && <Skeleton height={100} />}
-                                                    <img
-                                                        src={set.img_url}
-                                                        alt={set.name}
-                                                        className={`set-image collection ${loadedImages[set.set_num] ? 'loaded' : ''}`}
-                                                        onError={handleImageError}
-                                                        onLoad={() => handleImageLoad(set.set_num)}
-                                                        style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
-                                                    />
-                                                </div>
-
-                                                <div className="set-info">
-                                                    <div className="set-name">{set.name}</div>
-                                                    <div className="set-details">
-                                                        <span className="set-year">({set.year})</span>
-                                                        <span className="set-number">{set.set_num}</span>
-                                                    </div>
-
-                                                    {(set.retail_price || set.sealed_value || set.used_value) && (
-                                                        <div className="set-prices">
-                                                            {set.retail_price && (
-                                                                <div className="price-row">
-                                                                    <span className="price-label">Retail:</span>
-                                                                    <span className="price-value retail">
-                                                                        ${Number(set.retail_price).toFixed(2)}
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                            {set.sealed_value && (
-                                                                <div className="price-row">
-                                                                    <span className="price-label">Sealed:</span>
-                                                                    <span className="price-value sealed">
-                                                                        ${Number(set.sealed_value).toFixed(2)}
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                            {set.used_value && (
-                                                                <div className="price-row">
-                                                                    <span className="price-label">Used:</span>
-                                                                    <span className="price-value used">
-                                                                        ${Number(set.used_value).toFixed(2)}
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
-
-                                                </div>
-
-                                                {renderSetActions(set)}
-
-                                                {!isWishlist && set.quantity > 1 && (
-                                                    <div className="quantity-badge">×{set.quantity}</div>
-                                                )}
-                                            </div>
-                                        ))}
+                                        {theme.sets.map(set => renderSetCard(set))}
                                     </div>
                                 )}
                             </div>
