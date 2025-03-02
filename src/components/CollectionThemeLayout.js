@@ -58,13 +58,13 @@ const CollectionThemeLayout = ({ themes, favoriteThemeId, renderThemeContent }) 
     });
 
     return (
-        <div className="collection-themes-container">
+        <div className="flex flex-wrap gap-8">
             {themesWithLayout.map(theme => (
                 <div 
                     key={theme.theme_id}
-                    className={`collection-theme-section ${
-                        !theme.isFullWidth ? 'half' : ''
-                    }`}
+                    className={`${
+                        !theme.isFullWidth ? 'w-full lg:w-[calc(50%-1rem)]' : 'w-full'
+                    } bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden`}
                 >
                     {renderThemeContent(theme)}
                 </div>

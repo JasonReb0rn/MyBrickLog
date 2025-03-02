@@ -1,9 +1,6 @@
-// Register.js
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import './Login.css';
-import './Styles.css';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -158,50 +155,72 @@ const Register = () => {
     };
 
     return (
-        <div className="auth-container-centered">
-            <div className="auth-container">
-                <h2>Register</h2>
-                <form onSubmit={handleSubmit}>
+        <div className="flex justify-center items-center py-10 px-4">
+            <div className="w-full max-w-md bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-200">
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label>Username:</label>
+                        <label className="block text-gray-700 font-medium mb-2">Username:</label>
                         <input
                             type="text"
                             name="username"
                             value={formData.username}
                             onChange={handleChange}
                             required
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
-                        {errors.username && <p className="error-message">{errors.username}</p>}
+                        {errors.username && (
+                            <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                        )}
                     </div>
                     <div>
-                        <label>Email:</label>
+                        <label className="block text-gray-700 font-medium mb-2">Email:</label>
                         <input
                             type="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
                             required
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
-                        {errors.email && <p className="error-message">{errors.email}</p>}
+                        {errors.email && (
+                            <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                        )}
                     </div>
                     <div>
-                        <label>Password:</label>
+                        <label className="block text-gray-700 font-medium mb-2">Password:</label>
                         <input
                             type="password"
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
                             required
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
-                        {errors.password && <p className="error-message">{errors.password}</p>}
+                        {errors.password && (
+                            <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                        )}
                     </div>
-                    {message && <p className={message.includes('successful') ? 'success-message' : 'error-message'}>{message}</p>}
-                    <button type="submit" disabled={isSubmitting}>
+                    
+                    {message && (
+                        <div className={`p-3 ${message.includes('successful') ? 'bg-green-50 border-green-300 text-green-700' : 'bg-red-50 border-red-300 text-red-700'} border rounded-md`}>
+                            {message}
+                        </div>
+                    )}
+                    
+                    <button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium disabled:bg-blue-300 disabled:cursor-not-allowed"
+                    >
                         {isSubmitting ? 'Registering...' : 'Register'}
                     </button>
                 </form>
-                <div className="signup-link">
-                    <p>Already a member? <Link to="/login">Login instead.</Link></p>
+                
+                <div className="text-center mt-6">
+                    <p className="text-gray-600">
+                        Already a member? <Link to="/login" className="text-blue-600 hover:underline">Login instead.</Link>
+                    </p>
                 </div>
             </div>
         </div>

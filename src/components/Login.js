@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import './Login.css';
-import './Styles.css';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -63,44 +61,64 @@ const Login = () => {
     };
 
     return (
-        <div className="auth-container-centered">
-            <div className="auth-container">
-                <h2>Login</h2>
-                <form onSubmit={handleSubmit}>
+        <div className="flex justify-center items-center py-10 px-4">
+            <div className="w-full max-w-md bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-200">
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label>Username:</label>
+                        <label className="block text-gray-700 font-medium mb-2">Username:</label>
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
                     <div>
-                        <label>Password:</label>
+                        <label className="block text-gray-700 font-medium mb-2">Password:</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
-                    {message && <p className="error-message">{message}</p>}
+                    
+                    {message && (
+                        <div className="p-3 bg-red-50 border border-red-300 text-red-700 rounded-md">
+                            {message}
+                        </div>
+                    )}
 
-                    <div className="signup-link">
-                        <p>Forgot your password? <Link to="/forgot-password">Reset it here</Link></p>
+                    <div className="text-center">
+                        <p className="text-gray-600">
+                            Forgot your password? <Link to="/forgot-password" className="text-blue-600 hover:underline">Reset it here</Link>
+                        </p>
                     </div>
 
                     {unverified && (
-                    <button className="resend-verification-button" onClick={handleResendVerification}>Resend Verification Email</button>
+                        <button 
+                            type="button"
+                            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                            onClick={handleResendVerification}
+                        >
+                            Resend Verification Email
+                        </button>
                     )}
 
-                    <button type="submit" disabled={isSubmitting}>
+                    <button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium disabled:bg-blue-300 disabled:cursor-not-allowed"
+                    >
                         {isSubmitting ? 'Logging in...' : 'Login'}
                     </button>
-
                 </form>
                 
-                <div className="signup-link">
-                    <p>Not already a member? <Link to="/register">Register an account now!</Link></p>
+                <div className="text-center mt-6">
+                    <p className="text-gray-600">
+                        Not already a member? <Link to="/register" className="text-blue-600 hover:underline">Register an account now!</Link>
+                    </p>
                 </div>
             </div>
         </div>

@@ -1,7 +1,5 @@
-// PasswordReset.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import './Login.css';
 
 const PasswordReset = () => {
     const [password, setPassword] = useState('');
@@ -79,10 +77,13 @@ const PasswordReset = () => {
 
     if (isLoading) {
         return (
-            <div className="auth-container-centered">
-                <div className="auth-container">
-                    <h2>Reset Password</h2>
-                    <p>Verifying reset link...</p>
+            <div className="flex justify-center items-center py-10 px-4">
+                <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                    <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Reset Password</h2>
+                    <p className="text-center text-gray-600">Verifying reset link...</p>
+                    <div className="flex justify-center mt-4">
+                        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
                 </div>
             </div>
         );
@@ -90,12 +91,18 @@ const PasswordReset = () => {
 
     if (!isValid) {
         return (
-            <div className="auth-container-centered">
-                <div className="auth-container">
-                    <h2>Reset Password</h2>
-                    {message && <p className="error-message">{message}</p>}
-                    <div className="signup-link">
-                        <p><Link to="/forgot-password">Request a new reset link</Link></p>
+            <div className="flex justify-center items-center py-10 px-4">
+                <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                    <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Reset Password</h2>
+                    {message && (
+                        <div className="p-3 bg-red-50 border border-red-300 text-red-700 rounded-md mb-4">
+                            {message}
+                        </div>
+                    )}
+                    <div className="text-center mt-4">
+                        <Link to="/forgot-password" className="text-blue-600 hover:underline">
+                            Request a new reset link
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -103,30 +110,42 @@ const PasswordReset = () => {
     }
 
     return (
-        <div className="auth-container-centered">
-            <div className="auth-container">
-                <h2>Reset Password</h2>
-                <form onSubmit={handleSubmit}>
+        <div className="flex justify-center items-center py-10 px-4">
+            <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Reset Password</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label>New Password:</label>
+                        <label className="block text-gray-700 font-medium mb-2">New Password:</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
                     <div>
-                        <label>Confirm Password:</label>
+                        <label className="block text-gray-700 font-medium mb-2">Confirm Password:</label>
                         <input
                             type="password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
-                    {message && <p className="error-message">{message}</p>}
-                    <button type="submit" disabled={isSubmitting}>
+                    
+                    {message && (
+                        <div className={`p-3 ${message.includes('successfully') ? 'bg-green-50 border-green-300 text-green-700' : 'bg-red-50 border-red-300 text-red-700'} border rounded-md`}>
+                            {message}
+                        </div>
+                    )}
+                    
+                    <button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium disabled:bg-blue-300 disabled:cursor-not-allowed"
+                    >
                         {isSubmitting ? 'Resetting...' : 'Reset Password'}
                     </button>
                 </form>

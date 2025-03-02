@@ -2,6 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-gray-50;
+  }
+  
+  a {
+    @apply text-orange-600;
+  }
+  
+  a:hover {
+    @apply text-orange-800;
+  }
+}
+
+@layer components {
+  /* Common message components */
+  .loading, .error-message {
+    @apply text-center py-8;
+  }
+  
+  .centered-message {
+    @apply flex flex-col justify-center items-center mx-auto my-8;
+  }
+  
+  .collection-nouser-links-container {
+    @apply flex flex-row gap-4;
+  }
+}
+
+/* Animation keyframes for skeleton loading (if needed) */
+@keyframes skeleton-loading {
+  0% {
+    background-color: hsl(200, 20%, 70%);
+  }
+  100% {
+    background-color: hsl(200, 20%, 95%);
+  }
+}
+
+.skeleton {
+  animation: skeleton-loading 1s linear infinite alternate;
+  @apply opacity-70;
+}
+
+/* Common button styles that can be reused across the app */
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition-colors;
+  }
+  
+  .btn-danger {
+    @apply px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors;
+  }
+  
+  .btn-warning {
+    @apply px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black rounded-md transition-colors;
+  }
+  
+  /* Set card styles for consistency across components */
+  .set-card-base {
+    @apply w-56 p-4 bg-white rounded-lg shadow-md transition-all duration-200 hover:shadow-lg border border-gray-200;
+  }
+  
+  .set-card-selected {
+    @apply ring-2 ring-blue-500 bg-blue-50;
+  }
+  
+  .set-card-incomplete {
+    @apply border-2 border-amber-400 ring-amber-300;
+  }
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

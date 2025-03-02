@@ -189,149 +189,160 @@ const SubThemes = () => {
     };
 
     return (
-        <div className="content">
-            <div className="theme-navigation-section">
-                <div className="theme-header-container">
-                    <button onClick={goBack} className="navigation-button">
-                        <FontAwesomeIcon icon="arrow-left" className="button-icon" />
-                        Back to Themes
+        <div className="max-w-6xl mx-auto px-4 py-8">
+            <div className="mb-8">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+                    <button 
+                        onClick={goBack} 
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                    >
+                        <FontAwesomeIcon icon="arrow-left" />
+                        <span>Back to Themes</span>
                     </button>
-                    <h1 className="theme-subtheme-title">{parentThemeName}</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{parentThemeName}</h1>
                 </div>
     
                 {subThemes.length > 0 && (
-                    <div className="subthemes-section">
-                        <h2 className="section-header">Sub-Themes</h2>
-                        <div className="subthemes-grid">
+                    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Sub-Themes</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {subThemes.map(theme => (
                                 <button 
                                     key={theme.id} 
-                                    className="subtheme-button"
+                                    className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors"
                                     onClick={() => handleThemeClick(theme.id)}
                                 >
-                                    <span className="subtheme-name">{theme.name}</span>
-                                    <FontAwesomeIcon icon="chevron-right" className="chevron-icon" />
+                                    <span className="text-gray-800 font-medium">{theme.name}</span>
+                                    <FontAwesomeIcon icon="chevron-right" className="text-gray-500" />
                                 </button>
                             ))}
                         </div>
                     </div>
                 )}
     
-                <div className="sets-section">
-                    <div className="sets-header">
-                        <h2 className="theme-subtheme-title">Sets</h2>
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 bg-gray-50 border-b border-gray-200 gap-4">
+                        <h2 className="text-xl font-semibold text-gray-800">Sets</h2>
                         {Object.keys(selectedSets).length > 0 && (
-                            <div className="selected-actions">
+                            <div className="flex flex-wrap items-center gap-3">
                                 <button 
-                                    className="collection-action-button"
+                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2"
                                     onClick={() => addToCollection()}
                                 >
-                                    <FontAwesomeIcon icon="plus" className="button-icon" />
-                                    Add Selected to Collection
+                                    <FontAwesomeIcon icon="plus" />
+                                    <span>Add Selected to Collection</span>
                                 </button>
                                 <button 
-                                    className="wishlist-action-button"
+                                    className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black rounded-lg transition-colors flex items-center gap-2"
                                     onClick={addToWishlist}
                                 >
-                                    <FontAwesomeIcon icon="star" className="button-icon" />
-                                    Add Selected to Wishlist
+                                    <FontAwesomeIcon icon="star" />
+                                    <span>Add Selected to Wishlist</span>
                                 </button>
-                                <span className="selected-count">
+                                <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
                                     {Object.keys(selectedSets).length} selected
                                 </span>
                             </div>
                         )}
                     </div>
     
-                    <div className="sets-grid">
+                    <div className="p-6 flex flex-wrap justify-center gap-6">
                         {sets.map(set => (
                             <div
                                 key={set.set_num}
-                                className={`set-card ${selectedSets[set.set_num] ? 'selected' : ''}`}
-                                onClick={() => toggleSelectSet(set.set_num)}
+                                className={`w-56 p-4 bg-white rounded-lg shadow-md transition-all duration-200 hover:shadow-lg relative
+                                        ${selectedSets[set.set_num] ? 'ring-2 ring-blue-500 bg-blue-50' : 'border border-gray-200'} 
+                                        ${user ? 'cursor-pointer' : ''}`}
+                                onClick={() => user && toggleSelectSet(set.set_num)}
                             >
-                                <div className="set-image-container">
+                                <div className="h-32 flex items-center justify-center mb-4 relative">
                                     {!loadedImages[set.set_num] && (
-                                        <Skeleton height={100} />
+                                        <Skeleton height={100} width={120} />
                                     )}
                                     <img
                                         src={set.img_url}
                                         alt={set.name}
-                                        className={`set-image ${loadedImages[set.set_num] ? 'loaded' : 'loading'}`}
+                                        className={`h-full object-contain ${loadedImages[set.set_num] ? 'opacity-100' : 'opacity-0'}`}
                                         onError={handleImageError}
                                         onLoad={() => handleImageLoad(set.set_num)}
-                                        style={{ display: loadedImages[set.set_num] ? 'block' : 'none' }}
+                                        style={{ transition: 'opacity 0.3s' }}
                                     />
                                 </div>
                                 
-                                <div className="set-name">{set.name} ({set.year})</div>
-                                <div className="set-num">
+                                <h3 className="font-medium text-gray-800 mb-2 line-clamp-2">{set.name} ({set.year})</h3>
+                                
+                                <div className="text-sm text-gray-600">
                                     {selectedSets[set.set_num] !== undefined ? (
-                                        <div className="quantity-controls">
-                                            <button
-                                                className="quantity-button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleQuantityChange(set.set_num, Math.max(1, selectedSets[set.set_num] - 1));
-                                                }}
-                                            >
-                                                -
-                                            </button>
-                                            <input
-                                                type="text"
-                                                className="quantity-input"
-                                                value={selectedSets[set.set_num]}
-                                                onChange={(e) => {
-                                                    const quantity = parseInt(e.target.value, 10);
-                                                    if (!isNaN(quantity) && quantity > 0) {
-                                                        handleQuantityChange(set.set_num, quantity);
-                                                    }
-                                                }}
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
-                                            <button
-                                                className="quantity-button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleQuantityChange(set.set_num, selectedSets[set.set_num] + 1);
-                                                }}
-                                            >
-                                                +
-                                            </button>
-                                            <div className="button-container">
+                                        <div className="flex flex-col gap-3">
+                                            <div className="flex items-center justify-center gap-2">
                                                 <button
-                                                    className="add-to-collection-button"
+                                                    className="w-8 h-8 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        addToCollection(set.set_num, selectedSets[set.set_num]);
+                                                        handleQuantityChange(set.set_num, Math.max(1, selectedSets[set.set_num] - 1));
+                                                    }}
+                                                >
+                                                    -
+                                                </button>
+                                                <input
+                                                    type="text"
+                                                    className="w-12 h-8 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                                    value={selectedSets[set.set_num]}
+                                                    onChange={(e) => {
+                                                        const quantity = parseInt(e.target.value, 10);
+                                                        if (!isNaN(quantity) && quantity > 0) {
+                                                            handleQuantityChange(set.set_num, quantity);
+                                                        }
+                                                    }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                                <button
+                                                    className="w-8 h-8 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleQuantityChange(set.set_num, selectedSets[set.set_num] + 1);
+                                                    }}
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <button
+                                                    className={`py-2 px-3 rounded-md text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-300 flex items-center justify-center gap-2
+                                                              ${submittedSets[set.set_num] 
+                                                                ? 'bg-green-500 hover:bg-green-600' 
+                                                                : 'bg-blue-500 hover:bg-blue-600'}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        addToCollection(set.set_num);
                                                     }}
                                                 >
                                                     {submittedSets[set.set_num] ? (
                                                         <>
-                                                            <FontAwesomeIcon icon="thumbs-up" style={{ marginRight: '8px' }} />
+                                                            <FontAwesomeIcon icon="thumbs-up" />
                                                             Added!
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <FontAwesomeIcon icon="plus" style={{ marginRight: '8px' }} />
+                                                            <FontAwesomeIcon icon="plus" />
                                                             Add To Collection
                                                         </>
                                                     )}
                                                 </button>
                                                 <button
-                                                    className="wishlist-button"
+                                                    className="py-2 px-3 bg-yellow-500 hover:bg-yellow-600 text-black rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-yellow-300 flex items-center justify-center gap-2"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         addToWishlist();
                                                     }}
                                                 >
-                                                    <FontAwesomeIcon icon="plus" style={{ marginRight: '8px' }} />
+                                                    <FontAwesomeIcon icon="plus" />
                                                     Add to Wishlist
                                                 </button>
                                             </div>
                                         </div>
                                     ) : (
-                                        set.set_num
+                                        <span className="block text-center">{set.set_num}</span>
                                     )}
                                 </div>
                             </div>
@@ -339,8 +350,9 @@ const SubThemes = () => {
                     </div>
     
                     {isLoading && (
-                        <div className="loading-indicator">
-                            <Skeleton count={3} />
+                        <div className="text-center py-8">
+                            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
+                            <p className="mt-4 text-gray-600">Loading more sets...</p>
                         </div>
                     )}
                 </div>

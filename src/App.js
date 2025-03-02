@@ -4,8 +4,6 @@ import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Home from './components/Home';
-import Collection from './components/Collection';
-import Wishlist from './components/Wishlist';
 import UserSetsView from './components/UserSetsView';
 import Login from './components/Login';
 import Register from './components/Register';

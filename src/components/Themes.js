@@ -1,10 +1,7 @@
-// src/components/Themes.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import './Themes.css';
-import './Styles.css';
 
 const Themes = () => {
     const [parentThemes, setParentThemes] = useState([]);
@@ -129,38 +126,48 @@ const Themes = () => {
     };
 
     return (
-        <div className="content">
+        <div className="max-w-6xl mx-auto px-4 py-8">
             
             {searchResults.length === 0 && (
-              <div className="theme-header">
+              <h2 className="text-2xl font-bold text-gray-800 text-center mb-8">
                 Select Theme
-              </div>
+              </h2>
             )}
 
-            <form onSubmit={handleSearchSubmit}>
-                <div className="search-container">
+            <form onSubmit={handleSearchSubmit} className="mb-8">
+                <div className="flex flex-col sm:flex-row gap-2 w-full max-w-3xl mx-auto">
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={handleSearchChange}
                         placeholder="Search by set name or number"
-                        className="search-bar"
+                        className="flex-grow py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                     />
-                    <button type="submit" className="search-button"><FontAwesomeIcon icon="magnifying-glass" style={{ marginRight: '8px' }} />Search</button>
+                    <button 
+                        type="submit" 
+                        className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                        <FontAwesomeIcon icon="magnifying-glass" />
+                        <span>Search</span>
+                    </button>
                 </div>
             </form>
+
             {searchResults.length === 0 ? (
-                <div className="themes-list-container">
+                <div className="flex flex-wrap justify-center gap-4 mb-8">
                     {getSortedThemes().map(theme => (
                         <button
                             key={theme.id}
-                            className={`theme-button ${popularThemeIds.includes(Number(theme.id)) ? 'highlighted' : ''}`}
+                            className={`w-44 py-3 px-4 bg-white rounded-lg shadow-md border transition-all duration-200 hover:shadow-lg hover:scale-105
+                                      ${popularThemeIds.includes(Number(theme.id)) 
+                                        ? 'border-red-600 font-medium' 
+                                        : 'border-gray-200'}`}
                             onClick={() => handleThemeClick(theme.id)}
                         >   
-                            <span>
+                            <span className="flex items-center justify-center">
                                 {theme.name}
                                 {popularThemeIds.includes(Number(theme.id)) && (
-                                    <FontAwesomeIcon icon="fire" style={{ marginLeft: '8px' }} />
+                                    <FontAwesomeIcon icon="fire" className="ml-2 text-red-600" />
                                 )}
                             </span>
                         </button>
@@ -168,87 +175,109 @@ const Themes = () => {
                 </div>
             ) : (
                 <>
-                    <button onClick={clearSearchResults} className="back-button">Return to Themes</button>
-                    <div className="theme-header">Search Results</div>
-                    <div className="sets-container">
-                    {searchResults.map(set => (
-                        <div
-                            key={set.set_num}
-                            className={`set-card ${selectedSets[set.set_num] ? 'selected' : ''}`}
-                            onClick={() => toggleSelectSet(set.set_num)}
-                        >
-                            <img 
-                                src={set.img_url} 
-                                alt={set.name} 
-                                className="set-image" 
-                                onError={handleImageError}
-                                loading="lazy"
-                            />
-                            <div className="set-name">{set.name} ({set.year})</div>
-                            <div className="set-num">
-                                {selectedSets[set.set_num] !== undefined ? (
-                                    <div className="quantity-controls">
-                                        <button
-                                            className="quantity-button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleQuantityChange(set.set_num, Math.max(1, selectedSets[set.set_num] - 1));
-                                            }}
-                                        >
-                                            -
-                                        </button>
-                                        <input
-                                            type="text"
-                                            className="quantity-input"
-                                            value={selectedSets[set.set_num]}
-                                            onChange={(e) => {
-                                                const quantity = parseInt(e.target.value, 10);
-                                                if (!isNaN(quantity) && quantity > 0) {
-                                                    handleQuantityChange(set.set_num, quantity);
-                                                }
-                                            }}
-                                            onClick={(e) => e.stopPropagation()}
-                                        />
-                                        <button
-                                            className="quantity-button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleQuantityChange(set.set_num, selectedSets[set.set_num] + 1);
-                                            }}
-                                        >
-                                            +
-                                        </button>
-                                        <button
-                                            className="add-to-collection-button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                addToCollection(set.set_num, selectedSets[set.set_num]);
-                                            }}
-                                        >
-                                            {submittedSets[set.set_num] ? (
-                                                <>
-                                                    <FontAwesomeIcon icon="thumbs-up" style={{ marginRight: '8px' }} />
-                                                    Added!
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <FontAwesomeIcon icon="plus" style={{ marginRight: '8px' }} />
-                                                    Add To Collection
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                ) : (
-                                    set.set_num
-                                )}
+                    <button 
+                        onClick={clearSearchResults} 
+                        className="mb-8 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 mx-auto"
+                    >
+                        <FontAwesomeIcon icon="arrow-left" />
+                        <span>Return to Themes</span>
+                    </button>
+                    
+                    <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Search Results</h2>
+                    
+                    <div className="flex flex-wrap justify-center gap-6">
+                        {searchResults.map(set => (
+                            <div
+                                key={set.set_num}
+                                className={`w-56 p-4 bg-white rounded-lg shadow-md transition-all duration-200 hover:shadow-lg relative
+                                         ${selectedSets[set.set_num] ? 'ring-2 ring-blue-500 bg-blue-50' : 'border border-gray-200'}`}
+                                onClick={() => toggleSelectSet(set.set_num)}
+                            >
+                                <div className="h-32 flex items-center justify-center mb-4 relative">
+                                    <img 
+                                        src={set.img_url} 
+                                        alt={set.name} 
+                                        className="h-full object-contain" 
+                                        onError={handleImageError}
+                                        loading="lazy"
+                                    />
+                                </div>
+                                
+                                <h3 className="font-medium text-gray-800 mb-2 line-clamp-2">{set.name} ({set.year})</h3>
+                                
+                                <div className="text-sm text-gray-600">
+                                    {selectedSets[set.set_num] !== undefined ? (
+                                        <div className="flex flex-col gap-3">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                    className="w-8 h-8 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleQuantityChange(set.set_num, Math.max(1, selectedSets[set.set_num] - 1));
+                                                    }}
+                                                >
+                                                    -
+                                                </button>
+                                                <input
+                                                    type="text"
+                                                    className="w-12 h-8 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                                    value={selectedSets[set.set_num]}
+                                                    onChange={(e) => {
+                                                        const quantity = parseInt(e.target.value, 10);
+                                                        if (!isNaN(quantity) && quantity > 0) {
+                                                            handleQuantityChange(set.set_num, quantity);
+                                                        }
+                                                    }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                                <button
+                                                    className="w-8 h-8 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleQuantityChange(set.set_num, selectedSets[set.set_num] + 1);
+                                                    }}
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                            <button
+                                                className={`py-2 px-3 rounded-md text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-300 flex items-center justify-center gap-2
+                                                          ${submittedSets[set.set_num] 
+                                                            ? 'bg-green-500 hover:bg-green-600' 
+                                                            : 'bg-blue-500 hover:bg-blue-600'}`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    addToCollection(set.set_num, selectedSets[set.set_num]);
+                                                }}
+                                            >
+                                                {submittedSets[set.set_num] ? (
+                                                    <>
+                                                        <FontAwesomeIcon icon="thumbs-up" />
+                                                        Added!
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <FontAwesomeIcon icon="plus" />
+                                                        Add To Collection
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <span className="block text-center">{set.set_num}</span>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
                     </div>
                 </>
             )}
+            
             {isLoading && (
-                <div className="loading">Loading...</div>
+                <div className="text-center py-8">
+                    <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
+                    <p className="mt-4 text-gray-600">Loading...</p>
+                </div>
             )}
         </div>
     );
