@@ -596,12 +596,12 @@ const UserSetsView = () => {
                             : `${profileData?.display_name || profileData?.username}'s ${isWishlist ? 'Wishlist' : 'Collection'}`
                         }
                     </h2>
+                </div>
+                <div className="collection-actions">
                     <PriceToggle 
                         showPrices={showPrices} 
                         onToggle={() => setShowPrices(!showPrices)} 
                     />
-                </div>
-                <div className="collection-actions">
                     {!isWishlist && profileData?.has_wishlist && (
                         <button className="wishlist-link-button">
                             <Link to={`/wishlist/${userId}`}>
