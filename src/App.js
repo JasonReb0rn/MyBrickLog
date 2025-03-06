@@ -1,4 +1,4 @@
-// src/App.js
+// src/App.js - Updated
 import React from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -13,6 +13,7 @@ import Verify from './components/Verify';
 import Profile from './components/Profile';
 import Themes from './components/Themes';
 import SubThemes from './components/SubThemes';
+import SearchResults from './components/SearchResults'; // Import the new SearchResults component
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
@@ -47,6 +48,8 @@ const App = () => {
                                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                                 <Route path="/terms-of-service" element={<TermsOfService />} />
                                 <Route path="/about" element={<About />} />
+                                {/* Add the new search route */}
+                                <Route path="/search" element={<SearchResults />} />
                             </Routes>
                         </div>
                     <Footer />

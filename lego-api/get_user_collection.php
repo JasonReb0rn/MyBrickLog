@@ -77,6 +77,7 @@ try {
             t.name AS theme_name,
             c.collection_set_quantity as quantity,
             c.complete,
+            c.sealed, // Add this line to include sealed status
             COALESCE((
                 SELECT SUM(im.quantity)
                 FROM inventory_minifigs im
