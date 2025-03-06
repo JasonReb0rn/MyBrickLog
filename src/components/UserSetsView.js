@@ -26,12 +26,15 @@ import {
     faChevronUp,
     faShareAlt,
     faBoxOpen,
-    faBoxClosed,
+    faBox,
     faUserCircle,
     faGift,
     faPiggyBank,
     faCheckCircle,
-    faPlus
+    faPlus,
+    faTimes,
+    faExclamationTriangle,
+    faSync
 } from '@fortawesome/free-solid-svg-icons';
 import { 
     faTwitter,
@@ -75,6 +78,327 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, set, isWishlist }) => 
     );
 };
 
+// New component for set status management
+const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComplete, onUpdateSealed, setSets }) => {    // Hooks remain unchanged
+    const [quantity, setQuantity] = useState(set ? Number(set.quantity) : 0);
+    const [completeCount, setCompleteCount] = useState(set ? Number(set.complete) : 0);
+    const [sealedCount, setSealedCount] = useState(set ? Number(set.sealed) : 0);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (set) {
+            setQuantity(Number(set.quantity));
+            setCompleteCount(Number(set.complete));
+            setSealedCount(Number(set.sealed));
+            setError('');
+        }
+    }, [set]);
+    
+    if (!isOpen || !set) return null;
+
+    const validateAndUpdate = () => {
+        // Validation logic
+        if (completeCount > quantity) {
+            setError('Complete count cannot exceed total quantity');
+            return;
+        }
+        
+        if (sealedCount > quantity) {
+            setError('Sealed count cannot exceed total quantity');
+            return;
+        }
+    
+        // Assume sealed sets are always complete
+        let adjustedCompleteCount = completeCount;
+        if (sealedCount > completeCount) {
+            adjustedCompleteCount = sealedCount;
+            setCompleteCount(sealedCount);
+        }
+    
+        setIsUpdating(true);
+        setError('');
+    
+        // Create a single set of updates to apply after all API calls complete
+        const updatedSet = {
+            ...set,
+            quantity: quantity.toString(),
+            complete: adjustedCompleteCount.toString(),
+            sealed: sealedCount.toString()
+        };
+    
+        // Update quantity first
+        onUpdateQuantity(set.set_num, quantity)
+            .then(() => onUpdateComplete(set.set_num, adjustedCompleteCount))
+            .then(() => onUpdateSealed(set.set_num, sealedCount))
+            .then(() => {
+                // This is now properly using the setSets function from props
+                setSets(prevSets => prevSets.map(s => 
+                    s.set_num === set.set_num ? updatedSet : s
+                ));
+                setIsUpdating(false);
+                onClose();
+            })
+            .catch(err => {
+                setError('Failed to update. Please try again.');
+                setIsUpdating(false);
+                console.error('Error updating set status:', err);
+            });
+    };
+
+    const increaseQuantity = () => {
+        setQuantity(prev => prev + 1);
+
+        // Automatically increase complete count as well, assuming new sets are complete by default
+        setCompleteCount(prev => prev + 1);
+
+        // Note: We DON'T automatically increase sealed count as new sets could be either sealed or opened
+    };
+
+    const decreaseQuantity = () => {
+        if (quantity <= 1) return;
+        
+        const newQuantity = quantity - 1;
+        setQuantity(newQuantity);
+        
+        // Adjust complete and sealed counts if they exceed the new quantity
+        if (completeCount > newQuantity) {
+            setCompleteCount(newQuantity);
+        }
+        
+        if (sealedCount > newQuantity) {
+            setSealedCount(newQuantity);
+        }
+    };
+
+    const increaseComplete = () => {
+        if (completeCount >= quantity) return;
+        setCompleteCount(prev => prev + 1);
+    };
+
+    const decreaseComplete = () => {
+        if (completeCount <= 0) return;
+        
+        const newCompleteCount = completeCount - 1;
+        setCompleteCount(newCompleteCount);
+        
+        // Ensure sealed count doesn't exceed complete count
+        // (assuming you can't have sealed sets that are incomplete)
+        if (sealedCount > newCompleteCount) {
+            setSealedCount(newCompleteCount);
+        }
+    };
+
+    const increaseSealed = () => {
+        if (sealedCount >= quantity) return;
+        
+        const newSealedCount = sealedCount + 1;
+        setSealedCount(newSealedCount);
+        
+        // Sealed sets are always complete
+        if (newSealedCount > completeCount) {
+            setCompleteCount(newSealedCount);
+        }
+    };
+
+    const decreaseSealed = () => {
+        if (sealedCount <= 0) return;
+        setSealedCount(prev => prev - 1);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm" onClick={onClose}>
+            <div className="bg-white rounded-xl max-w-md w-11/12 p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+                {/* Enhanced header with set image */}
+                <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-4">
+                    <h2 className="text-xl font-bold text-gray-800">Update Set Status</h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
+                        <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                </div>
+                
+                <div className="mb-6 flex items-start">
+                    {/* Add small set image */}
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 mr-3">
+                        <img 
+                            src={set.img_url} 
+                            alt={set.name} 
+                            className="w-full h-full object-contain"
+                            onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
+                        />
+                    </div>
+                    <div>
+                        <h3 className="font-medium text-lg mb-1 text-gray-800">{set.name}</h3>
+                        <p className="text-sm text-gray-600">Set #{set.set_num}</p>
+                    </div>
+                </div>
+                
+                {error && (
+                    <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg flex items-center">
+                        <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
+                        {error}
+                    </div>
+                )}
+                
+                <div className="space-y-6">
+                    {/* Quantity Control - enhanced styling */}
+                    <div className="border-b border-gray-200 pb-4">
+                        <div className="flex justify-between items-center mb-3">
+                            <span className="font-medium text-gray-800">Quantity</span>
+                            <span className="text-sm text-gray-500">How many of this set do you own?</span>
+                        </div>
+                        <div className="flex items-center justify-center bg-gray-50 p-3 rounded-lg">
+                            <button 
+                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center"
+                                onClick={decreaseQuantity}
+                                disabled={quantity <= 1}
+                            >
+                                <FontAwesomeIcon icon={faPlus} className="transform rotate-45" />
+                            </button>
+                            <span className="mx-6 text-2xl font-bold">{quantity}</span>
+                            <button 
+                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center justify-center"
+                                onClick={increaseQuantity}
+                            >
+                                <FontAwesomeIcon icon={faPlus} />
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {/* Complete Status Control - enhanced styling */}
+                    <div className="border-b border-gray-200 pb-4">
+                        <div className="flex justify-between items-center mb-3">
+                            <span className="font-medium text-gray-800">Complete Sets</span>
+                            <div className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-lg">
+                                <span className="text-blue-700 font-medium">{completeCount}</span>
+                                <span className="text-gray-500">of</span>
+                                <span className="text-blue-700 font-medium">{quantity}</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-center bg-gray-50 p-3 rounded-lg">
+                            <button 
+                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center"
+                                onClick={decreaseComplete}
+                                disabled={completeCount <= 0}
+                            >
+                                <FontAwesomeIcon icon={faPlus} className="transform rotate-45" />
+                            </button>
+                            <div className="mx-4 flex flex-col items-center">
+                                <span className="text-2xl font-bold">{completeCount}</span>
+                                <div className="flex gap-2 mt-1">
+                                    <button 
+                                        className="text-xs bg-gray-100 hover:bg-gray-200 py-1 px-2 rounded transition-colors"
+                                        onClick={() => setCompleteCount(0)}
+                                        disabled={completeCount === 0}
+                                    >
+                                        None
+                                    </button>
+                                    <button 
+                                        className="text-xs bg-gray-100 hover:bg-gray-200 py-1 px-2 rounded transition-colors"
+                                        onClick={() => setCompleteCount(quantity)}
+                                        disabled={completeCount === quantity}
+                                    >
+                                        All
+                                    </button>
+                                </div>
+                            </div>
+                            <button 
+                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center"
+                                onClick={increaseComplete}
+                                disabled={completeCount >= quantity}
+                            >
+                                <FontAwesomeIcon icon={faPlus} />
+                            </button>
+                        </div>
+                        <div className="mt-2 text-sm text-gray-500 text-center">
+                            <p>Sets with all pieces and instructions</p>
+                        </div>
+                    </div>
+                    
+                    {/* Sealed Status Control - enhanced styling */}
+                    <div>
+                        <div className="flex justify-between items-center mb-3">
+                            <span className="font-medium text-gray-800">Sealed Sets</span>
+                            <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded-lg">
+                                <span className="text-green-700 font-medium">{sealedCount}</span>
+                                <span className="text-gray-500">of</span>
+                                <span className="text-green-700 font-medium">{quantity}</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-center bg-gray-50 p-3 rounded-lg">
+                            <button 
+                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center"
+                                onClick={decreaseSealed}
+                                disabled={sealedCount <= 0}
+                            >
+                                <FontAwesomeIcon icon={faPlus} className="transform rotate-45" />
+                            </button>
+                            <div className="mx-4 flex flex-col items-center">
+                                <span className="text-2xl font-bold">{sealedCount}</span>
+                                <div className="flex gap-2 mt-1">
+                                    <button 
+                                        className="text-xs bg-gray-100 hover:bg-gray-200 py-1 px-2 rounded transition-colors"
+                                        onClick={() => setSealedCount(0)}
+                                        disabled={sealedCount === 0}
+                                    >
+                                        None
+                                    </button>
+                                    <button 
+                                        className="text-xs bg-gray-100 hover:bg-gray-200 py-1 px-2 rounded transition-colors"
+                                        onClick={() => {
+                                            setSealedCount(quantity);
+                                            setCompleteCount(quantity); // Sealed sets are complete
+                                        }}
+                                        disabled={sealedCount === quantity}
+                                    >
+                                        All
+                                    </button>
+                                </div>
+                            </div>
+                            <button 
+                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center"
+                                onClick={increaseSealed}
+                                disabled={sealedCount >= quantity}
+                            >
+                                <FontAwesomeIcon icon={faPlus} />
+                            </button>
+                        </div>
+                        <div className="mt-2 text-sm text-gray-500 text-center">
+                            <p>Sets in unopened, original packaging</p>
+                            {sealedCount > completeCount && (
+                                <p className="text-amber-600 mt-1">Note: Sealed sets will be counted as complete</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="mt-6 flex justify-end gap-3">
+                    <button 
+                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors shadow-sm" 
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-sm flex items-center"
+                        onClick={validateAndUpdate}
+                        disabled={isUpdating}
+                    >
+                        {isUpdating ? (
+                            <>
+                                <FontAwesomeIcon icon={faSync} className="mr-2 animate-spin" />
+                                Updating...
+                            </>
+                        ) : (
+                            'Update'
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const PriceToggle = ({ showPrices, onToggle }) => (
     <button 
         onClick={onToggle}
@@ -108,14 +432,21 @@ const UserSetsView = () => {
         isOpen: false,
         set: null
     });
+    const [statusModal, setStatusModal] = useState({
+        isOpen: false,
+        set: null
+    });
     const [searchQuery, setSearchQuery] = useState('');
     const [sortOption, setSortOption] = useState('theme');
-    const [sortDirection, setSortDirection] = useState('asc');
+    const [sortDirection, setSortDirection] = useState('desc');
     const [showFilters, setShowFilters] = useState(false);
     const [filterOptions, setFilterOptions] = useState({
         complete: 'all',
+        sealed: 'all',
         decade: 'all'
     });
+    // New state for tracking pending updates
+    const [pendingUpdates, setPendingUpdates] = useState({});
     
     const { userId } = useParams();
     const { user } = useAuth();
@@ -132,7 +463,8 @@ const UserSetsView = () => {
         remove: isWishlist ? 'remove_set_from_wishlist.php' : 'remove_set_from_collection.php',
         moveToCollection: 'move_wishlist_to_collection.php',
         updateQuantity: 'update_set_quantity.php',
-        toggleComplete: 'toggle_set_complete_status.php'
+        updateComplete: 'update_set_complete_count.php',
+        updateSealed: 'update_set_sealed_count.php'
     };
 
     useEffect(() => {
@@ -181,11 +513,36 @@ const UserSetsView = () => {
             
             // Apply completion filter
             if (!isWishlist && filterOptions.complete !== 'all') {
-                results = results.filter(set => 
-                    filterOptions.complete === 'complete' ? 
-                    Number(set.complete) === 1 : 
-                    Number(set.complete) === 0
-                );
+                results = results.filter(set => {
+                    const completeCount = Number(set.complete);
+                    const totalCount = Number(set.quantity);
+                    
+                    if (filterOptions.complete === 'complete') {
+                        return completeCount === totalCount; // All copies are complete
+                    } else if (filterOptions.complete === 'incomplete') {
+                        return completeCount < totalCount; // At least one copy is incomplete
+                    } else if (filterOptions.complete === 'mixed') {
+                        return completeCount > 0 && completeCount < totalCount; // Some complete, some not
+                    }
+                    return true;
+                });
+            }
+            
+            // Apply sealed filter
+            if (!isWishlist && filterOptions.sealed !== 'all') {
+                results = results.filter(set => {
+                    const sealedCount = Number(set.sealed);
+                    const totalCount = Number(set.quantity);
+                    
+                    if (filterOptions.sealed === 'sealed') {
+                        return sealedCount === totalCount; // All copies are sealed
+                    } else if (filterOptions.sealed === 'opened') {
+                        return sealedCount < totalCount; // At least one copy is opened
+                    } else if (filterOptions.sealed === 'mixed') {
+                        return sealedCount > 0 && sealedCount < totalCount; // Some sealed, some not
+                    }
+                    return true;
+                });
             }
             
             // Apply decade filter
@@ -269,9 +626,47 @@ const UserSetsView = () => {
             setTimeout(() => setCopiedUrl(false), 2500);
         });
     };
+    
+    // Helper function to find original set data for reversion
+    const getOriginalSet = (set_num) => {
+        return sets.find(set => set.set_num === set_num);
+    };
 
+    // Modified to handle optimistic updates
     const updateQuantity = async (set_num, newQuantity) => {
-        if (isWishlist) return;
+        if (isWishlist) return Promise.reject("Cannot update quantity for wishlist items");
+        
+        // Set pending update flag
+        setPendingUpdates(prev => ({
+            ...prev,
+            [set_num]: {
+                ...prev[set_num],
+                quantity: true
+            }
+        }));
+        
+        // Store current state for potential rollback
+        const originalSet = { ...getOriginalSet(set_num) };
+        
+        // Optimistic update with proper constraints
+        setSets(prevSets => prevSets.map(set => {
+            if (set.set_num === set_num) {
+                // Create a new set object with updated values
+                const updatedSet = { ...set, quantity: newQuantity };
+                
+                // Adjust complete and sealed counts if they now exceed the new quantity
+                if (Number(set.complete) > newQuantity) {
+                    updatedSet.complete = newQuantity.toString();
+                }
+                
+                if (Number(set.sealed) > newQuantity) {
+                    updatedSet.sealed = newQuantity.toString();
+                }
+                
+                return updatedSet;
+            }
+            return set;
+        }));
         
         try {
             const response = await axios.post(
@@ -279,32 +674,159 @@ const UserSetsView = () => {
                 { user_id: Number(userId), set_num, quantity: newQuantity },
                 { withCredentials: true }
             );
+            
             if (response.data.success) {
-                setSets(sets.map(set => 
-                    set.set_num === set_num ? { ...set, quantity: newQuantity } : set
+                // Update with server confirmed values - convert all values to strings to match API format
+                setSets(prevSets => prevSets.map(set => 
+                    set.set_num === set_num ? { 
+                        ...set, 
+                        quantity: response.data.quantity.toString(),
+                        complete: response.data.complete_count.toString(),
+                        sealed: response.data.sealed_count.toString()
+                    } : set
                 ));
+                return Promise.resolve();
+            } else {
+                throw new Error(response.data.error || "Failed to update quantity");
             }
         } catch (error) {
             console.error('Error updating quantity:', error);
+            
+            // Revert to original data
+            setSets(prev => prev.map(set => 
+                set.set_num === set_num ? originalSet : set
+            ));
+            
+            return Promise.reject(error);
+        } finally {
+            // Clear pending update flag
+            setPendingUpdates(prev => ({
+                ...prev,
+                [set_num]: {
+                    ...prev[set_num],
+                    quantity: false
+                }
+            }));
         }
     };
 
-    const toggleCompleteStatus = async (set_num, currentStatus) => {
-        if (isWishlist) return;
-
+    const updateCompleteCount = async (set_num, newCount) => {
+        if (isWishlist) return Promise.reject("Cannot update complete count for wishlist items");
+    
+        // Set pending update flag
+        setPendingUpdates(prev => ({
+            ...prev,
+            [set_num]: {
+                ...prev[set_num],
+                complete: true
+            }
+        }));
+        
+        // Store current state for potential rollback
+        const originalSet = { ...getOriginalSet(set_num) };
+        
+        // Optimistic update - ensure consistent string/number handling
+        setSets(prevSets => prevSets.map(set => 
+            set.set_num === set_num ? { ...set, complete: newCount.toString() } : set
+        ));
+    
         try {
             const response = await axios.post(
-                `${process.env.REACT_APP_API_URL}/${endpoints.toggleComplete}`,
-                { user_id: Number(userId), set_num, complete: currentStatus ? 0 : 1 },
+                `${process.env.REACT_APP_API_URL}/${endpoints.updateComplete}`,
+                { user_id: Number(userId), set_num, complete_count: newCount },
                 { withCredentials: true }
             );
+            
             if (response.data.success) {
-                setSets(sets.map(set => 
-                    set.set_num === set_num ? { ...set, complete: currentStatus ? 0 : 1 } : set
+                // Update with server confirmed values
+                setSets(prevSets => prevSets.map(set => 
+                    set.set_num === set_num ? { 
+                        ...set, 
+                        complete: response.data.complete_count.toString() 
+                    } : set
                 ));
+                return Promise.resolve();
+            } else {
+                throw new Error(response.data.error || "Failed to update complete count");
             }
         } catch (error) {
-            console.error('Error toggling complete status:', error);
+            console.error('Error updating complete count:', error);
+            
+            // Revert to original data
+            setSets(prev => prev.map(set => 
+                set.set_num === set_num ? originalSet : set
+            ));
+            
+            return Promise.reject(error);
+        } finally {
+            // Clear pending update flag
+            setPendingUpdates(prev => ({
+                ...prev,
+                [set_num]: {
+                    ...prev[set_num],
+                    complete: false
+                }
+            }));
+        }
+    };
+
+    const updateSealedCount = async (set_num, newCount) => {
+        if (isWishlist) return Promise.reject("Cannot update sealed count for wishlist items");
+    
+        // Set pending update flag
+        setPendingUpdates(prev => ({
+            ...prev,
+            [set_num]: {
+                ...prev[set_num],
+                sealed: true
+            }
+        }));
+        
+        // Store current state for potential rollback
+        const originalSet = { ...getOriginalSet(set_num) };
+        
+        // Optimistic update - ensure consistent string/number handling
+        setSets(prevSets => prevSets.map(set => 
+            set.set_num === set_num ? { ...set, sealed: newCount.toString() } : set
+        ));
+    
+        try {
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL}/${endpoints.updateSealed}`,
+                { user_id: Number(userId), set_num, sealed_count: newCount },
+                { withCredentials: true }
+            );
+            
+            if (response.data.success) {
+                // Update with server confirmed values
+                setSets(prevSets => prevSets.map(set => 
+                    set.set_num === set_num ? { 
+                        ...set, 
+                        sealed: response.data.sealed_count.toString() 
+                    } : set
+                ));
+                return Promise.resolve();
+            } else {
+                throw new Error(response.data.error || "Failed to update sealed count");
+            }
+        } catch (error) {
+            console.error('Error updating sealed count:', error);
+            
+            // Revert to original data
+            setSets(prev => prev.map(set => 
+                set.set_num === set_num ? originalSet : set
+            ));
+            
+            return Promise.reject(error);
+        } finally {
+            // Clear pending update flag
+            setPendingUpdates(prev => ({
+                ...prev,
+                [set_num]: {
+                    ...prev[set_num],
+                    sealed: false
+                }
+            }));
         }
     };
 
@@ -355,10 +877,29 @@ const UserSetsView = () => {
     const handleCancelRemove = () => {
         setConfirmDialog({ isOpen: false, set: null });
     };
+    
+    // New method to open the status modal
+    const openStatusModal = (set) => {
+        setStatusModal({
+            isOpen: true,
+            set: set
+        });
+    };
+
+    const closeStatusModal = () => {
+        setStatusModal({
+            isOpen: false,
+            set: null
+        });
+    };
 
     const toggleSelectSet = (set_num) => {
         if (isOwner) {
-            setSelectedSet(selectedSet === set_num ? null : set_num);
+            if (selectedSet === set_num) {
+                setSelectedSet(null);
+            } else {
+                setSelectedSet(set_num);
+            }
         }
     };
 
@@ -390,6 +931,7 @@ const UserSetsView = () => {
         setSearchQuery('');
         setFilterOptions({
             complete: 'all',
+            sealed: 'all',
             decade: 'all'
         });
         setSortOption('theme');
@@ -453,6 +995,210 @@ const UserSetsView = () => {
         });
     
         return themesArray;
+    };
+
+    const renderSetCard = (set) => (
+        <div
+            key={set.set_num}
+            className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-200 hover:shadow-md
+                      ${!isWishlist && Number(set.complete) < Number(set.quantity) ? 'border-amber-400' : 'border-gray-200'} 
+                      ${selectedSet === set.set_num ? 'ring-2 ring-red-500 ring-opacity-50' : ''}`}
+            onClick={() => toggleSelectSet(set.set_num)}
+        >
+            <div className="relative">
+                <div className="p-2 h-48 flex items-center justify-center relative">
+                    {!loadedImages[set.set_num] && (
+                        <Skeleton height={180} width="100%" />
+                    )}
+                    <img
+                        src={set.img_url}
+                        alt={set.name}
+                        className={`h-full object-contain max-w-full ${loadedImages[set.set_num] ? 'opacity-100' : 'opacity-0'}`}
+                        onError={handleImageError}
+                        onLoad={() => handleImageLoad(set.set_num)}
+                        style={{ transition: 'opacity 0.3s' }}
+                    />
+                    
+                    {/* Quantity badge - positioned inside the image container */}
+                    {!isWishlist && set.quantity > 1 && (
+                        <div className="absolute top-2 right-2 bg-yellow-400 text-gray-800 h-7 w-7 rounded-full flex items-center justify-center font-bold text-sm shadow-md border-2 border-white">
+                            ×{set.quantity}
+                        </div>
+                    )}
+                </div>
+
+                {/* Set details */}
+                <div className="p-4 bg-gray-50/50">
+                    <h3 className="font-medium text-gray-800 mb-1 line-clamp-2 h-12">
+                        {set.name}
+                    </h3>
+                    
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm text-gray-600 font-mono">{set.set_num}</span>
+                        <span className="text-sm bg-gray-100 px-2 py-1 rounded-lg">{set.year}</span>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-1 mb-3">
+                        <div className="text-xs bg-red-50 text-red-700 rounded-full px-2 py-1 flex items-center">
+                            <FontAwesomeIcon icon={faPuzzlePiece} className="mr-1" size="xs" />
+                            <span>{set.num_parts.toLocaleString()}</span>
+                        </div>
+                        
+                        {set.num_minifigures > 0 && (
+                            <div className="text-xs bg-yellow-50 text-yellow-700 rounded-full px-2 py-1 flex items-center">
+                                <FontAwesomeIcon icon={faUserCircle} className="mr-1" size="xs" />
+                                <span>{set.num_minifigures}</span>
+                            </div>
+                        )}
+                        
+                        {!isWishlist && (
+                            <>
+                                <div className={`text-xs rounded-full px-2 py-1 flex items-center ${
+                                    Number(set.complete) === Number(set.quantity) 
+                                    ? 'bg-green-50 text-green-700' 
+                                    : Number(set.complete) > 0 
+                                      ? 'bg-blue-50 text-blue-700' 
+                                      : 'bg-amber-50 text-amber-700'
+                                }`}>
+                                    <FontAwesomeIcon 
+                                        icon={
+                                            Number(set.complete) === Number(set.quantity) 
+                                            ? faCheckCircle 
+                                            : faCircleHalfStroke
+                                        } 
+                                        className="mr-1" 
+                                        size="xs" 
+                                    />
+                                    <span>
+                                        {Number(set.complete) === Number(set.quantity) 
+                                            ? 'Complete' 
+                                            : Number(set.complete) > 0 
+                                              ? `${set.complete}/${set.quantity} Complete`
+                                              : 'Incomplete'
+                                        }
+                                    </span>
+                                </div>
+                                
+                                <div className={`text-xs rounded-full px-2 py-1 flex items-center ${
+                                    Number(set.sealed) === Number(set.quantity) 
+                                    ? 'bg-green-50 text-green-700' 
+                                    : Number(set.sealed) > 0 
+                                      ? 'bg-blue-50 text-blue-700' 
+                                      : 'bg-gray-50 text-gray-700'
+                                }`}>
+                                    <FontAwesomeIcon 
+                                        icon={
+                                            Number(set.sealed) > 0 
+                                            ? faBox 
+                                            : faBoxOpen
+                                        } 
+                                        className="mr-1" 
+                                        size="xs" 
+                                    />
+                                    <span>
+                                        {Number(set.sealed) === Number(set.quantity) 
+                                            ? 'Sealed' 
+                                            : Number(set.sealed) > 0 
+                                              ? `${set.sealed}/${set.quantity} Sealed`
+                                              : 'Opened'
+                                        }
+                                    </span>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                    
+                    {showPrices && (
+                        <div className="border-t border-gray-100 pt-3 mb-3">
+                            <div className="grid grid-cols-3 gap-2 text-sm">
+                                {set.retail_price && (
+                                    <div>
+                                        <div className="text-xs text-gray-500">Retail</div>
+                                        <div className="font-medium">${Number(set.retail_price).toFixed(2)}</div>
+                                    </div>
+                                )}
+                                
+                                {set.sealed_value && (
+                                    <div>
+                                        <div className="text-xs text-gray-500">Sealed</div>
+                                        <div className="font-medium text-green-600">${Number(set.sealed_value).toFixed(2)}</div>
+                                    </div>
+                                )}
+                                
+                                {set.used_value && (
+                                    <div>
+                                        <div className="text-xs text-gray-500">Used</div>
+                                        <div className="font-medium text-blue-600">${Number(set.used_value).toFixed(2)}</div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    
+                    {renderSetActions(set)}
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderSetActions = (set) => {
+        if (!isOwner || selectedSet !== set.set_num) {
+            return null;
+        }
+    
+        // For wishlist items, show move to collection button
+        if (isWishlist) {
+            return (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex flex-col gap-2">
+                        <button
+                            className="py-2 px-3 bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                moveToCollection(set.set_num);
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faBoxOpen} className="mr-2" />
+                            Move to Collection
+                        </button>
+                        
+                        <button
+                            className="py-2 px-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center"
+                            onClick={(e) => handleRemoveClick(set, e)}
+                        >
+                            <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                            <span>Remove</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+    
+        // For collection items, show buttons including Update Status
+        return (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="flex flex-col gap-2">
+                    <button
+                        className="py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            openStatusModal(set);
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faCube} className="mr-2" />
+                        <span>Update Status</span>
+                    </button>
+                    
+                    <button
+                        className="py-2 px-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center"
+                        onClick={(e) => handleRemoveClick(set, e)}
+                    >
+                        <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                        <span>Remove</span>
+                    </button>
+                </div>
+            </div>
+        );
     };
 
     const renderProfileSection = () => {
@@ -595,7 +1341,8 @@ const UserSetsView = () => {
         const totalUniqueModels = sets.length;
         const totalParts = sets.reduce((acc, set) => acc + (set.num_parts * Number(set.quantity)), 0);
         const totalMinifigures = sets.reduce((acc, set) => acc + (Number(set.num_minifigures) * Number(set.quantity)), 0);
-        const completeCount = sets.filter(set => Number(set.complete) === 1).length;
+        const completeCount = sets.reduce((acc, set) => acc + Number(set.complete), 0);
+        const sealedCount = sets.reduce((acc, set) => acc + Number(set.sealed), 0);
         const totalValue = sets.reduce((acc, set) => {
             const value = parseFloat(set.sealed_value) || 0;
             return acc + (value * Number(set.quantity));
@@ -631,23 +1378,16 @@ const UserSetsView = () => {
                 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                     <div className="flex">
-                        <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-4">
-                            <FontAwesomeIcon icon={faUserCircle} />
+                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
+                            <FontAwesomeIcon icon={faBox} />
                         </div>
                         <div>
-                            <h3 className="text-gray-500 font-medium text-sm">Minifigures</h3>
-                            <p className="text-2xl font-bold text-gray-800">{totalMinifigures.toLocaleString()}</p>
-                            <p className="text-xs text-gray-500 flex items-center">
-                                Little people
-                                <FontAwesomeIcon 
-                                    icon={faInfoCircle} 
-                                    className="ml-1 text-gray-400 cursor-help"
-                                    data-tooltip-id="tooltip-minifigures"
-                                />
-                                <Tooltip id="tooltip-minifigures" place="bottom" className="bg-gray-800 text-white text-xs py-1 px-2 rounded shadow-lg">
-                                    <span>Minifigure count data is sourced from a third-party database and may be incomplete.</span>
-                                </Tooltip>
+                            <h3 className="text-gray-500 font-medium text-sm">Collection Status</h3>
+                            <p className="text-sm font-medium text-gray-800">
+                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-md mr-1">{completeCount} complete</span>
+                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md">{sealedCount} sealed</span>
                             </p>
+                            <p className="text-xs text-gray-500 mt-1">Out of {totalSets} total sets</p>
                         </div>
                     </div>
                 </div>
@@ -666,173 +1406,6 @@ const UserSetsView = () => {
                         </div>
                     </div>
                 )}
-            </div>
-        );
-    };
-
-    const renderSetCard = (set) => (
-        <div
-            key={set.set_num}
-            className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-200 hover:shadow-md
-                      ${!isWishlist && Number(set.complete) === 0 ? 'border-amber-400' : 'border-gray-200'} 
-                      ${selectedSet === set.set_num ? 'ring-2 ring-red-500 ring-opacity-50' : ''}`}
-            onClick={() => toggleSelectSet(set.set_num)}
-        >
-            <div className="relative">
-                <div className="p-2 h-48 flex items-center justify-center relative">
-                    {!loadedImages[set.set_num] && (
-                        <Skeleton height={180} width="100%" />
-                    )}
-                    <img
-                        src={set.img_url}
-                        alt={set.name}
-                        className={`h-full object-contain max-w-full ${loadedImages[set.set_num] ? 'opacity-100' : 'opacity-0'}`}
-                        onError={handleImageError}
-                        onLoad={() => handleImageLoad(set.set_num)}
-                        style={{ transition: 'opacity 0.3s' }}
-                    />
-                    
-                    {/* Quantity badge - positioned inside the image container */}
-                    {!isWishlist && set.quantity > 1 && (
-                        <div className="absolute top-2 right-2 bg-yellow-400 text-gray-800 h-7 w-7 rounded-full flex items-center justify-center font-bold text-sm shadow-md border-2 border-white">
-                            ×{set.quantity}
-                        </div>
-                    )}
-                </div>
-
-                {/* Set details */}
-                <div className="p-4 bg-gray-50/50">
-                    <h3 className="font-medium text-gray-800 mb-1 line-clamp-2 h-12">
-                        {set.name}
-                    </h3>
-                    
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-600 font-mono">{set.set_num}</span>
-                        <span className="text-sm bg-gray-100 px-2 py-1 rounded-lg">{set.year}</span>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-1 mb-3">
-                        <div className="text-xs bg-red-50 text-red-700 rounded-full px-2 py-1 flex items-center">
-                            <FontAwesomeIcon icon={faPuzzlePiece} className="mr-1" size="xs" />
-                            <span>{set.num_parts.toLocaleString()}</span>
-                        </div>
-                        
-                        {set.num_minifigures > 0 && (
-                            <div className="text-xs bg-yellow-50 text-yellow-700 rounded-full px-2 py-1 flex items-center">
-                                <FontAwesomeIcon icon={faUserCircle} className="mr-1" size="xs" />
-                                <span>{set.num_minifigures}</span>
-                            </div>
-                        )}
-                        
-                        {!isWishlist && (
-                            <div className={`text-xs rounded-full px-2 py-1 flex items-center ${Number(set.complete) === 1 ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
-                                <FontAwesomeIcon icon={Number(set.complete) === 1 ? faCheckCircle : faCircleHalfStroke} className="mr-1" size="xs" />
-                                <span>{Number(set.complete) === 1 ? 'Complete' : 'Incomplete'}</span>
-                            </div>
-                        )}
-                    </div>
-                    
-                    {showPrices && (
-                        <div className="border-t border-gray-100 pt-3 mb-3">
-                            <div className="grid grid-cols-3 gap-2 text-sm">
-                                {set.retail_price && (
-                                    <div>
-                                        <div className="text-xs text-gray-500">Retail</div>
-                                        <div className="font-medium">${Number(set.retail_price).toFixed(2)}</div>
-                                    </div>
-                                )}
-                                
-                                {set.sealed_value && (
-                                    <div>
-                                        <div className="text-xs text-gray-500">Sealed</div>
-                                        <div className="font-medium text-green-600">${Number(set.sealed_value).toFixed(2)}</div>
-                                    </div>
-                                )}
-                                
-                                {set.used_value && (
-                                    <div>
-                                        <div className="text-xs text-gray-500">Used</div>
-                                        <div className="font-medium text-blue-600">${Number(set.used_value).toFixed(2)}</div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                    
-                    {renderSetActions(set)}
-                </div>
-            </div>
-        </div>
-    );
-
-    const renderSetActions = (set) => {
-        if (!isOwner || selectedSet !== set.set_num) {
-            return null;
-        }
-
-        return (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-                {!isWishlist && (
-                    <div className="flex items-center justify-center gap-4 mb-4">
-                        <button 
-                            className="w-8 h-8 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                updateQuantity(set.set_num, Number(set.quantity) - 1);
-                            }}
-                            disabled={set.quantity <= 1}
-                        >
-                            -
-                        </button>
-                        <span className="w-8 text-center font-medium">{set.quantity}</span>
-                        <button 
-                            className="w-8 h-8 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                updateQuantity(set.set_num, Number(set.quantity) + 1);
-                            }}
-                        >
-                            +
-                        </button>
-                    </div>
-                )}
-                
-                <div className="flex flex-col gap-2">
-                    {isWishlist ? (
-                        <button
-                            className="py-2 px-3 bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                moveToCollection(set.set_num);
-                            }}
-                        >
-                            <FontAwesomeIcon icon={faBoxOpen} className="mr-2" />
-                            Move to Collection
-                        </button>
-                    ) : (
-                        <button
-                            className={`py-2 px-3 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center
-                                      ${Number(set.complete) === 1 ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-amber-400 hover:bg-amber-500 text-gray-800'}`}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                toggleCompleteStatus(set.set_num, Number(set.complete));
-                            }}
-                        >
-                            <FontAwesomeIcon icon={Number(set.complete) === 1 ? faCircleHalfStroke : faCheckCircle} className="mr-2" />
-                            <span>
-                                Mark as {Number(set.complete) === 1 ? 'Incomplete' : 'Complete'}
-                            </span>
-                        </button>
-                    )}
-                    
-                    <button
-                        className="py-2 px-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center"
-                        onClick={(e) => handleRemoveClick(set, e)}
-                    >
-                        <FontAwesomeIcon icon={faTrash} className="mr-2" />
-                        <span>Remove</span>
-                    </button>
-                </div>
             </div>
         );
     };
@@ -942,7 +1515,7 @@ const UserSetsView = () => {
     };
 
     const renderEmptyState = () => {
-        if (searchQuery || filterOptions.complete !== 'all' || filterOptions.decade !== 'all') {
+        if (searchQuery || filterOptions.complete !== 'all' || filterOptions.sealed !== 'all' || filterOptions.decade !== 'all') {
             return (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -1052,6 +1625,16 @@ const UserSetsView = () => {
                     isWishlist={isWishlist}
                 />
 
+                <SetStatusModal
+                    isOpen={statusModal.isOpen}
+                    onClose={closeStatusModal}
+                    set={statusModal.set}
+                    onUpdateQuantity={updateQuantity}
+                    onUpdateComplete={updateCompleteCount}
+                    onUpdateSealed={updateSealedCount}
+                    setSets={setSets}
+                />
+
                 {renderProfileSection()}
                 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
@@ -1074,12 +1657,13 @@ const UserSetsView = () => {
                                 onClick={toggleFilters}
                                 className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 shadow-sm font-medium"
                             >
-                                <FontAwesomeIcon icon={faFilter} className={filterOptions.complete !== 'all' || filterOptions.decade !== 'all' || searchQuery ? 'text-red-600' : 'text-gray-600'} />
+                                <FontAwesomeIcon icon={faFilter} className={filterOptions.complete !== 'all' || filterOptions.sealed !== 'all' || filterOptions.decade !== 'all' || searchQuery ? 'text-red-600' : 'text-gray-600'} />
                                 <span>Filters</span>
-                                {(filterOptions.complete !== 'all' || filterOptions.decade !== 'all' || searchQuery) && (
+                                {(filterOptions.complete !== 'all' || filterOptions.sealed !== 'all' || filterOptions.decade !== 'all' || searchQuery) && (
                                     <span className="w-5 h-5 bg-red-600 text-white rounded-full text-xs flex items-center justify-center">
                                         {(filterOptions.complete !== 'all' ? 1 : 0) + 
-                                        (filterOptions.decade !== 'all' ? 1 : 0) + 
+                                        (filterOptions.sealed !== 'all' ? 1 : 0) + 
+                                        (filterOptions.decade !== 'all' ? 1 : 0) +
                                         (searchQuery ? 1 : 0)}
                                     </span>
                                 )}
@@ -1116,18 +1700,35 @@ const UserSetsView = () => {
                                     </div>
                                     
                                     {!isWishlist && (
-                                        <div>
-                                            <label className="block text-sm text-gray-600 mb-1">Status</label>
-                                            <select
-                                                value={filterOptions.complete}
-                                                onChange={(e) => setFilterOptions({...filterOptions, complete: e.target.value})}
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                                            >
-                                                <option value="all">All Sets</option>
-                                                <option value="complete">Complete Only</option>
-                                                <option value="incomplete">Incomplete Only</option>
-                                            </select>
-                                        </div>
+                                        <>
+                                            <div>
+                                                <label className="block text-sm text-gray-600 mb-1">Completion Status</label>
+                                                <select
+                                                    value={filterOptions.complete}
+                                                    onChange={(e) => setFilterOptions({...filterOptions, complete: e.target.value})}
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                >
+                                                    <option value="all">All Sets</option>
+                                                    <option value="complete">Only Complete Sets</option>
+                                                    <option value="incomplete">Has Incomplete Sets</option>
+                                                    <option value="mixed">Mixed (Some Complete, Some Not)</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm text-gray-600 mb-1">Package Status</label>
+                                                <select
+                                                    value={filterOptions.sealed}
+                                                    onChange={(e) => setFilterOptions({...filterOptions, sealed: e.target.value})}
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                >
+                                                    <option value="all">All Sets</option>
+                                                    <option value="sealed">Only Sealed Sets</option>
+                                                    <option value="opened">Has Opened Sets</option>
+                                                    <option value="mixed">Mixed (Some Sealed, Some Opened)</option>
+                                                </select>
+                                            </div>
+                                        </>
                                     )}
                                     
                                     <div>
@@ -1213,7 +1814,7 @@ const UserSetsView = () => {
                             </div>
                         </div>
                         
-                        {(searchQuery || filterOptions.complete !== 'all' || filterOptions.decade !== 'all') && (
+                        {(searchQuery || filterOptions.complete !== 'all' || filterOptions.sealed !== 'all' || filterOptions.decade !== 'all') && (
                             <div className="mt-6 pt-6 border-t border-gray-200 flex justify-between items-center">
                                 <div className="text-sm text-gray-600">
                                     <span className="font-medium">{filteredSets.length}</span> set{filteredSets.length === 1 ? '' : 's'} found

@@ -77,7 +77,7 @@ try {
             t.name AS theme_name,
             c.collection_set_quantity as quantity,
             c.complete,
-            c.sealed, // Add this line to include sealed status
+            c.sealed,
             COALESCE((
                 SELECT SUM(im.quantity)
                 FROM inventory_minifigs im
@@ -170,10 +170,9 @@ try {
         ]
     ];
 
-    // Set appropriate cache headers
-    header('Cache-Control: max-age=300, public'); // Cache for 5 minutes
-    header('ETag: "' . md5(json_encode($response)) . '"');
-
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    
     echo json_encode($response);
 
 } catch (PDOException $e) {

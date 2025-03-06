@@ -49,13 +49,14 @@ import {
   faSortDown,
   faSortUp,
   faBoxOpen,
+  faBox,
   faUserCircle,
   faGift,
   faPiggyBank,
   faUsers,
   faClock,
-  faTableCells, // This is the new name for faTh in newer versions
-  faListUl      // This is the modern alternative to faList
+  faTableCells,
+  faListUl
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -118,6 +119,7 @@ library.add(
   faSortDown,
   faSortUp,
   faBoxOpen,
+  faBox,
   faUserCircle,
   faGift,
   faPiggyBank,
