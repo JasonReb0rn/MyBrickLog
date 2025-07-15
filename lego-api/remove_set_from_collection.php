@@ -19,8 +19,13 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
     try {
         $pdo->beginTransaction();
 
+        // Remove the set from collection
         $stmt = $pdo->prepare("DELETE FROM collection WHERE user_id = ? AND set_num = ?");
         $stmt->execute([$user_id, $set_num]);
+
+        // Remove associated minifigure records
+        $minifigStmt = $pdo->prepare("DELETE FROM collection_minifigs WHERE user_id = ? AND set_num = ?");
+        $minifigStmt->execute([$user_id, $set_num]);
 
         $pdo->commit();
         $response['success'] = true;

@@ -80,11 +80,18 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, set, isWishlist }) => 
 
 // New component for set status management
 const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComplete, onUpdateSealed, setSets }) => {    // Hooks remain unchanged
+    const { user } = useAuth();
     const [quantity, setQuantity] = useState(set ? Number(set.quantity) : 0);
     const [completeCount, setCompleteCount] = useState(set ? Number(set.complete) : 0);
     const [sealedCount, setSealedCount] = useState(set ? Number(set.sealed) : 0);
     const [isUpdating, setIsUpdating] = useState(false);
     const [error, setError] = useState('');
+    
+    // New minifigure-related state
+    const [minifigs, setMinifigs] = useState([]);
+    const [loadingMinifigs, setLoadingMinifigs] = useState(false);
+    const [showMinifigs, setShowMinifigs] = useState(false);
+    const [updatingMinifigs, setUpdatingMinifigs] = useState({});
 
     useEffect(() => {
         if (set) {
@@ -92,8 +99,66 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
             setCompleteCount(Number(set.complete));
             setSealedCount(Number(set.sealed));
             setError('');
+            
+            // Fetch minifigures for this set
+            fetchMinifigures();
         }
     }, [set]);
+
+    // Function to fetch minifigures for the current set
+    const fetchMinifigures = async () => {
+        if (!set) return;
+        
+        setLoadingMinifigs(true);
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/get_set_minifigures.php?set_num=${set.set_num}`, {
+                withCredentials: true
+            });
+            
+            if (response.data.error) {
+                console.error('Error fetching minifigures:', response.data.error);
+                setMinifigs([]);
+            } else {
+                setMinifigs(response.data.minifigs || []);
+            }
+        } catch (error) {
+            console.error('Error fetching minifigures:', error);
+            setMinifigs([]);
+        }
+        setLoadingMinifigs(false);
+    };
+
+    // Function to update individual minifigure quantity
+    const updateMinifigQuantity = async (figNum, newQuantity) => {
+        setUpdatingMinifigs(prev => ({ ...prev, [figNum]: true }));
+        
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/update_collection_minifigure.php`, {
+                user_id: Number(user.user_id),
+                set_num: set.set_num,
+                fig_num: figNum,
+                quantity_owned: newQuantity
+            }, {
+                withCredentials: true
+            });
+            
+            if (response.data.success) {
+                // Update the local minifigs state
+                setMinifigs(prev => prev.map(minifig => 
+                    minifig.fig_num === figNum 
+                        ? { ...minifig, owned_quantity: newQuantity }
+                        : minifig
+                ));
+            } else {
+                setError('Failed to update minifigure quantity');
+            }
+        } catch (error) {
+            console.error('Error updating minifigure:', error);
+            setError('Failed to update minifigure quantity');
+        }
+        
+        setUpdatingMinifigs(prev => ({ ...prev, [figNum]: false }));
+    };
     
     if (!isOpen || !set) return null;
 
@@ -208,7 +273,7 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-white rounded-xl max-w-md w-11/12 p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-xl max-w-4xl w-11/12 max-h-[90vh] overflow-y-auto p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
                 {/* Enhanced header with set image */}
                 <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-4">
                     <h2 className="text-xl font-bold text-gray-800">Update Set Status</h2>
@@ -370,6 +435,124 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                             )}
                         </div>
                     </div>
+                    
+                    {/* Minifigure Management Section */}
+                    {minifigs.length > 0 && (
+                        <div className="border-t border-gray-200 pt-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-gray-800">Minifigures</span>
+                                    <span className="text-sm bg-purple-50 text-purple-700 px-2 py-1 rounded-full">
+                                        {minifigs.length} figures
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => setShowMinifigs(!showMinifigs)}
+                                    className="flex items-center gap-2 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
+                                >
+                                    <FontAwesomeIcon icon={showMinifigs ? faChevronUp : faChevronDown} />
+                                    <span>{showMinifigs ? 'Hide' : 'Show'} Details</span>
+                                </button>
+                            </div>
+                            
+                            {loadingMinifigs ? (
+                                <div className="text-center py-8">
+                                    <FontAwesomeIcon icon={faSync} className="animate-spin text-gray-400 text-xl mb-2" />
+                                    <p className="text-gray-500">Loading minifigures...</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Minifigure Summary */}
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                        <div className="bg-green-50 p-3 rounded-lg">
+                                            <div className="text-sm text-green-600 font-medium">Complete</div>
+                                            <div className="text-lg font-bold text-green-800">
+                                                {minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length}
+                                                <span className="text-sm font-normal"> / {minifigs.length}</span>
+                                            </div>
+                                        </div>
+                                        <div className="bg-amber-50 p-3 rounded-lg">
+                                            <div className="text-sm text-amber-600 font-medium">Missing</div>
+                                            <div className="text-lg font-bold text-amber-800">
+                                                {minifigs.filter(m => (m.owned_quantity || 0) < (m.required_quantity * quantity)).length}
+                                                <span className="text-sm font-normal"> figures</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Detailed Minifigure List */}
+                                    {showMinifigs && (
+                                        <div className="space-y-3 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                            {minifigs.map(minifig => {
+                                                const requiredTotal = minifig.required_quantity * quantity;
+                                                const owned = minifig.owned_quantity || 0;
+                                                const isComplete = owned >= requiredTotal;
+                                                const isUpdating = updatingMinifigs[minifig.fig_num];
+                                                
+                                                return (
+                                                    <div key={minifig.fig_num} className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                                                        <div className="flex items-center gap-3">
+                                                            {/* Minifigure Image */}
+                                                            <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                                <img 
+                                                                    src={minifig.img_url} 
+                                                                    alt={minifig.name}
+                                                                    className="w-full h-full object-contain"
+                                                                    onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
+                                                                />
+                                                            </div>
+                                                            
+                                                            {/* Minifigure Info */}
+                                                            <div className="flex-grow min-w-0">
+                                                                <h4 className="font-medium text-gray-800 truncate text-sm">{minifig.name}</h4>
+                                                                <div className="flex items-center gap-2 mt-1">
+                                                                    <span className={`text-xs px-2 py-1 rounded-full ${
+                                                                        isComplete 
+                                                                            ? 'bg-green-50 text-green-700' 
+                                                                            : 'bg-amber-50 text-amber-700'
+                                                                    }`}>
+                                                                        {owned} / {requiredTotal} owned
+                                                                    </span>
+                                                                    {isComplete && (
+                                                                        <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 text-xs" />
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {/* Quantity Controls */}
+                                                            <div className="flex items-center gap-1">
+                                                                <button
+                                                                    className="w-7 h-7 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 transition-colors flex items-center justify-center text-sm"
+                                                                    onClick={() => updateMinifigQuantity(minifig.fig_num, Math.max(0, owned - 1))}
+                                                                    disabled={isUpdating || owned <= 0}
+                                                                >
+                                                                    −
+                                                                </button>
+                                                                <div className="w-8 text-center text-sm font-medium">
+                                                                    {isUpdating ? (
+                                                                        <FontAwesomeIcon icon={faSync} className="animate-spin text-gray-400" />
+                                                                    ) : (
+                                                                        owned
+                                                                    )}
+                                                                </div>
+                                                                <button
+                                                                    className="w-7 h-7 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 transition-colors flex items-center justify-center text-sm"
+                                                                    onClick={() => updateMinifigQuantity(minifig.fig_num, owned + 1)}
+                                                                    disabled={isUpdating}
+                                                                >
+                                                                    +
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
                 
                 <div className="mt-6 flex justify-end gap-3">

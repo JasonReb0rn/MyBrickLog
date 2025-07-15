@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Jul 15, 2025 at 03:24 AM
+-- Generation Time: Jul 15, 2025 at 01:57 PM
 -- Server version: 8.0.42
 -- PHP Version: 8.2.27
 
@@ -35,6 +35,22 @@ CREATE TABLE `collection` (
   `complete` int NOT NULL DEFAULT '0',
   `sealed` int NOT NULL DEFAULT '0'
 ) ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `collection_minifigs`
+--
+
+CREATE TABLE `collection_minifigs` (
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `set_num` varchar(255) NOT NULL,
+  `fig_num` varchar(20) NOT NULL,
+  `quantity_owned` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -226,6 +242,17 @@ ALTER TABLE `collection`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `collection_minifigs`
+--
+ALTER TABLE `collection_minifigs`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_collection_minifig` (`user_id`,`set_num`,`fig_num`),
+  ADD KEY `idx_user_set` (`user_id`,`set_num`),
+  ADD KEY `idx_fig_num` (`fig_num`),
+  ADD KEY `set_num` (`set_num`),
+  ADD KEY `idx_collection_minifigs_user_set_fig` (`user_id`,`set_num`,`fig_num`);
+
+--
 -- Indexes for table `inventories`
 --
 ALTER TABLE `inventories`
@@ -328,6 +355,12 @@ ALTER TABLE `collection`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `collection_minifigs`
+--
+ALTER TABLE `collection_minifigs`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `log`
 --
 ALTER TABLE `log`
@@ -366,6 +399,14 @@ ALTER TABLE `wishlist`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `collection_minifigs`
+--
+ALTER TABLE `collection_minifigs`
+  ADD CONSTRAINT `collection_minifigs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `collection_minifigs_ibfk_2` FOREIGN KEY (`set_num`) REFERENCES `sets` (`set_num`) ON DELETE CASCADE,
+  ADD CONSTRAINT `collection_minifigs_ibfk_3` FOREIGN KEY (`fig_num`) REFERENCES `minifigs` (`fig_num`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `inventory_minifigs`
