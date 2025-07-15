@@ -70,6 +70,7 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
                 
                 // Update each minifigure's quantity based on new set quantity
                 foreach ($minifigs as $minifig) {
+                    // Calculate total owned: (minifigs per set) × (new total sets)
                     $new_minifig_quantity = $minifig['per_set_quantity'] * $quantity;
                     
                     // Check if this minifig exists in collection

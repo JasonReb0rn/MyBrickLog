@@ -23,9 +23,10 @@ function createMinifigureRecords($pdo, $userId, $setNum, $quantity) {
             $minifigsStmt->execute([$inventory['id']]);
             $minifigs = $minifigsStmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Create collection_minifigs records for each minifigure
+            // Create collection_minifigs records for each minifigure - assume user owns all minifigures
             foreach ($minifigs as $minifig) {
-                $totalMinifigQuantity = $minifig['quantity'] * $quantity; // minifigs per set * number of sets
+                // Calculate total owned: (minifigs per set) × (number of sets being added)
+                $totalMinifigQuantity = $minifig['quantity'] * $quantity;
                 
                 // Check if this minifig already exists in user's collection for this set
                 $existingStmt = $pdo->prepare("

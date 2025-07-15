@@ -81,6 +81,8 @@ try {
                 foreach ($minifigs as &$minifig) {
                     if (!isset($minifig['owned_quantity']) || $minifig['owned_quantity'] === null) {
                         // This minifigure doesn't have a collection record, create one
+                        // Calculate total owned: (minifigs per set) × (number of sets owned)
+                        // Example: If set has 2 of this minifig and user owns 3 sets = 2×3 = 6 total minifigs
                         $expectedQuantity = $minifig['required_quantity'] * $setQuantity;
                         
                         try {

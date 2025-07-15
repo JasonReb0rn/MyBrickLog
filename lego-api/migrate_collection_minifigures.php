@@ -73,9 +73,11 @@ try {
                 continue; // Skip sets with no minifigures
             }
             
-            // Create collection_minifigs records
+            // Create collection_minifigs records - assume user owns all minifigures from their sets
             $createdCount = 0;
             foreach ($minifigs as $minifig) {
+                // Calculate total owned: (minifigs per set) × (number of sets owned)
+                // Example: If set has 2 of this minifig and user owns 3 sets = 2×3 = 6 total minifigs
                 $totalMinifigQuantity = $minifig['quantity'] * $setQuantity;
                 
                 $insertStmt = $pdo->prepare("
