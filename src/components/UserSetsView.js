@@ -281,329 +281,434 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-white rounded-xl max-w-4xl w-11/12 max-h-[90vh] overflow-y-auto p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
-                {/* Enhanced header with set image */}
-                <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-4">
-                    <h2 className="text-xl font-bold text-gray-800">Update Set Status</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
-                        <FontAwesomeIcon icon={faTimes} />
-                    </button>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm p-4" onClick={onClose}>
+            <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+                {/* Modal Header */}
+                <div className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                                <img 
+                                    src={set.img_url} 
+                                    alt={set.name} 
+                                    className="w-full h-full object-contain"
+                                    onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
+                                />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-bold text-slate-800 mb-1">Update Set Status</h2>
+                                <h3 className="text-lg font-semibold text-slate-700 mb-1">{set.name}</h3>
+                                <p className="text-sm text-slate-500 font-mono">Set #{set.set_num}</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={onClose} 
+                            className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 transition-all duration-200 flex items-center justify-center"
+                        >
+                            <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                        </button>
+                    </div>
                 </div>
-                
-                <div className="mb-6 flex items-start">
-                    {/* Add small set image */}
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 mr-3">
-                        <img 
-                            src={set.img_url} 
-                            alt={set.name} 
-                            className="w-full h-full object-contain"
-                            onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
-                        />
-                    </div>
-                    <div>
-                        <h3 className="font-medium text-lg mb-1 text-gray-800">{set.name}</h3>
-                        <p className="text-sm text-gray-600">Set #{set.set_num}</p>
-                    </div>
-                </div>
-                
-                {error && (
-                    <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg flex items-center">
-                        <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
-                        {error}
-                    </div>
-                )}
-                
-                <div className="space-y-6">
-                    {/* Quantity Control - enhanced styling */}
-                    <div className="border-b border-gray-200 pb-4">
-                        <div className="flex justify-between items-center mb-3">
-                            <span className="font-medium text-gray-800">Quantity</span>
-                            <span className="text-sm text-gray-500">How many of this set do you own?</span>
-                        </div>
-                        <div className="flex items-center justify-center bg-gray-50 p-3 rounded-lg">
-                            <button 
-                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center"
-                                onClick={decreaseQuantity}
-                                disabled={quantity <= 1}
-                            >
-                                <FontAwesomeIcon icon={faPlus} className="transform rotate-45" />
-                            </button>
-                            <span className="mx-6 text-2xl font-bold">{quantity}</span>
-                            <button 
-                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center justify-center"
-                                onClick={increaseQuantity}
-                            >
-                                <FontAwesomeIcon icon={faPlus} />
-                            </button>
-                        </div>
-                    </div>
-                    
-                    {/* Complete Status Control - enhanced styling */}
-                    <div className="border-b border-gray-200 pb-4">
-                        <div className="flex justify-between items-center mb-3">
-                            <span className="font-medium text-gray-800">Complete Sets</span>
-                            <div className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-lg">
-                                <span className="text-blue-700 font-medium">{completeCount}</span>
-                                <span className="text-gray-500">of</span>
-                                <span className="text-blue-700 font-medium">{quantity}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-center bg-gray-50 p-3 rounded-lg">
-                            <button 
-                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center"
-                                onClick={decreaseComplete}
-                                disabled={completeCount <= 0}
-                            >
-                                <FontAwesomeIcon icon={faPlus} className="transform rotate-45" />
-                            </button>
-                            <div className="mx-4 flex flex-col items-center">
-                                <span className="text-2xl font-bold">{completeCount}</span>
-                                <div className="flex gap-2 mt-1">
-                                    <button 
-                                        className="text-xs bg-gray-100 hover:bg-gray-200 py-1 px-2 rounded transition-colors"
-                                        onClick={() => setCompleteCount(0)}
-                                        disabled={completeCount === 0}
-                                    >
-                                        None
-                                    </button>
-                                    <button 
-                                        className="text-xs bg-gray-100 hover:bg-gray-200 py-1 px-2 rounded transition-colors"
-                                        onClick={() => setCompleteCount(quantity)}
-                                        disabled={completeCount === quantity}
-                                    >
-                                        All
-                                    </button>
+
+                {/* Modal Content */}
+                <div className="overflow-y-auto max-h-[calc(95vh-140px)]">
+                    <div className="p-6 space-y-8">
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                    <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-600 text-sm" />
                                 </div>
+                                <span className="text-red-800 font-medium">{error}</span>
                             </div>
-                            <button 
-                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center"
-                                onClick={increaseComplete}
-                                disabled={completeCount >= quantity}
-                            >
-                                <FontAwesomeIcon icon={faPlus} />
-                            </button>
-                        </div>
-                        <div className="mt-2 text-sm text-gray-500 text-center">
-                            <p>Sets with all pieces and instructions</p>
-                        </div>
-                    </div>
-                    
-                    {/* Sealed Status Control - enhanced styling */}
-                    <div>
-                        <div className="flex justify-between items-center mb-3">
-                            <span className="font-medium text-gray-800">Sealed Sets</span>
-                            <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded-lg">
-                                <span className="text-green-700 font-medium">{sealedCount}</span>
-                                <span className="text-gray-500">of</span>
-                                <span className="text-green-700 font-medium">{quantity}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-center bg-gray-50 p-3 rounded-lg">
-                            <button 
-                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center"
-                                onClick={decreaseSealed}
-                                disabled={sealedCount <= 0}
-                            >
-                                <FontAwesomeIcon icon={faPlus} className="transform rotate-45" />
-                            </button>
-                            <div className="mx-4 flex flex-col items-center">
-                                <span className="text-2xl font-bold">{sealedCount}</span>
-                                <div className="flex gap-2 mt-1">
-                                    <button 
-                                        className="text-xs bg-gray-100 hover:bg-gray-200 py-1 px-2 rounded transition-colors"
-                                        onClick={() => setSealedCount(0)}
-                                        disabled={sealedCount === 0}
-                                    >
-                                        None
-                                    </button>
-                                    <button 
-                                        className="text-xs bg-gray-100 hover:bg-gray-200 py-1 px-2 rounded transition-colors"
-                                        onClick={() => {
-                                            setSealedCount(quantity);
-                                            setCompleteCount(quantity); // Sealed sets are complete
-                                        }}
-                                        disabled={sealedCount === quantity}
-                                    >
-                                        All
-                                    </button>
-                                </div>
-                            </div>
-                            <button 
-                                className="w-10 h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center"
-                                onClick={increaseSealed}
-                                disabled={sealedCount >= quantity}
-                            >
-                                <FontAwesomeIcon icon={faPlus} />
-                            </button>
-                        </div>
-                        <div className="mt-2 text-sm text-gray-500 text-center">
-                            <p>Sets in unopened, original packaging</p>
-                            {sealedCount > completeCount && (
-                                <p className="text-amber-600 mt-1">Note: Sealed sets will be counted as complete</p>
-                            )}
-                        </div>
-                    </div>
-                    
-                    {/* Minifigure Management Section - Always show if not loading */}
-                    <div className="border-t border-gray-200 pt-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium text-gray-800">Minifigures</span>
-                                {minifigs.length > 0 ? (
-                                    <span className="text-sm bg-purple-50 text-purple-700 px-2 py-1 rounded-full">
-                                        {minifigs.length} figures
-                                    </span>
-                                ) : (
-                                    !loadingMinifigs && (
-                                        <span className="text-sm bg-gray-50 text-gray-600 px-2 py-1 rounded-full">
-                                            No data available
-                                        </span>
-                                    )
-                                )}
-                            </div>
-                            {minifigs.length > 0 && (
-                                <button
-                                    onClick={() => setShowMinifigs(!showMinifigs)}
-                                    className="flex items-center gap-2 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
-                                >
-                                    <FontAwesomeIcon icon={showMinifigs ? faChevronUp : faChevronDown} />
-                                    <span>{showMinifigs ? 'Hide' : 'Show'} Details</span>
-                                </button>
-                            )}
-                        </div>
+                        )}
                         
-                        {loadingMinifigs ? (
-                            <div className="text-center py-8">
-                                <FontAwesomeIcon icon={faSync} className="animate-spin text-gray-400 text-xl mb-2" />
-                                <p className="text-gray-500">Loading minifigures...</p>
-                            </div>
-                        ) : minifigs.length > 0 ? (
-                            <>
-                                {/* Minifigure Summary */}
-                                <div className="grid grid-cols-2 gap-4 mb-4">
-                                    <div className="bg-green-50 p-3 rounded-lg">
-                                        <div className="text-sm text-green-600 font-medium">Complete</div>
-                                        <div className="text-lg font-bold text-green-800">
-                                            {minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length}
-                                            <span className="text-sm font-normal"> / {minifigs.length}</span>
+                        {/* Status Controls Section */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-semibold text-slate-800 flex items-center">
+                                <FontAwesomeIcon icon={faCube} className="mr-2 text-slate-600" />
+                                Collection Status
+                            </h3>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {/* Quantity Control */}
+                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                                    <div className="text-center mb-4">
+                                        <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <FontAwesomeIcon icon={faBoxOpen} className="text-white text-sm" />
                                         </div>
+                                        <span className="text-sm font-semibold text-slate-700 block">Quantity</span>
+                                        <span className="text-xs text-slate-500">Total sets owned</span>
                                     </div>
-                                    <div className="bg-amber-50 p-3 rounded-lg">
-                                        <div className="text-sm text-amber-600 font-medium">Missing</div>
-                                        <div className="text-lg font-bold text-amber-800">
-                                            {minifigs.filter(m => (m.owned_quantity || 0) < (m.required_quantity * quantity)).length}
-                                            <span className="text-sm font-normal"> figures</span>
-                                        </div>
+                                    <div className="flex items-center justify-center gap-3 mb-3">
+                                        <button 
+                                            className="w-10 h-10 bg-slate-600 hover:bg-slate-700 disabled:bg-slate-300 text-white rounded-xl transition-all duration-200 flex items-center justify-center font-semibold disabled:cursor-not-allowed"
+                                            onClick={decreaseQuantity}
+                                            disabled={quantity <= 1}
+                                        >
+                                            −
+                                        </button>
+                                        <span className="text-2xl font-bold text-slate-800 w-16 text-center">{quantity}</span>
+                                        <button 
+                                            className="w-10 h-10 bg-slate-600 hover:bg-slate-700 text-white rounded-xl transition-all duration-200 flex items-center justify-center font-semibold"
+                                            onClick={increaseQuantity}
+                                        >
+                                            +
+                                        </button>
                                     </div>
                                 </div>
                                 
-                                {/* Detailed Minifigure List */}
-                                {showMinifigs && (
-                                    <div className="space-y-3 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                        {minifigs.map(minifig => {
-                                            const requiredTotal = minifig.required_quantity * quantity;
-                                            const owned = minifig.owned_quantity || 0;
-                                            const isComplete = owned >= requiredTotal;
-                                            const isUpdating = updatingMinifigs[minifig.fig_num];
-                                            
-                                            return (
-                                                <div key={minifig.fig_num} className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-                                                    <div className="flex items-center gap-3">
-                                                        {/* Minifigure Image */}
-                                                        <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                            <img 
-                                                                src={minifig.img_url} 
-                                                                alt={minifig.name}
-                                                                className="w-full h-full object-contain"
-                                                                onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
-                                                            />
+                                {/* Complete Status Control */}
+                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+                                    <div className="text-center mb-4">
+                                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <FontAwesomeIcon icon={faCheckCircle} className="text-white text-sm" />
+                                        </div>
+                                        <span className="text-sm font-semibold text-blue-800 block">Complete</span>
+                                        <span className="text-xs text-blue-600 font-medium">{completeCount} of {quantity} sets</span>
+                                    </div>
+                                    <div className="flex items-center justify-center gap-3 mb-3">
+                                        <button 
+                                            className="w-10 h-10 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-xl transition-all duration-200 flex items-center justify-center font-semibold disabled:cursor-not-allowed"
+                                            onClick={decreaseComplete}
+                                            disabled={completeCount <= 0}
+                                        >
+                                            −
+                                        </button>
+                                        <span className="text-2xl font-bold text-blue-800 w-16 text-center">{completeCount}</span>
+                                        <button 
+                                            className="w-10 h-10 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-xl transition-all duration-200 flex items-center justify-center font-semibold disabled:cursor-not-allowed"
+                                            onClick={increaseComplete}
+                                            disabled={completeCount >= quantity}
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            className="text-xs bg-white hover:bg-blue-100 border border-blue-200 py-2 px-3 rounded-lg transition-all duration-200 flex-1 font-medium text-blue-700 disabled:opacity-50"
+                                            onClick={() => setCompleteCount(0)}
+                                            disabled={completeCount === 0}
+                                        >
+                                            None
+                                        </button>
+                                        <button 
+                                            className="text-xs bg-white hover:bg-blue-100 border border-blue-200 py-2 px-3 rounded-lg transition-all duration-200 flex-1 font-medium text-blue-700 disabled:opacity-50"
+                                            onClick={() => setCompleteCount(quantity)}
+                                            disabled={completeCount === quantity}
+                                        >
+                                            All
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                {/* Sealed Status Control */}
+                                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+                                    <div className="text-center mb-4">
+                                        <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <FontAwesomeIcon icon={faBox} className="text-white text-sm" />
+                                        </div>
+                                        <span className="text-sm font-semibold text-emerald-800 block">Sealed</span>
+                                        <span className="text-xs text-emerald-600 font-medium">{sealedCount} of {quantity} sets</span>
+                                    </div>
+                                    <div className="flex items-center justify-center gap-3 mb-3">
+                                        <button 
+                                            className="w-10 h-10 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white rounded-xl transition-all duration-200 flex items-center justify-center font-semibold disabled:cursor-not-allowed"
+                                            onClick={decreaseSealed}
+                                            disabled={sealedCount <= 0}
+                                        >
+                                            −
+                                        </button>
+                                        <span className="text-2xl font-bold text-emerald-800 w-16 text-center">{sealedCount}</span>
+                                        <button 
+                                            className="w-10 h-10 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white rounded-xl transition-all duration-200 flex items-center justify-center font-semibold disabled:cursor-not-allowed"
+                                            onClick={increaseSealed}
+                                            disabled={sealedCount >= quantity}
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            className="text-xs bg-white hover:bg-emerald-100 border border-emerald-200 py-2 px-3 rounded-lg transition-all duration-200 flex-1 font-medium text-emerald-700 disabled:opacity-50"
+                                            onClick={() => setSealedCount(0)}
+                                            disabled={sealedCount === 0}
+                                        >
+                                            None
+                                        </button>
+                                        <button 
+                                            className="text-xs bg-white hover:bg-emerald-100 border border-emerald-200 py-2 px-3 rounded-lg transition-all duration-200 flex-1 font-medium text-emerald-700 disabled:opacity-50"
+                                            onClick={() => {
+                                                setSealedCount(quantity);
+                                                setCompleteCount(quantity);
+                                            }}
+                                            disabled={sealedCount === quantity}
+                                        >
+                                            All
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Status Info */}
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                <div className="flex items-center justify-center text-sm text-slate-600">
+                                    <FontAwesomeIcon icon={faInfoCircle} className="mr-2 text-slate-500" />
+                                    <span className="text-center">
+                                        <strong>Complete:</strong> All pieces & instructions present • <strong>Sealed:</strong> Unopened original packaging
+                                        {sealedCount > completeCount && (
+                                            <span className="block mt-1 text-amber-600 font-medium">
+                                                <FontAwesomeIcon icon={faExclamationTriangle} className="mr-1" />
+                                                Sealed sets will automatically be marked as complete
+                                            </span>
+                                        )}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Minifigures Section */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-lg font-semibold text-slate-800 flex items-center">
+                                    <FontAwesomeIcon icon={faUserCircle} className="mr-2 text-slate-600" />
+                                    Minifigures
+                                    {minifigs.length > 0 && (
+                                        <span className="ml-3 text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
+                                            {minifigs.length} figures
+                                        </span>
+                                    )}
+                                </h3>
+                                {minifigs.length > 0 && (
+                                    <button
+                                        onClick={() => setShowMinifigs(!showMinifigs)}
+                                        className="flex items-center gap-3 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-medium transition-all duration-200 shadow-sm"
+                                    >
+                                        <FontAwesomeIcon icon={faUserCircle} />
+                                        <span>{showMinifigs ? 'Hide Minifigures' : 'Show Minifigures'}</span>
+                                        <FontAwesomeIcon icon={showMinifigs ? faChevronUp : faChevronDown} />
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {loadingMinifigs ? (
+                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center">
+                                    <FontAwesomeIcon icon={faSync} className="animate-spin text-slate-400 text-2xl mb-3" />
+                                    <p className="text-slate-600 font-medium">Loading minifigures...</p>
+                                </div>
+                            ) : minifigs.length > 0 ? (
+                                <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 space-y-4">
+                                    {/* Combined Progress Stats */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-grow mr-6">
+                                            {(() => {
+                                                const completeCount = minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length;
+                                                const totalCount = minifigs.length;
+                                                const progressPercentage = (completeCount / totalCount) * 100;
+                                                
+                                                return (
+                                                    <div className="bg-white rounded-lg px-6 py-4 border border-purple-200">
+                                                        <div className="flex items-center justify-between mb-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <FontAwesomeIcon icon={faUserCircle} className="text-purple-600" />
+                                                                <span className="text-lg font-semibold text-slate-800">Collection Progress</span>
+                                                            </div>
+                                                            <span className="text-lg font-bold text-slate-800">
+                                                                {completeCount}/{totalCount}
+                                                            </span>
                                                         </div>
                                                         
-                                                        {/* Minifigure Info */}
-                                                        <div className="flex-grow min-w-0">
-                                                            <h4 className="font-medium text-gray-800 truncate text-sm">{minifig.name}</h4>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <span className={`text-xs px-2 py-1 rounded-full ${
-                                                                    isComplete 
-                                                                        ? 'bg-green-50 text-green-700' 
-                                                                        : 'bg-amber-50 text-amber-700'
-                                                                }`}>
-                                                                    {owned} / {requiredTotal} owned
+                                                        {/* Progress Bar */}
+                                                        <div className="relative">
+                                                            <div className="w-full bg-slate-200 rounded-full h-3">
+                                                                <div 
+                                                                    className={`h-3 rounded-full transition-all duration-500 ${
+                                                                        completeCount === totalCount 
+                                                                            ? 'bg-emerald-500' 
+                                                                            : completeCount > 0 
+                                                                                ? 'bg-blue-500' 
+                                                                                : 'bg-slate-300'
+                                                                    }`}
+                                                                    style={{ width: `${Math.max(progressPercentage, 0)}%` }}
+                                                                ></div>
+                                                            </div>
+                                                            <div className="mt-2 flex justify-between text-sm">
+                                                                <span className="text-slate-600">
+                                                                    {completeCount === totalCount 
+                                                                        ? 'All minifigures complete!' 
+                                                                        : completeCount === 0 
+                                                                            ? 'No minifigures owned' 
+                                                                            : `${totalCount - completeCount} still needed`
+                                                                    }
                                                                 </span>
-                                                                {isComplete && (
-                                                                    <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 text-xs" />
-                                                                )}
+                                                                <span className="text-slate-600 font-medium">
+                                                                    {Math.round(progressPercentage)}%
+                                                                </span>
                                                             </div>
-                                                        </div>
-                                                        
-                                                        {/* Quantity Controls */}
-                                                        <div className="flex items-center gap-1">
-                                                            <button
-                                                                className="w-7 h-7 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 transition-colors flex items-center justify-center text-sm"
-                                                                onClick={() => updateMinifigQuantity(minifig.fig_num, Math.max(0, owned - 1))}
-                                                                disabled={isUpdating || owned <= 0}
-                                                            >
-                                                                −
-                                                            </button>
-                                                            <div className="w-8 text-center text-sm font-medium">
-                                                                {isUpdating ? (
-                                                                    <FontAwesomeIcon icon={faSync} className="animate-spin text-gray-400" />
-                                                                ) : (
-                                                                    owned
-                                                                )}
-                                                            </div>
-                                                            <button
-                                                                className="w-7 h-7 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 transition-colors flex items-center justify-center text-sm"
-                                                                onClick={() => updateMinifigQuantity(minifig.fig_num, owned + 1)}
-                                                                disabled={isUpdating}
-                                                            >
-                                                                +
-                                                            </button>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            );
-                                        })}
+                                                );
+                                            })()}
+                                        </div>
+                                        
+                                        {/* Conditional Bulk Actions */}
+                                        <div className="flex flex-col gap-2">
+                                            {(() => {
+                                                const completeCount = minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length;
+                                                const totalCount = minifigs.length;
+                                                const hasAnyOwned = minifigs.some(m => (m.owned_quantity || 0) > 0);
+                                                const allComplete = completeCount === totalCount;
+                                                
+                                                return (
+                                                    <>
+                                                        {!allComplete && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    minifigs.forEach(minifig => {
+                                                                        const requiredTotal = minifig.required_quantity * quantity;
+                                                                        updateMinifigQuantity(minifig.fig_num, requiredTotal);
+                                                                    });
+                                                                }}
+                                                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-emerald-300 whitespace-nowrap"
+                                                                disabled={Object.keys(updatingMinifigs).some(key => updatingMinifigs[key])}
+                                                            >
+                                                                <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+                                                                Mark All Complete
+                                                            </button>
+                                                        )}
+                                                        
+                                                        {hasAnyOwned && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    minifigs.forEach(minifig => {
+                                                                        updateMinifigQuantity(minifig.fig_num, 0);
+                                                                    });
+                                                                }}
+                                                                className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-slate-300 whitespace-nowrap"
+                                                                disabled={Object.keys(updatingMinifigs).some(key => updatingMinifigs[key])}
+                                                            >
+                                                                <FontAwesomeIcon icon={faTimes} className="mr-1" />
+                                                                Mark All Missing
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
                                     </div>
-                                )}
-                            </>
-                        ) : (
-                            <div className="text-center py-8">
-                                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <FontAwesomeIcon icon={faUserCircle} className="text-purple-600 text-2xl" />
+                                    
+                                    {/* Detailed Minifigure List */}
+                                    {showMinifigs && (
+                                        <div className="bg-white rounded-xl border border-purple-200 p-4">
+                                            <div className="grid gap-3">
+                                                {minifigs.map(minifig => {
+                                                    const requiredTotal = minifig.required_quantity * quantity;
+                                                    const owned = minifig.owned_quantity || 0;
+                                                    const isComplete = owned >= requiredTotal;
+                                                    const isUpdating = updatingMinifigs[minifig.fig_num];
+                                                    
+                                                    return (
+                                                        <div key={minifig.fig_num} className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+                                                            {/* Minifigure Image */}
+                                                            <div className="w-12 h-12 bg-white rounded-lg overflow-hidden shadow-sm border border-slate-200 flex-shrink-0">
+                                                                <img 
+                                                                    src={minifig.img_url} 
+                                                                    alt={minifig.name}
+                                                                    className="w-full h-full object-contain"
+                                                                    onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
+                                                                />
+                                                            </div>
+                                                            
+                                                            {/* Minifigure Info */}
+                                                            <div className="flex-grow min-w-0">
+                                                                <h4 className="font-semibold text-slate-800 truncate text-sm mb-1">{minifig.name}</h4>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                                                        isComplete 
+                                                                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' 
+                                                                            : 'bg-amber-100 text-amber-700 border border-amber-200'
+                                                                    }`}>
+                                                                        {owned}/{requiredTotal} owned
+                                                                    </span>
+                                                                    {isComplete && (
+                                                                        <FontAwesomeIcon icon={faCheckCircle} className="text-emerald-600 text-sm" />
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {/* Quantity Controls */}
+                                                            <div className="flex items-center gap-2">
+                                                                <button
+                                                                    className="w-8 h-8 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-all duration-200 flex items-center justify-center text-sm font-semibold disabled:bg-slate-300"
+                                                                    onClick={() => updateMinifigQuantity(minifig.fig_num, Math.max(0, owned - 1))}
+                                                                    disabled={isUpdating || owned <= 0}
+                                                                >
+                                                                    −
+                                                                </button>
+                                                                <div className="w-10 text-center">
+                                                                    {isUpdating ? (
+                                                                        <FontAwesomeIcon icon={faSync} className="animate-spin text-slate-400 text-sm" />
+                                                                    ) : (
+                                                                        <span className="text-sm font-bold text-slate-800">{owned}</span>
+                                                                    )}
+                                                                </div>
+                                                                <button
+                                                                    className="w-8 h-8 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-all duration-200 flex items-center justify-center text-sm font-semibold disabled:bg-slate-300"
+                                                                    onClick={() => updateMinifigQuantity(minifig.fig_num, owned + 1)}
+                                                                    disabled={isUpdating}
+                                                                >
+                                                                    +
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                                <h4 className="font-medium text-gray-800 mb-2">No Minifigure Data</h4>
-                                <p className="text-gray-600 text-sm max-w-md mx-auto">
-                                    This set doesn't have minifigure inventory data available yet. 
-                                    Minifigure tracking will be enabled when data becomes available.
-                                </p>
-                            </div>
-                        )}
+                            ) : (
+                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center">
+                                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <FontAwesomeIcon icon={faUserCircle} className="text-purple-600 text-xl" />
+                                    </div>
+                                    <h4 className="font-semibold text-slate-800 mb-2">No Minifigure Data Available</h4>
+                                    <p className="text-slate-600 text-sm max-w-md mx-auto">
+                                        This set doesn't have minifigure inventory data available yet. 
+                                        Minifigure tracking will be enabled when data becomes available.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-                
-                <div className="mt-6 flex justify-end gap-3">
-                    <button 
-                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors shadow-sm" 
-                        onClick={onClose}
-                    >
-                        Cancel
-                    </button>
-                    <button 
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-sm flex items-center"
-                        onClick={validateAndUpdate}
-                        disabled={isUpdating}
-                    >
-                        {isUpdating ? (
-                            <>
-                                <FontAwesomeIcon icon={faSync} className="mr-2 animate-spin" />
-                                Updating...
-                            </>
-                        ) : (
-                            'Update'
-                        )}
-                    </button>
+
+                {/* Modal Footer */}
+                <div className="bg-slate-50 border-t border-slate-200 p-6">
+                    <div className="flex justify-end gap-3">
+                        <button 
+                            className="px-6 py-3 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded-xl transition-all duration-200 font-medium" 
+                            onClick={onClose}
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all duration-200 font-medium flex items-center disabled:bg-red-400"
+                            onClick={validateAndUpdate}
+                            disabled={isUpdating}
+                        >
+                            {isUpdating ? (
+                                <>
+                                    <FontAwesomeIcon icon={faSync} className="mr-2 animate-spin" />
+                                    Updating...
+                                </>
+                            ) : (
+                                <>
+                                    <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
+                                    Update Status
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -660,6 +765,8 @@ const UserSetsView = () => {
     const [pendingUpdates, setPendingUpdates] = useState({});
     const [migrationStatus, setMigrationStatus] = useState(null);
     const [isMigrating, setIsMigrating] = useState(false);
+    const [migrationNeeded, setMigrationNeeded] = useState(false);
+    const [checkingMigration, setCheckingMigration] = useState(false);
     
     const { userId } = useParams();
     const { user } = useAuth();
@@ -684,6 +791,33 @@ const UserSetsView = () => {
         localStorage.setItem('showPrices', JSON.stringify(showPrices));
     }, [showPrices]);
 
+    // Function to check if migration is needed
+    const checkMigrationStatus = async () => {
+        if (!isOwner || isWishlist || !userId) return;
+        
+        setCheckingMigration(true);
+        try {
+            const response = await axios.get(
+                `${process.env.REACT_APP_API_URL}/check_migration_status.php`,
+                { withCredentials: true }
+            );
+            
+            if (response.data.error) {
+                console.error('Error checking migration status:', response.data.error);
+                setMigrationNeeded(false);
+            } else {
+                setMigrationNeeded(response.data.migration_needed);
+                console.log(`Migration check: ${response.data.sets_needing_migration} sets need migration, migration needed: ${response.data.migration_needed}`);
+            }
+            
+        } catch (error) {
+            console.error('Error checking migration status:', error);
+            // On error, don't show migration button to avoid confusion
+            setMigrationNeeded(false);
+        }
+        setCheckingMigration(false);
+    };
+
     useEffect(() => {
         const fetchSets = async () => {
             if (!userId) return;
@@ -700,6 +834,14 @@ const UserSetsView = () => {
                     setSets(response.data.sets);
                     setFilteredSets(response.data.sets);
                     setProfileData(response.data.profile);
+                    
+                    // Check migration status after sets are loaded (only for collection owners)
+                    if (!isWishlist && isOwner && response.data.sets.length > 0) {
+                        // Delay the migration check slightly to let the sets state update
+                        setTimeout(() => {
+                            checkMigrationStatus();
+                        }, 100);
+                    }
                 }
             } catch (error) {
                 console.error(`Error fetching user ${isWishlist ? 'wishlist' : 'collection'}:`, error);
@@ -709,6 +851,13 @@ const UserSetsView = () => {
 
         fetchSets();
     }, [userId, isWishlist, endpoints.fetch]);
+
+    // Update sets dependency for migration check
+    useEffect(() => {
+        if (sets.length > 0 && !isWishlist && isOwner) {
+            checkMigrationStatus();
+        }
+    }, [sets.length, isWishlist, isOwner]);
 
     useEffect(() => {
         const applyFiltersAndSort = () => {
@@ -1127,6 +1276,9 @@ const UserSetsView = () => {
                     details: response.data
                 });
                 
+                // Hide the migration button after successful migration
+                setMigrationNeeded(false);
+                
                 // Refresh the current set's minifigures if modal is open
                 if (statusModal.isOpen && statusModal.set) {
                     // This will trigger a refetch of minifigures for the current set
@@ -1135,6 +1287,11 @@ const UserSetsView = () => {
                         set: { ...statusModal.set }
                     });
                 }
+                
+                // Recheck migration status after a delay to see if more migration is needed
+                setTimeout(() => {
+                    checkMigrationStatus();
+                }, 2000);
             } else {
                 setMigrationStatus({
                     type: 'error',
@@ -1583,15 +1740,15 @@ const UserSetsView = () => {
                                     )
                                 )}
                                 
-                                {isOwner && !isWishlist && (
+                                {isOwner && !isWishlist && migrationNeeded && (
                                     <button 
                                         onClick={migrateCollectionMinifigures}
-                                        disabled={isMigrating}
+                                        disabled={isMigrating || checkingMigration}
                                         className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white rounded-lg transition-colors text-sm font-medium"
                                         title="Migrate existing collection to include minifigure tracking"
                                     >
-                                        <FontAwesomeIcon icon={isMigrating ? faSync : faUserCircle} className={`mr-2 ${isMigrating ? 'animate-spin' : ''}`} />
-                                        {isMigrating ? 'Migrating...' : 'Migrate Minifigs'}
+                                        <FontAwesomeIcon icon={isMigrating || checkingMigration ? faSync : faUserCircle} className={`mr-2 ${isMigrating || checkingMigration ? 'animate-spin' : ''}`} />
+                                        {isMigrating ? 'Migrating...' : checkingMigration ? 'Checking...' : 'Migrate Minifigs'}
                                     </button>
                                 )}
                                 
