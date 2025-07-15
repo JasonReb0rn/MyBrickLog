@@ -34,7 +34,8 @@ if (isset($_SESSION['user_id'])) {
                     $updateStmt->execute([$newQuantity, $userId, $setNum]);
                 } else {
                     // If the set does not exist, insert a new record
-                    $insertStmt = $pdo->prepare("INSERT INTO collection (user_id, set_num, collection_set_quantity) VALUES (?, ?, ?)");
+                    // Setting complete=1 (true) and sealed=0 by default (assuming sets are complete but opened)
+                    $insertStmt = $pdo->prepare("INSERT INTO collection (user_id, set_num, collection_set_quantity, complete, sealed) VALUES (?, ?, ?, 1, 0)");
                     $insertStmt->execute([$userId, $setNum, $quantity]);
                 }
             }

@@ -1028,7 +1028,7 @@ const UserSetsView = () => {
                 </div>
 
                 {/* Set details */}
-                <div className="p-4 bg-gray-50/50">
+                <div className="p-4 pt-0 bg-gray-50/50">
                     <h3 className="font-medium text-gray-800 mb-1 line-clamp-2 h-12">
                         {set.name}
                     </h3>
@@ -1336,20 +1336,53 @@ const UserSetsView = () => {
 
     const renderStatsCards = () => {
         if (isWishlist) return null;
-
+    
         const totalSets = sets.reduce((acc, set) => acc + Number(set.quantity), 0);
         const totalUniqueModels = sets.length;
         const totalParts = sets.reduce((acc, set) => acc + (set.num_parts * Number(set.quantity)), 0);
-        const totalMinifigures = sets.reduce((acc, set) => acc + (Number(set.num_minifigures) * Number(set.quantity)), 0);
         const completeCount = sets.reduce((acc, set) => acc + Number(set.complete), 0);
         const sealedCount = sets.reduce((acc, set) => acc + Number(set.sealed), 0);
+        
+        // Updated collection value calculation
         const totalValue = sets.reduce((acc, set) => {
-            const value = parseFloat(set.sealed_value) || 0;
-            return acc + (value * Number(set.quantity));
+            const sealedCount = Number(set.sealed) || 0;
+            const completeCount = Number(set.complete) || 0;
+            const nonSealedCompleteCount = completeCount - sealedCount;
+            const incompleteCount = Number(set.quantity) - completeCount;
+            
+            // Get the different prices, defaulting to 0 if not available
+            const sealedValue = parseFloat(set.sealed_value) || 0;
+            const usedValue = parseFloat(set.used_value) || 0;
+            const retailPrice = parseFloat(set.retail_price) || 0;
+            
+            // Calculate value for each type of set
+            let setValue = 0;
+            
+            // For sealed sets, use sealed_value if available, otherwise retail_price
+            if (sealedCount > 0) {
+                setValue += sealedCount * (sealedValue > 0 ? sealedValue : retailPrice);
+            }
+            
+            // For complete but not sealed sets, use used_value if available, otherwise retail_price
+            if (nonSealedCompleteCount > 0) {
+                setValue += nonSealedCompleteCount * (usedValue > 0 ? usedValue : retailPrice);
+            }
+            
+            // For incomplete sets, use used_value if available, otherwise retail_price
+            if (incompleteCount > 0) {
+                setValue += incompleteCount * (usedValue > 0 ? usedValue : retailPrice);
+            }
+            
+            return acc + setValue;
         }, 0);
         
+        // Determine number of columns based on whether prices are shown
+        const gridCols = showPrices ? 
+            "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" : 
+            "grid-cols-1 sm:grid-cols-3 lg:grid-cols-3";
+        
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className={`grid ${gridCols} gap-4 mb-8`}>
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                     <div className="flex">
                         <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 mr-4">
@@ -1432,7 +1465,7 @@ const UserSetsView = () => {
         }
         
         return (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 sm:gap-6">
                 {/* Full width themes */}
                 {fullWidthThemes.map(theme => (
                     <div 
@@ -1440,13 +1473,13 @@ const UserSetsView = () => {
                         className="w-full bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
                     >
                         <div 
-                            className="px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white flex justify-between items-center cursor-pointer"
+                            className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-red-600 to-red-700 text-white flex justify-between items-center cursor-pointer"
                             onClick={() => toggleCollapse(theme.theme_id)}
                         >
                             <div className="flex items-center">
-                                <FontAwesomeIcon icon={faCube} className="mr-3 text-yellow-400" />
-                                <h3 className="text-lg font-semibold">{theme.theme_name}</h3>
-                                <span className="ml-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                <FontAwesomeIcon icon={faCube} className="mr-2 sm:mr-3 text-yellow-400" />
+                                <h3 className="text-base sm:text-lg font-semibold">{theme.theme_name}</h3>
+                                <span className="ml-2 sm:ml-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                                     {theme.sets.length} {theme.sets.length === 1 ? 'set' : 'sets'}
                                 </span>
                             </div>
@@ -1457,8 +1490,8 @@ const UserSetsView = () => {
                         </div>
                         
                         {!collapsedThemes[theme.theme_id] && (
-                            <div className="p-6">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div className="p-3 sm:p-4 md:p-6">
+                                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4">
                                     {theme.sets.map(set => renderSetCard(set))}
                                 </div>
                             </div>
@@ -1468,20 +1501,20 @@ const UserSetsView = () => {
                 
                 {/* Half width themes in pairs */}
                 {rows.map((row, index) => (
-                    <div key={`row-${index}`} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div key={`row-${index}`} className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                         {row.map(theme => (
                             <div 
                                 key={theme.theme_id} 
                                 className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
                             >
                                 <div 
-                                    className="px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white flex justify-between items-center cursor-pointer"
+                                    className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-red-600 to-red-700 text-white flex justify-between items-center cursor-pointer"
                                     onClick={() => toggleCollapse(theme.theme_id)}
                                 >
                                     <div className="flex items-center">
-                                        <FontAwesomeIcon icon={faCube} className="mr-3 text-yellow-400" />
-                                        <h3 className="text-lg font-semibold">{theme.theme_name}</h3>
-                                        <span className="ml-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                        <FontAwesomeIcon icon={faCube} className="mr-2 sm:mr-3 text-yellow-400" />
+                                        <h3 className="text-base sm:text-lg font-semibold">{theme.theme_name}</h3>
+                                        <span className="ml-2 sm:ml-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                                             {theme.sets.length} {theme.sets.length === 1 ? 'set' : 'sets'}
                                         </span>
                                     </div>
@@ -1492,8 +1525,8 @@ const UserSetsView = () => {
                                 </div>
                                 
                                 {!collapsedThemes[theme.theme_id] && (
-                                    <div className="p-6">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="p-3 sm:p-4 md:p-6">
+                                        <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
                                             {theme.sets.map(set => renderSetCard(set))}
                                         </div>
                                     </div>
@@ -1508,7 +1541,7 @@ const UserSetsView = () => {
 
     const renderGridView = (sets) => {
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {sets.map(set => renderSetCard(set))}
             </div>
         );
@@ -1615,7 +1648,7 @@ const UserSetsView = () => {
     }
 
     return (
-        <div className="w-full mx-auto px-4 py-8">
+        <div className="w-full mx-auto px-2 sm:px-4 py-4 sm:py-8">
             <div className="max-w-7xl mx-auto">
                 <ConfirmationDialog
                     isOpen={confirmDialog.isOpen}
@@ -1834,7 +1867,7 @@ const UserSetsView = () => {
 
             {/* Main Content - Full width for set display */}
             {filteredSets.length > 0 ? (
-                <div className="max-w-7xl mx-auto mb-8">
+                <div className="max-w-7xl mx-auto mb-4 sm:mb-8">
                     {/* Show theme view for theme sort, grid view for other sorts */}
                     {sortOption === 'theme' ? 
                         renderThemeView(groupAndSortThemes(filteredSets, profileData?.favorite_theme)) : 

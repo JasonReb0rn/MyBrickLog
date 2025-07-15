@@ -155,7 +155,7 @@ const Home = () => {
                         <div className="md:w-1/2 mb-10 md:mb-0 md:pr-10">
                             <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
                                 Track Your LEGO® Collection
-                                <span className="block text-yellow-300">Build Your Legacy</span>
+                                <span className="block text-yellow-300">Organize, Wishlist, Collect</span>
                             </h1>
                             <p className="text-lg md:text-xl mb-8 text-red-100">
                                 Organize, showcase, and discover new sets. Never lose track of your brick collection again.

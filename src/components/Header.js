@@ -56,7 +56,7 @@ const Header = () => {
                     <div className="hidden md:flex items-center space-x-1">
                         <Link 
                             to="/" 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-colors ${isActive('/')}`}
+                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors ${isActive('/')}`}
                         >
                             <FontAwesomeIcon icon="house" className="mr-2" />
                             Home
@@ -64,7 +64,7 @@ const Header = () => {
 
                         <Link 
                             to={collectionUrl} 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-colors ${isActive(collectionUrl)}`}
+                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors ${isActive(collectionUrl)}`}
                         >
                             <FontAwesomeIcon icon="folder-open" className="mr-2" />
                             My Collection
@@ -72,7 +72,7 @@ const Header = () => {
 
                         <Link 
                             to={wishlistUrl} 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-colors ${isActive(wishlistUrl)}`}
+                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors ${isActive(wishlistUrl)}`}
                         >
                             <FontAwesomeIcon icon="heart" className="mr-2" />
                             My Wishlist
@@ -80,7 +80,7 @@ const Header = () => {
 
                         <Link 
                             to="/themes" 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-colors ${isActive('/themes')}`}
+                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors ${isActive('/themes')}`}
                         >
                             <FontAwesomeIcon icon="folder-plus" className="mr-2" />
                             Add Sets
@@ -88,7 +88,7 @@ const Header = () => {
 
                         <button
                             onClick={() => setShowSearch(!showSearch)}
-                            className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-colors"
+                            className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors"
                         >
                             <FontAwesomeIcon icon={faSearch} className="mr-2" />
                             Search
@@ -101,14 +101,14 @@ const Header = () => {
                             <div className="flex items-center space-x-2">
                                 <Link 
                                     to="/profile" 
-                                    className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-colors"
+                                    className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors"
                                 >
                                     <FontAwesomeIcon icon="user" className="mr-2" />
                                     {user.username}
                                 </Link>
                                 <button 
                                     onClick={handleLogout}
-                                    className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-colors"
+                                    className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors"
                                 >
                                     <FontAwesomeIcon icon="right-from-bracket" className="mr-2" />
                                     Sign Out
@@ -128,7 +128,7 @@ const Header = () => {
                     {/* Mobile Menu Button */}
                     <div className="md:hidden flex items-center">
                         <button 
-                            className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-red-700 transition-colors"
+                            className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-red-700 hover:text-white transition-colors"
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         >
                             <FontAwesomeIcon icon={isMobileMenuOpen ? faXmark : faBars} />
@@ -164,7 +164,7 @@ const Header = () => {
                     <div className="px-2 pt-2 pb-3 space-y-1">
                         <Link 
                             to="/" 
-                            className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600"
+                            className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
                             <FontAwesomeIcon icon="house" className="mr-3 text-yellow-400" />
@@ -173,7 +173,7 @@ const Header = () => {
 
                         <Link 
                             to={collectionUrl} 
-                            className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600"
+                            className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
                             <FontAwesomeIcon icon="folder-open" className="mr-3 text-yellow-400" />
@@ -182,7 +182,7 @@ const Header = () => {
 
                         <Link 
                             to={wishlistUrl} 
-                            className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600"
+                            className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
                             <FontAwesomeIcon icon="heart" className="mr-3 text-yellow-400" />
@@ -191,7 +191,7 @@ const Header = () => {
 
                         <Link 
                             to="/themes" 
-                            className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600"
+                            className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
                             <FontAwesomeIcon icon="folder-plus" className="mr-3 text-yellow-400" />
@@ -203,7 +203,7 @@ const Header = () => {
                                 setShowSearch(!showSearch);
                                 setIsMobileMenuOpen(false);
                             }}
-                            className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600"
+                            className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
                         >
                             <FontAwesomeIcon icon={faSearch} className="mr-3 text-yellow-400" />
                             Search
@@ -213,7 +213,7 @@ const Header = () => {
                             <>
                                 <Link 
                                     to="/profile" 
-                                    className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600"
+                                    className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     <FontAwesomeIcon icon="user" className="mr-3 text-yellow-400" />
@@ -221,7 +221,7 @@ const Header = () => {
                                 </Link>
                                 <button 
                                     onClick={handleLogout}
-                                    className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600"
+                                    className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
                                 >
                                     <FontAwesomeIcon icon="right-from-bracket" className="mr-3 text-yellow-400" />
                                     Sign Out
@@ -230,7 +230,7 @@ const Header = () => {
                         ) : (
                             <Link 
                                 to="/login" 
-                                className="block px-3 py-2 rounded-md text-base font-medium text-white bg-red-600 hover:bg-red-500"
+                                className="block px-3 py-2 rounded-md text-base font-medium text-white bg-red-600 hover:bg-red-500 hover:text-white"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 <FontAwesomeIcon icon="user" className="mr-3 text-yellow-400" />
