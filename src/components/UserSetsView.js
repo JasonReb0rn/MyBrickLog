@@ -1430,7 +1430,9 @@ const UserSetsView = () => {
             <div className="relative">
                 <div className="p-2 h-48 flex items-center justify-center relative">
                     {!loadedImages[set.set_num] && (
-                        <Skeleton height={180} width="100%" />
+                        <div className="absolute inset-2">
+                            <Skeleton height="100%" width="100%" />
+                        </div>
                     )}
                     <img
                         src={set.img_url}
@@ -1677,17 +1679,20 @@ const UserSetsView = () => {
         
         return (
             <div className="bg-white rounded-xl shadow-md border border-gray-200 mb-8 overflow-hidden">
-                <div className="bg-gradient-to-r from-red-600 to-red-700 h-32 relative">
-                    {/* Decorative elements */}
-                    <div className="absolute top-4 right-4 w-16 h-16 bg-yellow-400 rounded-full opacity-20"></div>
-                    <div className="absolute top-16 right-24 w-8 h-8 bg-red-400 rounded-lg opacity-30 transform rotate-12"></div>
-                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url(/images/lego_pattern_bg.png)', backgroundSize: '200px' }}></div>
+                {/* Reduced header height and made it more subtle */}
+                <div className="bg-gradient-to-r from-red-500 to-red-600 h-20 relative">
+                    {/* Simplified decorative elements */}
+                    <div className="absolute top-2 right-4 w-10 h-10 bg-yellow-400 rounded-full opacity-20"></div>
+                    <div className="absolute top-3 right-16 w-6 h-6 bg-red-400 rounded-lg opacity-25 transform rotate-12"></div>
+                    <div className="absolute inset-0 opacity-8" style={{ backgroundImage: 'url(/images/lego_pattern_bg.png)', backgroundSize: '150px' }}></div>
                 </div>
                 
-                <div className="px-8 pb-8 relative">
-                    <div className="flex flex-col md:flex-row">
-                        <div className="flex-shrink-0 -mt-16 mb-4 md:mb-0 flex justify-center md:justify-start">
-                            <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+                {/* Content area with better avatar integration */}
+                <div className="px-6 sm:px-8 py-8">
+                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                        {/* Profile image positioned naturally within content */}
+                        <div className="flex-shrink-0">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-3 border-gray-200 shadow-lg overflow-hidden bg-white">
                                 <img 
                                     src={profileData.profile_picture ? `https://mybricklog.s3.us-east-2.amazonaws.com/profile-pictures/${profileData.profile_picture}` : '/images/lego_user.png'}
                                     alt={displayName}
@@ -1697,19 +1702,20 @@ const UserSetsView = () => {
                             </div>
                         </div>
                         
-                        <div className="flex-grow md:pl-8 text-center md:text-left">
-                            <h1 className="text-3xl font-bold text-gray-800 mb-2 mt-4 md:mt-0">{displayName}</h1>
+                        {/* User info section */}
+                        <div className="flex-grow text-center md:text-left">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">{displayName}</h1>
                             
-                            <div className="flex flex-wrap gap-4 justify-center md:justify-start mt-3 mb-4">
+                            <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-4">
                                 {profileData.location && (
-                                    <div className="inline-flex items-center px-3 py-1 bg-gray-100 rounded-full text-gray-700 text-sm">
+                                    <div className="inline-flex items-center px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 text-sm">
                                         <FontAwesomeIcon icon={faMapMarkerAlt} className="text-red-500 mr-2" /> 
                                         <span>{profileData.location}</span>
                                     </div>
                                 )}
                                 
                                 {profileData.favorite_theme_name && (
-                                    <div className="inline-flex items-center px-3 py-1 bg-gray-100 rounded-full text-gray-700 text-sm">
+                                    <div className="inline-flex items-center px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 text-sm">
                                         <FontAwesomeIcon icon={faCube} className="text-blue-500 mr-2" /> 
                                         <span>{profileData.favorite_theme_name}</span>
                                     </div>
@@ -1717,57 +1723,61 @@ const UserSetsView = () => {
                             </div>
                             
                             {profileData.bio && (
-                                <p className="text-gray-600 mt-4 whitespace-pre-line max-w-3xl">{profileData.bio}</p>
+                                <p className="text-gray-600 whitespace-pre-line max-w-3xl leading-relaxed">{profileData.bio}</p>
                             )}
                         </div>
                         
-                        <div className="mt-6 md:mt-0 md:ml-auto flex flex-col items-center md:items-end">
-                            <div className="flex gap-3 mb-4">
-                                {profileData.twitter_handle && (
-                                    <a 
-                                        href={`https://twitter.com/${profileData.twitter_handle}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-10 h-10 bg-blue-400 hover:bg-blue-500 text-white rounded-full flex items-center justify-center transition-colors"
-                                        style={{ margin: '4px' }}
-                                    >
-                                        <FontAwesomeIcon icon={faTwitter} />
-                                    </a>
-                                )}
-                                
-                                {profileData.youtube_channel && (
-                                    <a 
-                                        href={`https://youtube.com/${profileData.youtube_channel}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-10 h-10 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-colors"
-                                    >
-                                        <FontAwesomeIcon icon={faYoutube} />
-                                    </a>
-                                )}
-                                
-                                {profileData.bricklink_store && (
-                                    <a 
-                                        href={`https://store.bricklink.com/${profileData.bricklink_store}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-10 h-10 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center transition-colors"
-                                    >
-                                        <FontAwesomeIcon icon={faStore} />
-                                    </a>
-                                )}
-                                
-                                {profileData.email && (
-                                    <a 
-                                        href={`mailto:${profileData.email}`}
-                                        className="w-10 h-10 bg-purple-500 hover:bg-purple-600 text-white rounded-full flex items-center justify-center transition-colors"
-                                    >
-                                        <FontAwesomeIcon icon={faEnvelope} />
-                                    </a>
-                                )}
-                            </div>
+                        {/* Actions and social media section */}
+                        <div className="flex-shrink-0 flex flex-col items-center md:items-end gap-4">
+                            {/* Social media icons */}
+                            {(profileData.twitter_handle || profileData.youtube_channel || profileData.bricklink_store || profileData.email) && (
+                                <div className="flex gap-3">
+                                    {profileData.twitter_handle && (
+                                        <a 
+                                            href={`https://twitter.com/${profileData.twitter_handle}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-10 h-10 bg-blue-400 hover:bg-blue-500 text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
+                                        >
+                                            <FontAwesomeIcon icon={faTwitter} />
+                                        </a>
+                                    )}
+                                    
+                                    {profileData.youtube_channel && (
+                                        <a 
+                                            href={`https://youtube.com/${profileData.youtube_channel}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-10 h-10 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
+                                        >
+                                            <FontAwesomeIcon icon={faYoutube} />
+                                        </a>
+                                    )}
+                                    
+                                    {profileData.bricklink_store && (
+                                        <a 
+                                            href={`https://store.bricklink.com/${profileData.bricklink_store}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-10 h-10 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
+                                        >
+                                            <FontAwesomeIcon icon={faStore} />
+                                        </a>
+                                    )}
+                                    
+                                    {profileData.email && (
+                                        <a 
+                                            href={`mailto:${profileData.email}`}
+                                            className="w-10 h-10 bg-purple-500 hover:bg-purple-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
+                                        >
+                                            <FontAwesomeIcon icon={faEnvelope} />
+                                        </a>
+                                    )}
+                                </div>
+                            )}
                             
-                            <div className="flex items-center gap-3">
+                            {/* Action buttons */}
+                            <div className="flex flex-wrap gap-3 justify-center md:justify-end">
                                 {isWishlist ? (
                                     <Link 
                                         to={`/collection/${userId}`}
@@ -1792,7 +1802,7 @@ const UserSetsView = () => {
                                     <button 
                                         onClick={migrateCollectionMinifigures}
                                         disabled={isMigrating || checkingMigration}
-                                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white rounded-lg transition-colors text-sm font-medium"
+                                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white rounded-lg transition-colors text-sm font-medium shadow-sm"
                                         title="Migrate existing collection to include minifigure tracking"
                                     >
                                         <FontAwesomeIcon icon={isMigrating || checkingMigration ? faSync : faUserCircle} className={`mr-2 ${isMigrating || checkingMigration ? 'animate-spin' : ''}`} />
@@ -1802,7 +1812,7 @@ const UserSetsView = () => {
                                 
                                 <button 
                                     onClick={shareUrl} 
-                                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-lg transition-colors text-sm font-medium"
+                                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-lg transition-colors text-sm font-medium shadow-sm"
                                 >
                                     <FontAwesomeIcon icon={copiedUrl ? "check" : faShareAlt} className="mr-2" />
                                     {copiedUrl ? 'Copied!' : 'Share'}
@@ -1859,8 +1869,8 @@ const UserSetsView = () => {
         
         // Determine number of columns based on whether prices are shown
         const gridCols = showPrices ? 
-            "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" : 
-            "grid-cols-1 sm:grid-cols-3 lg:grid-cols-3";
+            "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" : 
+            "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
         
         return (
             <div className={`grid ${gridCols} gap-4 mb-8`}>
@@ -1886,6 +1896,28 @@ const UserSetsView = () => {
                             <h3 className="text-gray-500 font-medium text-sm">Total Pieces</h3>
                             <p className="text-2xl font-bold text-gray-800">{totalParts.toLocaleString()}</p>
                             <p className="text-xs text-gray-500">Building bricks</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                    <div className="flex">
+                        <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-4">
+                            <FontAwesomeIcon icon={faUserCircle} />
+                        </div>
+                        <div>
+                            <h3 className="text-gray-500 font-medium text-sm">Total Minifigures</h3>
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-2xl font-bold text-purple-600">
+                                    {sets.reduce((acc, set) => acc + (Number(set.owned_minifigures) || 0), 0)}
+                                </span>
+                                <span className="text-lg text-gray-400">/</span>
+                                <span className="text-lg font-semibold text-gray-600">
+                                    {sets.reduce((acc, set) => acc + (Number(set.expected_minifigures) || 0), 0)}
+                                </span>
+                                <span className="text-sm text-purple-600 font-medium">owned</span>
+                            </div>
+                            <p className="text-xs text-gray-500">Collection minifigures</p>
                         </div>
                     </div>
                 </div>

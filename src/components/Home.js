@@ -172,7 +172,7 @@ const Home = () => {
                                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-none">
                                     <span className="block text-white mb-2">Track Your</span>
                                     <span className="block bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 bg-clip-text text-transparent">
-                                        LEGO® Collection
+                                        LEGO<span className="text-2xl md:text-3xl lg:text-4xl align-top">®</span> Collection
                                     </span>
                                 </h1>
                                 <p className="text-xl md:text-2xl mb-8 text-red-50 leading-relaxed max-w-2xl mx-auto lg:mx-0">
@@ -299,11 +299,13 @@ const Home = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
                 {/* Content Selection Tabs */}
-                <div className="flex justify-center mb-8">
-                    <div className="inline-flex bg-white rounded-lg p-1 shadow">
+                <div className="flex justify-center mb-12">
+                    <div className="inline-flex bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-2 shadow-lg border border-gray-200 backdrop-blur-sm">
                         <button
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                activeTab === 'recent' ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+                            className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform ${
+                                activeTab === 'recent' 
+                                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg scale-105' 
+                                    : 'text-gray-600 hover:text-gray-800 hover:bg-white hover:shadow-md hover:scale-102'
                             }`}
                             onClick={() => setActiveTab('recent')}
                         >
@@ -311,8 +313,10 @@ const Home = () => {
                             Recent Sets
                         </button>
                         <button
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                activeTab === 'themes' ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+                            className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform ${
+                                activeTab === 'themes' 
+                                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg scale-105' 
+                                    : 'text-gray-600 hover:text-gray-800 hover:bg-white hover:shadow-md hover:scale-102'
                             }`}
                             onClick={() => setActiveTab('themes')}
                         >
@@ -320,8 +324,10 @@ const Home = () => {
                             Popular Themes
                         </button>
                         <button
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                activeTab === 'users' ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+                            className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform ${
+                                activeTab === 'users' 
+                                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg scale-105' 
+                                    : 'text-gray-600 hover:text-gray-800 hover:bg-white hover:shadow-md hover:scale-102'
                             }`}
                             onClick={() => setActiveTab('users')}
                         >
@@ -333,16 +339,21 @@ const Home = () => {
 
                 {/* Recently Added Sets */}
                 {activeTab === 'recent' && (
-                    <div className="bg-white rounded-xl shadow-md p-6 mb-10">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-gray-800">
-                                <FontAwesomeIcon icon="clock" className="mr-2 text-red-600" />
-                                Recently Added Sets
-                            </h2>
-                            <Link to="/themes" className="text-red-600 hover:text-red-800 transition-colors text-sm font-medium">
-                                View All Sets <FontAwesomeIcon icon="arrow-right" className="ml-1" />
-                            </Link>
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                        <div className="bg-gradient-to-r from-red-600 to-red-700 p-6">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-2xl font-bold text-white flex items-center">
+                                    <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                                        <FontAwesomeIcon icon="clock" className="text-white" />
+                                    </div>
+                                    Recently Added Sets
+                                </h2>
+                                <Link to="/themes" className="text-white hover:text-yellow-300 transition-colors text-sm font-medium bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                    View All Sets <FontAwesomeIcon icon="arrow-right" className="ml-1" />
+                                </Link>
+                            </div>
                         </div>
+                        <div className="p-6">
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {displayedSets.map(set => (
@@ -353,19 +364,21 @@ const Home = () => {
                                     }`}
                                 >
                                     <div className="p-4">
-                                        <div className="h-32 flex items-center justify-center mb-4 relative">
-                                            {!loadedImages[set.set_num] && (
-                                                <Skeleton height={100} width={120} />
-                                            )}
-                                            <img
-                                                src={set.img_url || '/images/lego_piece_questionmark.png'}
-                                                alt={set.name}
-                                                className={`h-full object-contain ${loadedImages[set.set_num] ? 'opacity-100' : 'opacity-0'}`}
-                                                onError={(e) => e.target.src = '/images/lego_piece_questionmark.png'}
-                                                onLoad={() => handleImageLoad(set.set_num)}
-                                                style={{ transition: 'opacity 0.3s' }}
-                                            />
-                                        </div>
+                                                                <div className="h-32 flex items-center justify-center mb-4 relative">
+                            {!loadedImages[set.set_num] && (
+                                <div className="absolute inset-0">
+                                    <Skeleton height="100%" width="100%" />
+                                </div>
+                            )}
+                            <img
+                                src={set.img_url || '/images/lego_piece_questionmark.png'}
+                                alt={set.name}
+                                className={`h-full object-contain max-w-full ${loadedImages[set.set_num] ? 'opacity-100' : 'opacity-0'}`}
+                                onError={(e) => e.target.src = '/images/lego_piece_questionmark.png'}
+                                onLoad={() => handleImageLoad(set.set_num)}
+                                style={{ transition: 'opacity 0.3s' }}
+                            />
+                        </div>
                                         
                                         <h3 className="font-medium text-gray-800 mb-1 line-clamp-2 h-12">
                                             {set.name}
@@ -478,21 +491,27 @@ const Home = () => {
                                 </button>
                             </div>
                         )}
+                        </div>
                     </div>
                 )}
 
                 {/* Popular Themes */}
                 {activeTab === 'themes' && (
-                    <div className="bg-white rounded-xl shadow-md p-6 mb-10">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-gray-800">
-                                <FontAwesomeIcon icon="cubes" className="mr-2 text-red-600" />
-                                Popular Themes
-                            </h2>
-                            <Link to="/themes" className="text-red-600 hover:text-red-800 transition-colors text-sm font-medium">
-                                View All Themes <FontAwesomeIcon icon="arrow-right" className="ml-1" />
-                            </Link>
+                    <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-xl border border-blue-100 overflow-hidden">
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-2xl font-bold text-white flex items-center">
+                                    <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                                        <FontAwesomeIcon icon="cubes" className="text-white" />
+                                    </div>
+                                    Popular Themes
+                                </h2>
+                                <Link to="/themes" className="text-white hover:text-yellow-300 transition-colors text-sm font-medium bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                    View All Themes <FontAwesomeIcon icon="arrow-right" className="ml-1" />
+                                </Link>
+                            </div>
                         </div>
+                        <div className="p-6">
                         
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             {popularThemes.map(theme => (
@@ -526,23 +545,29 @@ const Home = () => {
                                 </div>
                             ))}
                         </div>
+                        </div>
                     </div>
                 )}
 
                 {/* User Collections */}
                 {activeTab === 'users' && (
-                    <div className="bg-white rounded-xl shadow-md p-6 mb-10">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-gray-800">
-                                <FontAwesomeIcon icon="users" className="mr-2 text-red-600" />
-                                User Collections
-                            </h2>
-                            {user && (
-                                <Link to={`/collection/${user.user_id}`} className="text-red-600 hover:text-red-800 transition-colors text-sm font-medium">
-                                    View My Collection <FontAwesomeIcon icon="arrow-right" className="ml-1" />
-                                </Link>
-                            )}
+                    <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-xl border border-purple-100 overflow-hidden">
+                        <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-2xl font-bold text-white flex items-center">
+                                    <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                                        <FontAwesomeIcon icon="users" className="text-white" />
+                                    </div>
+                                    User Collections
+                                </h2>
+                                {user && (
+                                    <Link to={`/collection/${user.user_id}`} className="text-white hover:text-yellow-300 transition-colors text-sm font-medium bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                        View My Collection <FontAwesomeIcon icon="arrow-right" className="ml-1" />
+                                    </Link>
+                                )}
+                            </div>
                         </div>
+                        <div className="p-6">
                         
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             {userCollections.map(user => (
@@ -566,6 +591,7 @@ const Home = () => {
                                 </Link>
                             ))}
                         </div>
+                        </div>
                     </div>
                 )}
             </div>
@@ -583,7 +609,7 @@ const Home = () => {
                             ) : (
                                 <>
                                     <div className="text-4xl font-bold text-yellow-400 mb-2">{siteStats.total_sets.toLocaleString()}+</div>
-                                    <p className="text-gray-300">LEGO® Sets Cataloged</p>
+                                    <p className="text-gray-300">LEGO<span className="text-xs align-top">®</span> Sets Cataloged</p>
                                 </>
                             )}
                         </div>
