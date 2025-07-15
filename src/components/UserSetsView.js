@@ -1678,21 +1678,23 @@ const UserSetsView = () => {
         const displayName = profileData.display_name || profileData.username;
         
         return (
-            <div className="bg-white rounded-xl shadow-md border border-gray-200 mb-8 overflow-hidden">
-                {/* Reduced header height and made it more subtle */}
-                <div className="bg-gradient-to-r from-red-500 to-red-600 h-20 relative">
-                    {/* Simplified decorative elements */}
-                    <div className="absolute top-2 right-4 w-10 h-10 bg-yellow-400 rounded-full opacity-20"></div>
-                    <div className="absolute top-3 right-16 w-6 h-6 bg-red-400 rounded-lg opacity-25 transform rotate-12"></div>
-                    <div className="absolute inset-0 opacity-8" style={{ backgroundImage: 'url(/images/lego_pattern_bg.png)', backgroundSize: '150px' }}></div>
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 mb-8 overflow-hidden">
+                {/* Enhanced header with better gradient and decorative elements */}
+                <div className="bg-gradient-to-r from-red-600 via-red-500 to-red-600 h-24 relative overflow-hidden">
+                    {/* Improved decorative elements */}
+                    <div className="absolute top-3 right-6 w-12 h-12 bg-yellow-400 rounded-full opacity-25 animate-pulse"></div>
+                    <div className="absolute top-4 right-20 w-8 h-8 bg-red-300 rounded-lg opacity-30 transform rotate-12"></div>
+                    <div className="absolute bottom-2 right-8 w-6 h-6 bg-yellow-300 rounded-lg opacity-20 transform -rotate-12"></div>
+                    {/* Subtle pattern overlay */}
+                    <div className="absolute inset-0 bg-black bg-opacity-10"></div>
                 </div>
                 
-                {/* Content area with better avatar integration */}
+                {/* Enhanced content area */}
                 <div className="px-6 sm:px-8 py-8">
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                        {/* Profile image positioned naturally within content */}
+                        {/* Enhanced profile image */}
                         <div className="flex-shrink-0">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-3 border-gray-200 shadow-lg overflow-hidden bg-white">
+                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white shadow-xl overflow-hidden bg-white ring-4 ring-gray-100">
                                 <img 
                                     src={profileData.profile_picture ? `https://mybricklog.s3.us-east-2.amazonaws.com/profile-pictures/${profileData.profile_picture}` : '/images/lego_user.png'}
                                     alt={displayName}
@@ -1702,34 +1704,34 @@ const UserSetsView = () => {
                             </div>
                         </div>
                         
-                        {/* User info section */}
+                        {/* Enhanced user info section */}
                         <div className="flex-grow text-center md:text-left">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">{displayName}</h1>
+                            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">{displayName}</h1>
                             
                             <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-4">
                                 {profileData.location && (
-                                    <div className="inline-flex items-center px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 text-sm">
+                                    <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-full text-gray-700 text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200">
                                         <FontAwesomeIcon icon={faMapMarkerAlt} className="text-red-500 mr-2" /> 
                                         <span>{profileData.location}</span>
                                     </div>
                                 )}
                                 
                                 {profileData.favorite_theme_name && (
-                                    <div className="inline-flex items-center px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 text-sm">
-                                        <FontAwesomeIcon icon={faCube} className="text-blue-500 mr-2" /> 
+                                    <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-full text-blue-700 text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200">
+                                        <FontAwesomeIcon icon={faCube} className="text-blue-600 mr-2" /> 
                                         <span>{profileData.favorite_theme_name}</span>
                                     </div>
                                 )}
                             </div>
                             
                             {profileData.bio && (
-                                <p className="text-gray-600 whitespace-pre-line max-w-3xl leading-relaxed">{profileData.bio}</p>
+                                <p className="text-gray-600 whitespace-pre-line max-w-3xl leading-relaxed text-base">{profileData.bio}</p>
                             )}
                         </div>
                         
-                        {/* Actions and social media section */}
+                        {/* Enhanced actions and social media section */}
                         <div className="flex-shrink-0 flex flex-col items-center md:items-end gap-4">
-                            {/* Social media icons */}
+                            {/* Enhanced social media icons */}
                             {(profileData.twitter_handle || profileData.youtube_channel || profileData.bricklink_store || profileData.email) && (
                                 <div className="flex gap-3">
                                     {profileData.twitter_handle && (
@@ -1737,7 +1739,7 @@ const UserSetsView = () => {
                                             href={`https://twitter.com/${profileData.twitter_handle}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="w-10 h-10 bg-blue-400 hover:bg-blue-500 text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
+                                            className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105"
                                         >
                                             <FontAwesomeIcon icon={faTwitter} />
                                         </a>
@@ -1748,7 +1750,7 @@ const UserSetsView = () => {
                                             href={`https://youtube.com/${profileData.youtube_channel}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="w-10 h-10 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
+                                            className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105"
                                         >
                                             <FontAwesomeIcon icon={faYoutube} />
                                         </a>
@@ -1759,7 +1761,7 @@ const UserSetsView = () => {
                                             href={`https://store.bricklink.com/${profileData.bricklink_store}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="w-10 h-10 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
+                                            className="w-12 h-12 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105"
                                         >
                                             <FontAwesomeIcon icon={faStore} />
                                         </a>
@@ -1768,7 +1770,7 @@ const UserSetsView = () => {
                                     {profileData.email && (
                                         <a 
                                             href={`mailto:${profileData.email}`}
-                                            className="w-10 h-10 bg-purple-500 hover:bg-purple-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
+                                            className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105"
                                         >
                                             <FontAwesomeIcon icon={faEnvelope} />
                                         </a>
@@ -1776,12 +1778,12 @@ const UserSetsView = () => {
                                 </div>
                             )}
                             
-                            {/* Action buttons */}
+                            {/* Enhanced action buttons */}
                             <div className="flex flex-wrap gap-3 justify-center md:justify-end">
                                 {isWishlist ? (
                                     <Link 
                                         to={`/collection/${userId}`}
-                                        className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg shadow-sm transition-colors text-sm font-medium"
+                                        className="px-5 py-2.5 bg-gradient-to-r from-white to-gray-50 border border-gray-300 hover:from-gray-50 hover:to-gray-100 text-gray-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-sm font-medium"
                                     >
                                         <FontAwesomeIcon icon={faBoxOpen} className="mr-2" />
                                         View Collection
@@ -1790,7 +1792,7 @@ const UserSetsView = () => {
                                     profileData?.has_wishlist && (
                                         <Link 
                                             to={`/wishlist/${userId}`}
-                                            className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg shadow-sm transition-colors text-sm font-medium"
+                                            className="px-5 py-2.5 bg-gradient-to-r from-white to-gray-50 border border-gray-300 hover:from-gray-50 hover:to-gray-100 text-gray-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-sm font-medium"
                                         >
                                             <FontAwesomeIcon icon={faGift} className="mr-2" />
                                             View Wishlist
@@ -1802,7 +1804,7 @@ const UserSetsView = () => {
                                     <button 
                                         onClick={migrateCollectionMinifigures}
                                         disabled={isMigrating || checkingMigration}
-                                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white rounded-lg transition-colors text-sm font-medium shadow-sm"
+                                        className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 disabled:from-purple-400 disabled:to-purple-500 text-white rounded-xl transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg disabled:cursor-not-allowed"
                                         title="Migrate existing collection to include minifigure tracking"
                                     >
                                         <FontAwesomeIcon icon={isMigrating || checkingMigration ? faSync : faUserCircle} className={`mr-2 ${isMigrating || checkingMigration ? 'animate-spin' : ''}`} />
@@ -1812,7 +1814,7 @@ const UserSetsView = () => {
                                 
                                 <button 
                                     onClick={shareUrl} 
-                                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-lg transition-colors text-sm font-medium shadow-sm"
+                                    className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-800 rounded-xl transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg"
                                 >
                                     <FontAwesomeIcon icon={copiedUrl ? "check" : faShareAlt} className="mr-2" />
                                     {copiedUrl ? 'Copied!' : 'Share'}
@@ -1873,83 +1875,81 @@ const UserSetsView = () => {
             "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
         
         return (
-            <div className={`grid ${gridCols} gap-4 mb-8`}>
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                    <div className="flex">
-                        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 mr-4">
-                            <FontAwesomeIcon icon={faBoxOpen} />
+            <div className={`grid ${gridCols} gap-4 sm:gap-6 mb-8`}>
+                <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md hover:shadow-lg border border-gray-200 p-5 transition-all duration-200 hover:scale-105">
+                    <div className="flex items-start">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white mr-4 shadow-lg">
+                            <FontAwesomeIcon icon={faBoxOpen} className="text-lg" />
                         </div>
-                        <div>
-                            <h3 className="text-gray-500 font-medium text-sm">Total Sets</h3>
-                            <p className="text-2xl font-bold text-gray-800">{totalSets}</p>
-                            <p className="text-xs text-gray-500">{totalUniqueModels} unique models</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                    <div className="flex">
-                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
-                            <FontAwesomeIcon icon={faPuzzlePiece} />
-                        </div>
-                        <div>
-                            <h3 className="text-gray-500 font-medium text-sm">Total Pieces</h3>
-                            <p className="text-2xl font-bold text-gray-800">{totalParts.toLocaleString()}</p>
-                            <p className="text-xs text-gray-500">Building bricks</p>
+                        <div className="flex-grow">
+                            <h3 className="text-gray-600 font-semibold text-sm uppercase tracking-wide mb-1">Total Sets</h3>
+                            <p className="text-2xl font-bold text-gray-800 mb-1">{totalSets.toLocaleString()}</p>
+                            <p className="text-xs text-gray-500 font-medium">{totalUniqueModels} unique models</p>
                         </div>
                     </div>
                 </div>
                 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                    <div className="flex">
-                        <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-4">
-                            <FontAwesomeIcon icon={faUserCircle} />
+                <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-md hover:shadow-lg border border-blue-200 p-5 transition-all duration-200 hover:scale-105">
+                    <div className="flex items-start">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white mr-4 shadow-lg">
+                            <FontAwesomeIcon icon={faPuzzlePiece} className="text-lg" />
                         </div>
-                        <div>
-                            <h3 className="text-gray-500 font-medium text-sm">Total Minifigures</h3>
-                            <div className="flex items-baseline gap-2">
+                        <div className="flex-grow">
+                            <h3 className="text-blue-700 font-semibold text-sm uppercase tracking-wide mb-1">Total Pieces</h3>
+                            <p className="text-2xl font-bold text-gray-800 mb-1">{totalParts.toLocaleString()}</p>
+                            <p className="text-xs text-blue-600 font-medium">Building bricks</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl shadow-md hover:shadow-lg border border-purple-200 p-5 transition-all duration-200 hover:scale-105">
+                    <div className="flex items-start">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white mr-4 shadow-lg">
+                            <FontAwesomeIcon icon={faUserCircle} className="text-lg" />
+                        </div>
+                        <div className="flex-grow">
+                            <h3 className="text-purple-700 font-semibold text-sm uppercase tracking-wide mb-1">Total Minifigures</h3>
+                            <div className="flex items-baseline gap-2 mb-1">
                                 <span className="text-2xl font-bold text-purple-600">
-                                    {sets.reduce((acc, set) => acc + (Number(set.owned_minifigures) || 0), 0)}
+                                    {sets.reduce((acc, set) => acc + (Number(set.owned_minifigures) || 0), 0).toLocaleString()}
                                 </span>
                                 <span className="text-lg text-gray-400">/</span>
                                 <span className="text-lg font-semibold text-gray-600">
-                                    {sets.reduce((acc, set) => acc + (Number(set.expected_minifigures) || 0), 0)}
+                                    {sets.reduce((acc, set) => acc + (Number(set.expected_minifigures) || 0), 0).toLocaleString()}
                                 </span>
-                                <span className="text-sm text-purple-600 font-medium">owned</span>
                             </div>
-                            <p className="text-xs text-gray-500">Collection minifigures</p>
+                            <p className="text-xs text-purple-600 font-medium">Collection minifigures</p>
                         </div>
                     </div>
                 </div>
                 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                    <div className="flex">
-                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mr-4">
-                            <FontAwesomeIcon icon={faCheckCircle} />
+                <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl shadow-md hover:shadow-lg border border-emerald-200 p-5 transition-all duration-200 hover:scale-105">
+                    <div className="flex items-start">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white mr-4 shadow-lg">
+                            <FontAwesomeIcon icon={faCheckCircle} className="text-lg" />
                         </div>
-                        <div>
-                            <h3 className="text-gray-500 font-medium text-sm">Collection Status</h3>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-2xl font-bold text-emerald-600">{completeCount}</span>
+                        <div className="flex-grow">
+                            <h3 className="text-emerald-700 font-semibold text-sm uppercase tracking-wide mb-1">Collection Status</h3>
+                            <div className="flex items-baseline gap-2 mb-1">
+                                <span className="text-2xl font-bold text-emerald-600">{completeCount.toLocaleString()}</span>
                                 <span className="text-lg text-gray-400">/</span>
-                                <span className="text-lg font-semibold text-gray-600">{totalSets}</span>
-                                <span className="text-sm text-emerald-600 font-medium">complete</span>
+                                <span className="text-lg font-semibold text-gray-600">{totalSets.toLocaleString()}</span>
                             </div>
-                            <p className="text-xs text-gray-500">{sealedCount} sealed sets</p>
+                            <p className="text-xs text-emerald-600 font-medium">{sealedCount.toLocaleString()} sealed sets</p>
                         </div>
                     </div>
                 </div>
                 
                 {showPrices && (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                        <div className="flex">
-                            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-4">
-                                <FontAwesomeIcon icon={faPiggyBank} />
+                    <div className="bg-gradient-to-br from-white to-green-50 rounded-xl shadow-md hover:shadow-lg border border-green-200 p-5 transition-all duration-200 hover:scale-105">
+                        <div className="flex items-start">
+                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white mr-4 shadow-lg">
+                                <FontAwesomeIcon icon={faPiggyBank} className="text-lg" />
                             </div>
-                            <div>
-                                <h3 className="text-gray-500 font-medium text-sm">Collection Value</h3>
-                                <p className="text-2xl font-bold text-gray-800">${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
-                                <p className="text-xs text-gray-500">Estimated market value</p>
+                            <div className="flex-grow">
+                                <h3 className="text-green-700 font-semibold text-sm uppercase tracking-wide mb-1">Collection Value</h3>
+                                <p className="text-2xl font-bold text-gray-800 mb-1">${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                                <p className="text-xs text-green-600 font-medium">Estimated market value</p>
                             </div>
                         </div>
                     </div>
