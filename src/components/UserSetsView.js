@@ -119,7 +119,16 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                 console.error('Error fetching minifigures:', response.data.error);
                 setMinifigs([]);
             } else {
-                setMinifigs(response.data.minifigs || []);
+                // Always set the minifigs array, even if empty
+                const minifigData = response.data.minifigs || [];
+                setMinifigs(minifigData);
+                
+                // Log for debugging
+                console.log(`Fetched ${minifigData.length} minifigures for set ${set.set_num}`, {
+                    hasInventoryData: response.data.has_inventory_data,
+                    totalMinifigs: response.data.total_minifigs,
+                    setInfo: response.data.set_info
+                });
             }
         } catch (error) {
             console.error('Error fetching minifigures:', error);
@@ -436,16 +445,24 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                         </div>
                     </div>
                     
-                    {/* Minifigure Management Section */}
-                    {minifigs.length > 0 && (
-                        <div className="border-t border-gray-200 pt-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-medium text-gray-800">Minifigures</span>
+                    {/* Minifigure Management Section - Always show if not loading */}
+                    <div className="border-t border-gray-200 pt-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-800">Minifigures</span>
+                                {minifigs.length > 0 ? (
                                     <span className="text-sm bg-purple-50 text-purple-700 px-2 py-1 rounded-full">
                                         {minifigs.length} figures
                                     </span>
-                                </div>
+                                ) : (
+                                    !loadingMinifigs && (
+                                        <span className="text-sm bg-gray-50 text-gray-600 px-2 py-1 rounded-full">
+                                            No data available
+                                        </span>
+                                    )
+                                )}
+                            </div>
+                            {minifigs.length > 0 && (
                                 <button
                                     onClick={() => setShowMinifigs(!showMinifigs)}
                                     className="flex items-center gap-2 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
@@ -453,106 +470,117 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                     <FontAwesomeIcon icon={showMinifigs ? faChevronUp : faChevronDown} />
                                     <span>{showMinifigs ? 'Hide' : 'Show'} Details</span>
                                 </button>
-                            </div>
-                            
-                            {loadingMinifigs ? (
-                                <div className="text-center py-8">
-                                    <FontAwesomeIcon icon={faSync} className="animate-spin text-gray-400 text-xl mb-2" />
-                                    <p className="text-gray-500">Loading minifigures...</p>
-                                </div>
-                            ) : (
-                                <>
-                                    {/* Minifigure Summary */}
-                                    <div className="grid grid-cols-2 gap-4 mb-4">
-                                        <div className="bg-green-50 p-3 rounded-lg">
-                                            <div className="text-sm text-green-600 font-medium">Complete</div>
-                                            <div className="text-lg font-bold text-green-800">
-                                                {minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length}
-                                                <span className="text-sm font-normal"> / {minifigs.length}</span>
-                                            </div>
-                                        </div>
-                                        <div className="bg-amber-50 p-3 rounded-lg">
-                                            <div className="text-sm text-amber-600 font-medium">Missing</div>
-                                            <div className="text-lg font-bold text-amber-800">
-                                                {minifigs.filter(m => (m.owned_quantity || 0) < (m.required_quantity * quantity)).length}
-                                                <span className="text-sm font-normal"> figures</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Detailed Minifigure List */}
-                                    {showMinifigs && (
-                                        <div className="space-y-3 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                            {minifigs.map(minifig => {
-                                                const requiredTotal = minifig.required_quantity * quantity;
-                                                const owned = minifig.owned_quantity || 0;
-                                                const isComplete = owned >= requiredTotal;
-                                                const isUpdating = updatingMinifigs[minifig.fig_num];
-                                                
-                                                return (
-                                                    <div key={minifig.fig_num} className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-                                                        <div className="flex items-center gap-3">
-                                                            {/* Minifigure Image */}
-                                                            <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                                <img 
-                                                                    src={minifig.img_url} 
-                                                                    alt={minifig.name}
-                                                                    className="w-full h-full object-contain"
-                                                                    onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
-                                                                />
-                                                            </div>
-                                                            
-                                                            {/* Minifigure Info */}
-                                                            <div className="flex-grow min-w-0">
-                                                                <h4 className="font-medium text-gray-800 truncate text-sm">{minifig.name}</h4>
-                                                                <div className="flex items-center gap-2 mt-1">
-                                                                    <span className={`text-xs px-2 py-1 rounded-full ${
-                                                                        isComplete 
-                                                                            ? 'bg-green-50 text-green-700' 
-                                                                            : 'bg-amber-50 text-amber-700'
-                                                                    }`}>
-                                                                        {owned} / {requiredTotal} owned
-                                                                    </span>
-                                                                    {isComplete && (
-                                                                        <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 text-xs" />
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            
-                                                            {/* Quantity Controls */}
-                                                            <div className="flex items-center gap-1">
-                                                                <button
-                                                                    className="w-7 h-7 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 transition-colors flex items-center justify-center text-sm"
-                                                                    onClick={() => updateMinifigQuantity(minifig.fig_num, Math.max(0, owned - 1))}
-                                                                    disabled={isUpdating || owned <= 0}
-                                                                >
-                                                                    −
-                                                                </button>
-                                                                <div className="w-8 text-center text-sm font-medium">
-                                                                    {isUpdating ? (
-                                                                        <FontAwesomeIcon icon={faSync} className="animate-spin text-gray-400" />
-                                                                    ) : (
-                                                                        owned
-                                                                    )}
-                                                                </div>
-                                                                <button
-                                                                    className="w-7 h-7 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 transition-colors flex items-center justify-center text-sm"
-                                                                    onClick={() => updateMinifigQuantity(minifig.fig_num, owned + 1)}
-                                                                    disabled={isUpdating}
-                                                                >
-                                                                    +
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </>
                             )}
                         </div>
-                    )}
+                        
+                        {loadingMinifigs ? (
+                            <div className="text-center py-8">
+                                <FontAwesomeIcon icon={faSync} className="animate-spin text-gray-400 text-xl mb-2" />
+                                <p className="text-gray-500">Loading minifigures...</p>
+                            </div>
+                        ) : minifigs.length > 0 ? (
+                            <>
+                                {/* Minifigure Summary */}
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div className="bg-green-50 p-3 rounded-lg">
+                                        <div className="text-sm text-green-600 font-medium">Complete</div>
+                                        <div className="text-lg font-bold text-green-800">
+                                            {minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length}
+                                            <span className="text-sm font-normal"> / {minifigs.length}</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-amber-50 p-3 rounded-lg">
+                                        <div className="text-sm text-amber-600 font-medium">Missing</div>
+                                        <div className="text-lg font-bold text-amber-800">
+                                            {minifigs.filter(m => (m.owned_quantity || 0) < (m.required_quantity * quantity)).length}
+                                            <span className="text-sm font-normal"> figures</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Detailed Minifigure List */}
+                                {showMinifigs && (
+                                    <div className="space-y-3 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                        {minifigs.map(minifig => {
+                                            const requiredTotal = minifig.required_quantity * quantity;
+                                            const owned = minifig.owned_quantity || 0;
+                                            const isComplete = owned >= requiredTotal;
+                                            const isUpdating = updatingMinifigs[minifig.fig_num];
+                                            
+                                            return (
+                                                <div key={minifig.fig_num} className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                                                    <div className="flex items-center gap-3">
+                                                        {/* Minifigure Image */}
+                                                        <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                            <img 
+                                                                src={minifig.img_url} 
+                                                                alt={minifig.name}
+                                                                className="w-full h-full object-contain"
+                                                                onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
+                                                            />
+                                                        </div>
+                                                        
+                                                        {/* Minifigure Info */}
+                                                        <div className="flex-grow min-w-0">
+                                                            <h4 className="font-medium text-gray-800 truncate text-sm">{minifig.name}</h4>
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                                                    isComplete 
+                                                                        ? 'bg-green-50 text-green-700' 
+                                                                        : 'bg-amber-50 text-amber-700'
+                                                                }`}>
+                                                                    {owned} / {requiredTotal} owned
+                                                                </span>
+                                                                {isComplete && (
+                                                                    <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 text-xs" />
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* Quantity Controls */}
+                                                        <div className="flex items-center gap-1">
+                                                            <button
+                                                                className="w-7 h-7 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 transition-colors flex items-center justify-center text-sm"
+                                                                onClick={() => updateMinifigQuantity(minifig.fig_num, Math.max(0, owned - 1))}
+                                                                disabled={isUpdating || owned <= 0}
+                                                            >
+                                                                −
+                                                            </button>
+                                                            <div className="w-8 text-center text-sm font-medium">
+                                                                {isUpdating ? (
+                                                                    <FontAwesomeIcon icon={faSync} className="animate-spin text-gray-400" />
+                                                                ) : (
+                                                                    owned
+                                                                )}
+                                                            </div>
+                                                            <button
+                                                                className="w-7 h-7 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 transition-colors flex items-center justify-center text-sm"
+                                                                onClick={() => updateMinifigQuantity(minifig.fig_num, owned + 1)}
+                                                                disabled={isUpdating}
+                                                            >
+                                                                +
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-center py-8">
+                                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <FontAwesomeIcon icon={faUserCircle} className="text-purple-600 text-2xl" />
+                                </div>
+                                <h4 className="font-medium text-gray-800 mb-2">No Minifigure Data</h4>
+                                <p className="text-gray-600 text-sm max-w-md mx-auto">
+                                    This set doesn't have minifigure inventory data available yet. 
+                                    Minifigure tracking will be enabled when data becomes available.
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
                 
                 <div className="mt-6 flex justify-end gap-3">
@@ -630,6 +658,8 @@ const UserSetsView = () => {
     });
     // New state for tracking pending updates
     const [pendingUpdates, setPendingUpdates] = useState({});
+    const [migrationStatus, setMigrationStatus] = useState(null);
+    const [isMigrating, setIsMigrating] = useState(false);
     
     const { userId } = useParams();
     const { user } = useAuth();
@@ -1076,6 +1106,57 @@ const UserSetsView = () => {
         });
     };
 
+    // Migration function for backwards compatibility
+    const migrateCollectionMinifigures = async () => {
+        if (!isOwner) return;
+        
+        setIsMigrating(true);
+        setMigrationStatus(null);
+        
+        try {
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL}/migrate_collection_minifigures.php`,
+                {},
+                { withCredentials: true }
+            );
+            
+            if (response.data.success) {
+                setMigrationStatus({
+                    type: 'success',
+                    message: `Migration completed! ${response.data.migrated_count} sets migrated, ${response.data.skipped_count} sets skipped.`,
+                    details: response.data
+                });
+                
+                // Refresh the current set's minifigures if modal is open
+                if (statusModal.isOpen && statusModal.set) {
+                    // This will trigger a refetch of minifigures for the current set
+                    setStatusModal({
+                        isOpen: true,
+                        set: { ...statusModal.set }
+                    });
+                }
+            } else {
+                setMigrationStatus({
+                    type: 'error',
+                    message: response.data.error || 'Migration failed'
+                });
+            }
+        } catch (error) {
+            console.error('Error migrating minifigures:', error);
+            setMigrationStatus({
+                type: 'error',
+                message: 'Error occurred during migration'
+            });
+        }
+        
+        setIsMigrating(false);
+        
+        // Clear status after 10 seconds
+        setTimeout(() => {
+            setMigrationStatus(null);
+        }, 10000);
+    };
+
     const toggleSelectSet = (set_num) => {
         if (isOwner) {
             if (selectedSet === set_num) {
@@ -1502,6 +1583,18 @@ const UserSetsView = () => {
                                     )
                                 )}
                                 
+                                {isOwner && !isWishlist && (
+                                    <button 
+                                        onClick={migrateCollectionMinifigures}
+                                        disabled={isMigrating}
+                                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white rounded-lg transition-colors text-sm font-medium"
+                                        title="Migrate existing collection to include minifigure tracking"
+                                    >
+                                        <FontAwesomeIcon icon={isMigrating ? faSync : faUserCircle} className={`mr-2 ${isMigrating ? 'animate-spin' : ''}`} />
+                                        {isMigrating ? 'Migrating...' : 'Migrate Minifigs'}
+                                    </button>
+                                )}
+                                
                                 <button 
                                     onClick={shareUrl} 
                                     className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-lg transition-colors text-sm font-medium"
@@ -1852,6 +1945,31 @@ const UserSetsView = () => {
                 />
 
                 {renderProfileSection()}
+                
+                {/* Migration Status Display */}
+                {migrationStatus && (
+                    <div className={`mb-6 p-4 rounded-lg border ${
+                        migrationStatus.type === 'success' 
+                            ? 'bg-green-50 border-green-200 text-green-800' 
+                            : 'bg-red-50 border-red-200 text-red-800'
+                    }`}>
+                        <div className="flex items-center">
+                            <FontAwesomeIcon 
+                                icon={migrationStatus.type === 'success' ? faCheckCircle : faExclamationTriangle} 
+                                className="mr-2" 
+                            />
+                            <span className="font-medium">{migrationStatus.message}</span>
+                        </div>
+                        {migrationStatus.details && (
+                            <div className="mt-2 text-sm opacity-75">
+                                Total collections: {migrationStatus.details.total_collections} | 
+                                Migrated: {migrationStatus.details.migrated_count} | 
+                                Skipped: {migrationStatus.details.skipped_count} | 
+                                Errors: {migrationStatus.details.error_count}
+                            </div>
+                        )}
+                    </div>
+                )}
                 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                     <h2 className="text-3xl font-bold text-gray-800 flex items-center">
