@@ -17,7 +17,7 @@ const Home = () => {
     const [loadedImages, setLoadedImages] = useState({});
     const [loadedThemeImages, setLoadedThemeImages] = useState({});
     const [activeTab, setActiveTab] = useState('recent');
-    const [featuredSet, setFeaturedSet] = useState(null);
+    const [featuredUserSet, setFeaturedUserSet] = useState(null);
     const [loadingFeatured, setLoadingFeatured] = useState(true);
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -34,11 +34,12 @@ const Home = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [themesResponse, collectionsResponse, recentSetsResponse, statsResponse] = await Promise.all([
+                const [themesResponse, collectionsResponse, recentSetsResponse, statsResponse, featuredUserSetResponse] = await Promise.all([
                     axios.get(`${process.env.REACT_APP_API_URL}/get_popular_themes.php`),
                     axios.get(`${process.env.REACT_APP_API_URL}/get_random_collections.php`),
                     axios.get(`${process.env.REACT_APP_API_URL}/get_recent_set_additions.php`),
-                    axios.get(`${process.env.REACT_APP_API_URL}/get_site_statistics.php`)
+                    axios.get(`${process.env.REACT_APP_API_URL}/get_site_statistics.php`),
+                    axios.get(`${process.env.REACT_APP_API_URL}/get_random_user_set.php`)
                 ]);
     
                 setPopularThemes(themesResponse.data);
@@ -54,10 +55,9 @@ const Home = () => {
                     loading: false
                 });
                 
-                // Set a random featured set from recent sets
-                if (recentSetsResponse.data.sets.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * Math.min(5, recentSetsResponse.data.sets.length));
-                    setFeaturedSet(recentSetsResponse.data.sets[randomIndex]);
+                // Set featured user set
+                if (featuredUserSetResponse.data && !featuredUserSetResponse.data.error) {
+                    setFeaturedUserSet(featuredUserSetResponse.data);
                 }
                 setLoadingFeatured(false);
                 
@@ -146,98 +146,155 @@ const Home = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Hero Section */}
-            <section className="relative bg-gradient-to-r from-red-600 to-red-700 text-white overflow-hidden">
-                <div className="absolute inset-0 opacity-20">
-                    <div className="absolute inset-0" style={{ backgroundImage: 'url(/images/lego_pattern_bg.png)', backgroundSize: '200px' }}></div>
+            <section className="relative bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white overflow-hidden min-h-[80vh] flex items-center">
+                {/* Background Elements */}
+                <div className="absolute inset-0">
+                    {/* Subtle grid pattern */}
+                    <div className="absolute inset-0 opacity-10" style={{ 
+                        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1px, transparent 0)`,
+                        backgroundSize: '40px 40px'
+                    }}></div>
+                    {/* Geometric shapes */}
+                    <div className="absolute top-20 left-10 w-24 h-24 bg-yellow-400 rounded-3xl opacity-20 transform rotate-12"></div>
+                    <div className="absolute top-40 right-20 w-16 h-16 bg-white rounded-2xl opacity-10 transform -rotate-12"></div>
+                    <div className="absolute bottom-20 right-1/3 w-12 h-12 bg-red-400 rounded-lg opacity-20 transform rotate-45"></div>
                 </div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-24 relative z-10">
-                    <div className="flex flex-col md:flex-row items-center">
-                        <div className="md:w-1/2 mb-10 md:mb-0 md:pr-10">
-                            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-                                Track Your LEGO® Collection
-                                <span className="block text-yellow-300">Organize, Wishlist, Collect</span>
-                            </h1>
-                            <p className="text-lg md:text-xl mb-8 text-red-100">
-                                Organize, showcase, and discover new sets. Never lose track of your brick collection again.
-                            </p>
-                            <div className="flex flex-wrap gap-4">
+                
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-24 relative z-10 w-full">
+                    <div className="flex flex-col lg:flex-row items-center lg:items-center gap-12 lg:gap-16">
+                        {/* Content Section */}
+                        <div className="lg:w-3/5 text-center lg:text-left">
+                            <div className="mb-6">
+                                <div className="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 rounded-full text-sm font-medium mb-6 backdrop-blur-sm border border-white border-opacity-30">
+                                    <FontAwesomeIcon icon="star" className="mr-2 text-yellow-300" />
+                                    The Ultimate LEGO® Collection Manager
+                                </div>
+                                <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-none">
+                                    <span className="block text-white mb-2">Track Your</span>
+                                    <span className="block bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 bg-clip-text text-transparent">
+                                        LEGO® Collection
+                                    </span>
+                                </h1>
+                                <p className="text-xl md:text-2xl mb-8 text-red-50 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                                    Organize, showcase, and discover new sets. Never lose track of your brick collection again with our comprehensive tracking system.
+                                </p>
+                            </div>
+                            
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                                 {user ? (
                                     <>
                                         <Link 
                                             to={`/collection/${user.user_id}`}
-                                            className="px-6 py-3 bg-white text-red-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-md"
+                                            className="group px-8 py-4 bg-white text-red-600 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center"
                                         >
-                                            <FontAwesomeIcon icon="folder-open" className="mr-2" />
+                                            <FontAwesomeIcon icon="folder-open" className="mr-3 group-hover:scale-110 transition-transform" />
                                             My Collection
                                         </Link>
                                         <Link 
                                             to="/themes"
-                                            className="px-6 py-3 bg-yellow-400 text-red-700 rounded-lg font-semibold hover:bg-yellow-300 transition-colors shadow-md"
+                                            className="group px-8 py-4 bg-gradient-to-r from-yellow-400 to-amber-400 text-red-800 rounded-2xl font-bold text-lg hover:from-yellow-300 hover:to-amber-300 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center"
                                         >
-                                            <FontAwesomeIcon icon="plus" className="mr-2" />
+                                            <FontAwesomeIcon icon="plus" className="mr-3 group-hover:scale-110 transition-transform" />
                                             Add Sets
                                         </Link>
                                     </>
                                 ) : (
                                     <>
                                         <Link 
-                                            to="/login"
-                                            className="px-6 py-3 bg-white text-red-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-md"
+                                            to="/register"
+                                            className="group px-8 py-4 bg-gradient-to-r from-yellow-400 to-amber-400 text-red-800 rounded-2xl font-bold text-lg hover:from-yellow-300 hover:to-amber-300 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center"
                                         >
-                                            <FontAwesomeIcon icon="user" className="mr-2" />
-                                            Sign In
+                                            <FontAwesomeIcon icon="user-plus" className="mr-3 group-hover:scale-110 transition-transform" />
+                                            Start Free Today
                                         </Link>
                                         <Link 
-                                            to="/register"
-                                            className="px-6 py-3 bg-yellow-400 text-red-700 rounded-lg font-semibold hover:bg-yellow-300 transition-colors shadow-md"
+                                            to="/login"
+                                            className="group px-8 py-4 bg-white bg-opacity-20 text-white rounded-2xl font-bold text-lg hover:bg-opacity-30 transition-all duration-300 border-2 border-white border-opacity-30 hover:border-opacity-50 backdrop-blur-sm flex items-center justify-center"
                                         >
-                                            <FontAwesomeIcon icon="user-plus" className="mr-2" />
-                                            Register Now
+                                            <FontAwesomeIcon icon="user" className="mr-3 group-hover:scale-110 transition-transform" />
+                                            Sign In
                                         </Link>
                                     </>
                                 )}
                             </div>
                         </div>
-                        <div className="md:w-1/2 relative">
+                        
+                        {/* Featured Set Section */}
+                        <div className="lg:w-2/5 relative">
                             {loadingFeatured ? (
-                                <div className="w-full h-64 md:h-80 rounded-xl bg-red-500 animate-pulse"></div>
-                            ) : featuredSet ? (
-                                <div className="bg-white p-6 rounded-xl shadow-lg transform rotate-2 transition-transform hover:rotate-0">
-                                    <div className="flex flex-col items-center">
-                                        <div className="h-40 md:h-52 w-full flex items-center justify-center mb-4">
-                                            <img
-                                                src={featuredSet.img_url || '/images/lego_piece_questionmark.png'}
-                                                alt={featuredSet.name}
-                                                className="h-full object-contain"
-                                                onError={(e) => e.target.src = '/images/lego_piece_questionmark.png'}
-                                            />
+                                <div className="w-full h-80 lg:h-96 rounded-3xl bg-white bg-opacity-20 backdrop-blur-sm animate-pulse"></div>
+                            ) : featuredUserSet ? (
+                                <div className="relative group">
+                                    {/* Main card */}
+                                    <div className="bg-white p-8 rounded-3xl shadow-2xl transform rotate-2 group-hover:rotate-0 transition-all duration-500 hover:scale-105 border-4 border-white">
+                                        <div className="text-center">
+                                            {/* Featured badge */}
+                                            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                                                <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                                                    🌟 Featured Set
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="h-48 lg:h-56 w-full flex items-center justify-center mb-6 bg-white rounded-2xl">
+                                                <img
+                                                    src={featuredUserSet.set.img_url || '/images/lego_piece_questionmark.png'}
+                                                    alt={featuredUserSet.set.name}
+                                                    className="h-full object-contain"
+                                                    onError={(e) => e.target.src = '/images/lego_piece_questionmark.png'}
+                                                />
+                                            </div>
+                                            
+                                            <h3 className="text-2xl text-gray-800 font-bold text-center mb-3 line-clamp-2">
+                                                {featuredUserSet.set.name}
+                                            </h3>
+                                            
+                                            <div className="flex items-center justify-center gap-4 mb-4">
+                                                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold">
+                                                    #{featuredUserSet.set.set_num}
+                                                </span>
+                                                <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
+                                                    {featuredUserSet.set.year}
+                                                </span>
+                                            </div>
+                                            
+                                            <p className="text-gray-600 mb-6 text-sm">
+                                                from <Link 
+                                                    to={`/collection/${featuredUserSet.user.user_id}`}
+                                                    className="text-red-600 hover:text-red-800 font-bold underline decoration-2 underline-offset-2"
+                                                >
+                                                    {featuredUserSet.user.username}'s
+                                                </Link> collection
+                                            </p>
+                                            
+                                            <button 
+                                                onClick={() => toggleSelectSet(featuredUserSet.set.set_num)}
+                                                className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-bold hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                                            >
+                                                <FontAwesomeIcon icon="plus" className="mr-2" />
+                                                Add to My Collection
+                                            </button>
                                         </div>
-                                        <h3 className="text-xl text-gray-800 font-bold text-center mb-2">
-                                            {featuredSet.name}
-                                        </h3>
-                                        <p className="text-gray-600 mb-4">Set #{featuredSet.set_num} ({featuredSet.year})</p>
-                                        <button 
-                                            onClick={() => toggleSelectSet(featuredSet.set_num)}
-                                            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                                        >
-                                            <FontAwesomeIcon icon="plus" className="mr-2" />
-                                            Add to Collection
-                                        </button>
                                     </div>
+                                    
+                                    {/* Floating decorative elements */}
+                                    <div className="absolute -top-8 -left-8 w-16 h-16 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-2xl transform rotate-12 opacity-80 shadow-lg"></div>
+                                    <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-3xl transform -rotate-12 opacity-70 shadow-lg"></div>
+                                    <div className="absolute top-16 -right-4 w-8 h-8 bg-yellow-300 rounded-lg transform rotate-45 opacity-60"></div>
                                 </div>
                             ) : (
-                                <div className="bg-white p-6 rounded-xl shadow-lg">
-                                    <p className="text-center text-gray-500">No featured set available</p>
+                                <div className="bg-white bg-opacity-20 backdrop-blur-sm p-8 rounded-3xl border border-white border-opacity-30">
+                                    <div className="text-center">
+                                        <FontAwesomeIcon icon="cubes" className="text-6xl mb-4 opacity-50" />
+                                        <p className="text-white text-lg">No featured set available</p>
+                                    </div>
                                 </div>
                             )}
-                            
-                            {/* Decorative elements */}
-                            <div className="absolute -top-6 -left-6 w-12 h-12 bg-yellow-400 rounded-lg transform rotate-12 opacity-70"></div>
-                            <div className="absolute -bottom-8 -right-4 w-16 h-16 bg-red-500 rounded-lg transform -rotate-12 opacity-70"></div>
                         </div>
                     </div>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent"></div>
+                
+                {/* Bottom gradient transition */}
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 via-gray-50/50 to-transparent"></div>
             </section>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
