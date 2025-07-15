@@ -84,6 +84,19 @@ try {
                 JOIN inventories i ON im.inventory_id = i.id
                 WHERE i.set_num = s.set_num
             ), 0) AS num_minifigures,
+            -- Get owned minifigures summary
+            COALESCE((
+                SELECT SUM(cm.quantity_owned)
+                FROM collection_minifigs cm
+                WHERE cm.user_id = c.user_id AND cm.set_num = c.set_num
+            ), 0) AS owned_minifigures,
+            -- Calculate expected minifigures (total required for all owned sets)
+            COALESCE((
+                SELECT SUM(im.quantity) * c.collection_set_quantity
+                FROM inventory_minifigs im
+                JOIN inventories i ON im.inventory_id = i.id
+                WHERE i.set_num = s.set_num
+            ), 0) AS expected_minifigures,
             sp.retail_price,
             sp.sealed_value,
             sp.used_value,

@@ -468,7 +468,7 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                         
                         {/* Minifigures Section */}
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center">
                                 <h3 className="text-lg font-semibold text-slate-800 flex items-center">
                                     <FontAwesomeIcon icon={faUserCircle} className="mr-2 text-slate-600" />
                                     Minifigures
@@ -478,16 +478,6 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                         </span>
                                     )}
                                 </h3>
-                                {minifigs.length > 0 && (
-                                    <button
-                                        onClick={() => setShowMinifigs(!showMinifigs)}
-                                        className="flex items-center gap-3 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-medium transition-all duration-200 shadow-sm"
-                                    >
-                                        <FontAwesomeIcon icon={faUserCircle} />
-                                        <span>{showMinifigs ? 'Hide Minifigures' : 'Show Minifigures'}</span>
-                                        <FontAwesomeIcon icon={showMinifigs ? faChevronUp : faChevronDown} />
-                                    </button>
-                                )}
                             </div>
                             
                             {loadingMinifigs ? (
@@ -497,9 +487,9 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                 </div>
                             ) : minifigs.length > 0 ? (
                                 <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 space-y-4">
-                                    {/* Combined Progress Stats */}
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex-grow mr-6">
+                                    {/* Progress Stats with Action Buttons */}
+                                    <div className="flex items-center gap-6">
+                                        <div className="flex-grow">
                                             {(() => {
                                                 const completeCount = minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length;
                                                 const totalCount = minifigs.length;
@@ -550,8 +540,9 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                             })()}
                                         </div>
                                         
-                                        {/* Conditional Bulk Actions */}
-                                        <div className="flex flex-col gap-2">
+                                        {/* Stacked Action Buttons */}
+                                        <div className="flex flex-col gap-3">
+                                            {/* Conditional Bulk Actions */}
                                             {(() => {
                                                 const completeCount = minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length;
                                                 const totalCount = minifigs.length;
@@ -593,6 +584,16 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                                     </>
                                                 );
                                             })()}
+                                            
+                                            {/* Show/Hide Minifigures Button - Always at bottom */}
+                                            <button
+                                                onClick={() => setShowMinifigs(!showMinifigs)}
+                                                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-all duration-200 shadow-sm whitespace-nowrap text-sm"
+                                            >
+                                                <FontAwesomeIcon icon={faUserCircle} />
+                                                <span>{showMinifigs ? 'Hide Minifigures' : 'Show Minifigures'}</span>
+                                                <FontAwesomeIcon icon={showMinifigs ? faChevronUp : faChevronDown} />
+                                            </button>
                                         </div>
                                     </div>
                                     
@@ -1442,7 +1443,7 @@ const UserSetsView = () => {
                     
                     {/* Quantity badge - positioned inside the image container */}
                     {!isWishlist && set.quantity > 1 && (
-                        <div className="absolute top-2 right-2 bg-yellow-400 text-gray-800 h-7 w-7 rounded-full flex items-center justify-center font-bold text-sm shadow-md border-2 border-white">
+                        <div className="absolute top-2 right-2 bg-gradient-to-br from-amber-400 to-amber-500 text-gray-900 min-h-10 min-w-10 px-3 rounded-full flex items-center justify-center font-extrabold text-base shadow-xl border-2 border-white hover:from-amber-500 hover:to-amber-600 transition-all duration-200 hover:scale-105">
                             ×{set.quantity}
                         </div>
                     )}
@@ -1459,73 +1460,120 @@ const UserSetsView = () => {
                         <span className="text-sm bg-gray-100 px-2 py-1 rounded-lg">{set.year}</span>
                     </div>
                     
-                    <div className="flex flex-wrap gap-1 mb-3">
-                        <div className="text-xs bg-red-50 text-red-700 rounded-full px-2 py-1 flex items-center">
-                            <FontAwesomeIcon icon={faPuzzlePiece} className="mr-1" size="xs" />
-                            <span>{set.num_parts.toLocaleString()}</span>
-                        </div>
-                        
-                        {set.num_minifigures > 0 && (
-                            <div className="text-xs bg-yellow-50 text-yellow-700 rounded-full px-2 py-1 flex items-center">
-                                <FontAwesomeIcon icon={faUserCircle} className="mr-1" size="xs" />
-                                <span>{set.num_minifigures}</span>
-                            </div>
-                        )}
-                        
-                        {!isWishlist && (
-                            <>
-                                <div className={`text-xs rounded-full px-2 py-1 flex items-center ${
-                                    Number(set.complete) === Number(set.quantity) 
-                                    ? 'bg-green-50 text-green-700' 
-                                    : Number(set.complete) > 0 
-                                      ? 'bg-blue-50 text-blue-700' 
-                                      : 'bg-amber-50 text-amber-700'
-                                }`}>
-                                    <FontAwesomeIcon 
-                                        icon={
-                                            Number(set.complete) === Number(set.quantity) 
-                                            ? faCheckCircle 
-                                            : faCircleHalfStroke
-                                        } 
-                                        className="mr-1" 
-                                        size="xs" 
-                                    />
-                                    <span>
-                                        {Number(set.complete) === Number(set.quantity) 
-                                            ? 'Complete' 
-                                            : Number(set.complete) > 0 
-                                              ? `${set.complete}/${set.quantity} Complete`
-                                              : 'Incomplete'
-                                        }
-                                    </span>
+                    <div className="space-y-2 mb-4">
+                        {/* Primary Stats Row */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                {/* Pieces Count */}
+                                <div className="group relative">
+                                    <div className="bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-semibold rounded-lg px-3 py-1.5 flex items-center shadow-sm border border-red-600/20 hover:shadow-md transition-all duration-200">
+                                        <FontAwesomeIcon icon={faPuzzlePiece} className="mr-2 text-red-100" size="sm" />
+                                        <span>{set.num_parts.toLocaleString()}</span>
+                                    </div>
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                        {set.num_parts.toLocaleString()} pieces
+                                    </div>
                                 </div>
                                 
-                                <div className={`text-xs rounded-full px-2 py-1 flex items-center ${
-                                    Number(set.sealed) === Number(set.quantity) 
-                                    ? 'bg-green-50 text-green-700' 
-                                    : Number(set.sealed) > 0 
-                                      ? 'bg-blue-50 text-blue-700' 
-                                      : 'bg-gray-50 text-gray-700'
-                                }`}>
-                                    <FontAwesomeIcon 
-                                        icon={
-                                            Number(set.sealed) > 0 
-                                            ? faBox 
-                                            : faBoxOpen
-                                        } 
-                                        className="mr-1" 
-                                        size="xs" 
-                                    />
-                                    <span>
-                                        {Number(set.sealed) === Number(set.quantity) 
-                                            ? 'Sealed' 
-                                            : Number(set.sealed) > 0 
-                                              ? `${set.sealed}/${set.quantity} Sealed`
-                                              : 'Opened'
+                                {/* Minifigures Count */}
+                                {set.num_minifigures > 0 && (
+                                    <div className="group relative">
+                                        <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-600/20 text-sm font-semibold rounded-lg px-3 py-1.5 flex items-center shadow-sm border transition-all duration-200 hover:shadow-md">
+                                            <FontAwesomeIcon icon={faUserCircle} className="mr-2 opacity-90" size="sm" />
+                                            <span>
+                                                {!isWishlist && set.expected_minifigures > 0 ? (
+                                                    `${set.owned_minifigures}/${set.expected_minifigures}`
+                                                ) : (
+                                                    set.num_minifigures
+                                                )}
+                                            </span>
+                                        </div>
+                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                            {!isWishlist && set.expected_minifigures > 0 ? 
+                                                `${set.owned_minifigures} of ${set.expected_minifigures} minifigures owned` : 
+                                                `${set.num_minifigures} minifigure${set.num_minifigures === 1 ? '' : 's'}`
+                                            }
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {/* Collection Status Row (Only for Collection, not Wishlist) */}
+                        {!isWishlist && (
+                            <div className="flex items-center gap-2">
+                                {/* Completion Status */}
+                                <div className="group relative flex-1">
+                                    <div className={`text-sm font-medium rounded-lg px-3 py-2 flex items-center justify-center shadow-sm border transition-all duration-200 hover:shadow-md ${
+                                        Number(set.complete) === Number(set.quantity) 
+                                        ? 'bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-800 border-emerald-200 shadow-emerald-100' 
+                                        : Number(set.complete) > 0 
+                                          ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 border-blue-200 shadow-blue-100' 
+                                          : 'bg-gradient-to-r from-amber-50 to-amber-100 text-amber-800 border-amber-200 shadow-amber-100'
+                                    }`}>
+                                        <FontAwesomeIcon 
+                                            icon={
+                                                Number(set.complete) === Number(set.quantity) 
+                                                ? faCheckCircle 
+                                                : faCircleHalfStroke
+                                            } 
+                                            className="mr-2" 
+                                            size="sm" 
+                                        />
+                                        <span className="font-semibold">
+                                            {Number(set.complete) === Number(set.quantity) 
+                                                ? 'Complete' 
+                                                : Number(set.complete) > 0 
+                                                  ? `${set.complete}/${set.quantity}`
+                                                  : 'Incomplete'
+                                            }
+                                        </span>
+                                    </div>
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                        {Number(set.complete) === Number(set.quantity) 
+                                            ? 'All sets are complete' 
+                                            : Number(set.complete) > 0 
+                                              ? `${set.complete} of ${set.quantity} sets complete`
+                                              : 'No complete sets'
                                         }
-                                    </span>
+                                    </div>
                                 </div>
-                            </>
+                                
+                                {/* Sealed Status */}
+                                <div className="group relative flex-1">
+                                    <div className={`text-sm font-medium rounded-lg px-3 py-2 flex items-center justify-center shadow-sm border transition-all duration-200 hover:shadow-md ${
+                                        Number(set.sealed) > 0 
+                                          ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 border-blue-200 shadow-blue-100' 
+                                          : 'bg-gradient-to-r from-slate-50 to-slate-100 text-slate-700 border-slate-200 shadow-slate-100'
+                                    }`}>
+                                        <FontAwesomeIcon 
+                                            icon={
+                                                Number(set.sealed) > 0 
+                                                ? faBox 
+                                                : faBoxOpen
+                                            } 
+                                            className="mr-2" 
+                                            size="sm" 
+                                        />
+                                        <span className="font-semibold">
+                                            {Number(set.sealed) === Number(set.quantity) 
+                                                ? 'Sealed' 
+                                                : Number(set.sealed) > 0 
+                                                  ? `${set.sealed}/${set.quantity}`
+                                                  : 'Opened'
+                                            }
+                                        </span>
+                                    </div>
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                        {Number(set.sealed) === Number(set.quantity) 
+                                            ? 'All sets are sealed' 
+                                            : Number(set.sealed) > 0 
+                                              ? `${set.sealed} of ${set.quantity} sets sealed`
+                                              : 'All sets are opened'
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         )}
                     </div>
                     
@@ -1844,16 +1892,18 @@ const UserSetsView = () => {
                 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                     <div className="flex">
-                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
-                            <FontAwesomeIcon icon={faBox} />
+                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mr-4">
+                            <FontAwesomeIcon icon={faCheckCircle} />
                         </div>
                         <div>
                             <h3 className="text-gray-500 font-medium text-sm">Collection Status</h3>
-                            <p className="text-sm font-medium text-gray-800">
-                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-md mr-1">{completeCount} complete</span>
-                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md">{sealedCount} sealed</span>
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">Out of {totalSets} total sets</p>
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-2xl font-bold text-emerald-600">{completeCount}</span>
+                                <span className="text-lg text-gray-400">/</span>
+                                <span className="text-lg font-semibold text-gray-600">{totalSets}</span>
+                                <span className="text-sm text-emerald-600 font-medium">complete</span>
+                            </div>
+                            <p className="text-xs text-gray-500">{sealedCount} sealed sets</p>
                         </div>
                     </div>
                 </div>
