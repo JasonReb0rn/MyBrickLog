@@ -719,13 +719,27 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
 const PriceToggle = ({ showPrices, onToggle }) => (
     <button 
         onClick={onToggle}
-        className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 shadow-sm"
+        className={`flex items-center gap-3 px-5 py-2.5 rounded-xl transition-all duration-200 font-medium shadow-md hover:shadow-lg border ${
+            showPrices 
+                ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-green-500 hover:scale-105' 
+                : 'bg-gradient-to-r from-white to-gray-50 hover:from-gray-50 hover:to-gray-100 text-gray-700 border-gray-300 hover:scale-105'
+        }`}
         data-tooltip-id="price-toggle-tooltip"
     >
-        <FontAwesomeIcon icon={showPrices ? faEyeSlash : faEye} className="text-gray-600" />
-        <FontAwesomeIcon icon={faDollarSign} className="text-green-600" />
-        <span className="font-medium">{showPrices ? 'Hide' : 'Show'} Prices</span>
-        <Tooltip id="price-toggle-tooltip" place="bottom" className="bg-gray-800 text-white text-xs py-1 px-2 rounded shadow-lg">
+        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+            showPrices ? 'bg-green-400 bg-opacity-30' : 'bg-gray-200'
+        }`}>
+            <FontAwesomeIcon 
+                icon={showPrices ? faEyeSlash : faEye} 
+                className={`text-sm ${showPrices ? 'text-green-100' : 'text-gray-600'}`} 
+            />
+        </div>
+        <FontAwesomeIcon 
+            icon={faDollarSign} 
+            className={`text-lg ${showPrices ? 'text-green-200' : 'text-green-600'}`} 
+        />
+        <span className="font-semibold">{showPrices ? 'Hide' : 'Show'} Prices</span>
+        <Tooltip id="price-toggle-tooltip" place="bottom" className="bg-gray-800 text-white text-xs py-2 px-3 rounded-lg shadow-xl">
             <span>{showPrices ? 'Hide' : 'Show'} set market values</span>
         </Tooltip>
     </button>
@@ -1452,25 +1466,25 @@ const UserSetsView = () => {
                 </div>
 
                 {/* Set details */}
-                <div className="p-4 pt-0 bg-gray-50/50">
-                    <h3 className="font-medium text-gray-800 mb-1 line-clamp-2 h-12">
+                <div className="p-3 sm:p-4 pt-0 bg-gray-50/50">
+                    <h3 className="font-medium text-gray-800 mb-1 line-clamp-2 text-sm sm:text-base leading-tight" style={{ minHeight: '2.5rem' }}>
                         {set.name}
                     </h3>
                     
                     <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-600 font-mono">{set.set_num}</span>
-                        <span className="text-sm bg-gray-100 px-2 py-1 rounded-lg">{set.year}</span>
+                        <span className="text-xs sm:text-sm text-gray-600 font-mono truncate flex-shrink">{set.set_num}</span>
+                        <span className="text-xs sm:text-sm bg-gray-100 px-2 py-0.5 sm:py-1 rounded-lg ml-2 flex-shrink-0">{set.year}</span>
                     </div>
                     
                     <div className="space-y-2 mb-4">
                         {/* Primary Stats Row */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 {/* Pieces Count */}
                                 <div className="group relative">
-                                    <div className="bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-semibold rounded-lg px-3 py-1.5 flex items-center shadow-sm border border-red-600/20 hover:shadow-md transition-all duration-200">
-                                        <FontAwesomeIcon icon={faPuzzlePiece} className="mr-2 text-red-100" size="sm" />
-                                        <span>{set.num_parts.toLocaleString()}</span>
+                                    <div className="bg-gradient-to-r from-red-500 to-red-600 text-white text-xs sm:text-sm font-semibold rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 flex items-center shadow-sm border border-red-600/20 hover:shadow-md transition-all duration-200">
+                                        <FontAwesomeIcon icon={faPuzzlePiece} className="mr-1 sm:mr-2 text-red-100" size="sm" />
+                                        <span className="whitespace-nowrap">{set.num_parts.toLocaleString()}</span>
                                     </div>
                                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
                                         {set.num_parts.toLocaleString()} pieces
@@ -1480,9 +1494,9 @@ const UserSetsView = () => {
                                 {/* Minifigures Count */}
                                 {set.num_minifigures > 0 && (
                                     <div className="group relative">
-                                        <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-600/20 text-sm font-semibold rounded-lg px-3 py-1.5 flex items-center shadow-sm border transition-all duration-200 hover:shadow-md">
-                                            <FontAwesomeIcon icon={faUserCircle} className="mr-2 opacity-90" size="sm" />
-                                            <span>
+                                        <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-600/20 text-xs sm:text-sm font-semibold rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 flex items-center shadow-sm border transition-all duration-200 hover:shadow-md">
+                                            <FontAwesomeIcon icon={faUserCircle} className="mr-1 sm:mr-2 opacity-90" size="sm" />
+                                            <span className="whitespace-nowrap">
                                                 {!isWishlist && set.expected_minifigures > 0 ? (
                                                     `${set.owned_minifigures}/${set.expected_minifigures}`
                                                 ) : (
@@ -1503,10 +1517,10 @@ const UserSetsView = () => {
                         
                         {/* Collection Status Row (Only for Collection, not Wishlist) */}
                         {!isWishlist && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col sm:flex-row items-stretch gap-2">
                                 {/* Completion Status */}
                                 <div className="group relative flex-1">
-                                    <div className={`text-sm font-medium rounded-lg px-3 py-2 flex items-center justify-center shadow-sm border transition-all duration-200 hover:shadow-md ${
+                                    <div className={`text-xs sm:text-sm font-medium rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center shadow-sm border transition-all duration-200 hover:shadow-md min-h-[2rem] ${
                                         Number(set.complete) === Number(set.quantity) 
                                         ? 'bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-800 border-emerald-200 shadow-emerald-100' 
                                         : Number(set.complete) > 0 
@@ -1519,10 +1533,10 @@ const UserSetsView = () => {
                                                 ? faCheckCircle 
                                                 : faCircleHalfStroke
                                             } 
-                                            className="mr-2" 
+                                            className="mr-1 sm:mr-2 flex-shrink-0" 
                                             size="sm" 
                                         />
-                                        <span className="font-semibold">
+                                        <span className="font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
                                             {Number(set.complete) === Number(set.quantity) 
                                                 ? 'Complete' 
                                                 : Number(set.complete) > 0 
@@ -1543,7 +1557,7 @@ const UserSetsView = () => {
                                 
                                 {/* Sealed Status */}
                                 <div className="group relative flex-1">
-                                    <div className={`text-sm font-medium rounded-lg px-3 py-2 flex items-center justify-center shadow-sm border transition-all duration-200 hover:shadow-md ${
+                                    <div className={`text-xs sm:text-sm font-medium rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center shadow-sm border transition-all duration-200 hover:shadow-md min-h-[2rem] ${
                                         Number(set.sealed) > 0 
                                           ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 border-blue-200 shadow-blue-100' 
                                           : 'bg-gradient-to-r from-slate-50 to-slate-100 text-slate-700 border-slate-200 shadow-slate-100'
@@ -1554,10 +1568,10 @@ const UserSetsView = () => {
                                                 ? faBox 
                                                 : faBoxOpen
                                             } 
-                                            className="mr-2" 
+                                            className="mr-1 sm:mr-2 flex-shrink-0" 
                                             size="sm" 
                                         />
-                                        <span className="font-semibold">
+                                        <span className="font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
                                             {Number(set.sealed) === Number(set.quantity) 
                                                 ? 'Sealed' 
                                                 : Number(set.sealed) > 0 
@@ -1580,26 +1594,26 @@ const UserSetsView = () => {
                     </div>
                     
                     {showPrices && (
-                        <div className="border-t border-gray-100 pt-3 mb-3">
-                            <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div className="border-t border-gray-100 pt-2 sm:pt-3 mb-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs sm:text-sm">
                                 {set.retail_price && (
-                                    <div>
-                                        <div className="text-xs text-gray-500">Retail</div>
-                                        <div className="font-medium">${Number(set.retail_price).toFixed(2)}</div>
+                                    <div className="text-center sm:text-left">
+                                        <div className="text-xs text-gray-500 mb-0.5">Retail</div>
+                                        <div className="font-medium truncate">${Number(set.retail_price).toFixed(2)}</div>
                                     </div>
                                 )}
                                 
                                 {set.sealed_value && (
-                                    <div>
-                                        <div className="text-xs text-gray-500">Sealed</div>
-                                        <div className="font-medium text-green-600">${Number(set.sealed_value).toFixed(2)}</div>
+                                    <div className="text-center sm:text-left">
+                                        <div className="text-xs text-gray-500 mb-0.5">Sealed</div>
+                                        <div className="font-medium text-green-600 truncate">${Number(set.sealed_value).toFixed(2)}</div>
                                     </div>
                                 )}
                                 
                                 {set.used_value && (
-                                    <div>
-                                        <div className="text-xs text-gray-500">Used</div>
-                                        <div className="font-medium text-blue-600">${Number(set.used_value).toFixed(2)}</div>
+                                    <div className="text-center sm:text-left col-span-2 sm:col-span-1">
+                                        <div className="text-xs text-gray-500 mb-0.5">Used</div>
+                                        <div className="font-medium text-blue-600 truncate">${Number(set.used_value).toFixed(2)}</div>
                                     </div>
                                 )}
                             </div>
@@ -2228,17 +2242,34 @@ const UserSetsView = () => {
                             
                             <button
                                 onClick={toggleFilters}
-                                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 shadow-sm font-medium"
+                                className={`flex items-center gap-3 px-5 py-2.5 rounded-xl transition-all duration-200 font-semibold shadow-md hover:shadow-lg border ${
+                                    (filterOptions.complete !== 'all' || filterOptions.sealed !== 'all' || filterOptions.decade !== 'all' || searchQuery)
+                                        ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-red-500 hover:scale-105'
+                                        : 'bg-gradient-to-r from-white to-gray-50 hover:from-gray-50 hover:to-gray-100 text-gray-700 border-gray-300 hover:scale-105'
+                                }`}
                             >
-                                <FontAwesomeIcon icon={faFilter} className={filterOptions.complete !== 'all' || filterOptions.sealed !== 'all' || filterOptions.decade !== 'all' || searchQuery ? 'text-red-600' : 'text-gray-600'} />
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                                    (filterOptions.complete !== 'all' || filterOptions.sealed !== 'all' || filterOptions.decade !== 'all' || searchQuery)
+                                        ? 'bg-red-400 bg-opacity-30'
+                                        : 'bg-gray-200'
+                                }`}>
+                                    <FontAwesomeIcon 
+                                        icon={faFilter} 
+                                        className={`text-sm ${
+                                            (filterOptions.complete !== 'all' || filterOptions.sealed !== 'all' || filterOptions.decade !== 'all' || searchQuery)
+                                                ? 'text-red-100'
+                                                : 'text-gray-600'
+                                        }`} 
+                                    />
+                                </div>
                                 <span>Filters</span>
                                 {(filterOptions.complete !== 'all' || filterOptions.sealed !== 'all' || filterOptions.decade !== 'all' || searchQuery) && (
-                                    <span className="w-5 h-5 bg-red-600 text-white rounded-full text-xs flex items-center justify-center">
+                                    <div className="w-6 h-6 bg-red-400 bg-opacity-40 text-red-100 rounded-full text-xs font-bold flex items-center justify-center ring-2 ring-red-300 ring-opacity-50">
                                         {(filterOptions.complete !== 'all' ? 1 : 0) + 
                                         (filterOptions.sealed !== 'all' ? 1 : 0) + 
                                         (filterOptions.decade !== 'all' ? 1 : 0) +
                                         (searchQuery ? 1 : 0)}
-                                    </span>
+                                    </div>
                                 )}
                             </button>
                         </div>
@@ -2248,26 +2279,31 @@ const UserSetsView = () => {
                 {/* Stats Cards for Collection */}
                 {sets.length > 0 && renderStatsCards()}
                 
-                {/* Filters Section */}
+                {/* Enhanced Filters Section */}
                 {sets.length > 0 && showFilters && (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-                        <div className="flex flex-col lg:flex-row justify-between gap-6">
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-200 p-6 sm:p-8 mb-8 transition-all duration-300">
+                        <div className="flex flex-col lg:flex-row justify-between gap-8">
                             <div className="flex-grow">
-                                <h3 className="font-medium text-gray-800 mb-3">Search & Filter</h3>
+                                <div className="flex items-center mb-6">
+                                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mr-3 shadow-sm">
+                                        <FontAwesomeIcon icon={faSearch} className="text-gray-600 text-sm" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-800">Search & Filter</h3>
+                                </div>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                                     <div className="relative">
-                                        <label className="block text-sm text-gray-600 mb-1">Search</label>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Search Sets</label>
                                         <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                                 <FontAwesomeIcon icon={faSearch} className="text-gray-400" />
                                             </div>
                                             <input
                                                 type="text"
-                                                placeholder="Search sets..."
+                                                placeholder="Search by name, number, or theme..."
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200 hover:shadow-md"
                                             />
                                         </div>
                                     </div>
@@ -2275,11 +2311,11 @@ const UserSetsView = () => {
                                     {!isWishlist && (
                                         <>
                                             <div>
-                                                <label className="block text-sm text-gray-600 mb-1">Completion Status</label>
+                                                <label className="block text-sm font-semibold text-gray-700 mb-2">Completion Status</label>
                                                 <select
                                                     value={filterOptions.complete}
                                                     onChange={(e) => setFilterOptions({...filterOptions, complete: e.target.value})}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200 hover:shadow-md font-medium"
                                                 >
                                                     <option value="all">All Sets</option>
                                                     <option value="complete">Only Complete Sets</option>
@@ -2289,11 +2325,11 @@ const UserSetsView = () => {
                                             </div>
                                             
                                             <div>
-                                                <label className="block text-sm text-gray-600 mb-1">Package Status</label>
+                                                <label className="block text-sm font-semibold text-gray-700 mb-2">Package Status</label>
                                                 <select
                                                     value={filterOptions.sealed}
                                                     onChange={(e) => setFilterOptions({...filterOptions, sealed: e.target.value})}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200 hover:shadow-md font-medium"
                                                 >
                                                     <option value="all">All Sets</option>
                                                     <option value="sealed">Only Sealed Sets</option>
@@ -2305,11 +2341,11 @@ const UserSetsView = () => {
                                     )}
                                     
                                     <div>
-                                        <label className="block text-sm text-gray-600 mb-1">Decade</label>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Release Decade</label>
                                         <select
                                             value={filterOptions.decade}
                                             onChange={(e) => setFilterOptions({...filterOptions, decade: e.target.value})}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200 hover:shadow-md font-medium"
                                         >
                                             <option value="all">All Decades</option>
                                             {getDecadeOptions().map(decade => (
@@ -2320,67 +2356,82 @@ const UserSetsView = () => {
                                 </div>
                             </div>
                             
-                            <div className="border-t lg:border-t-0 lg:border-l border-gray-200 pt-4 lg:pt-0 lg:pl-6">
-                                <h3 className="font-medium text-gray-800 mb-3">Sort By</h3>
+                            <div className="border-t lg:border-t-0 lg:border-l border-gray-300 pt-6 lg:pt-0 lg:pl-8">
+                                <div className="flex items-center mb-6">
+                                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mr-3 shadow-sm">
+                                        <FontAwesomeIcon icon={faSortDown} className="text-gray-600 text-sm" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-800">Sort By</h3>
+                                </div>
                                 
-                                <div className="flex flex-wrap gap-2">
+                                <div className="grid grid-cols-2 gap-3">
                                     <button
                                         onClick={() => handleSortChange('theme')}
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center ${
-                                            sortOption === 'theme' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        className={`px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md ${
+                                            sortOption === 'theme' 
+                                                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 hover:scale-105' 
+                                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
                                         }`}
                                     >
                                         Theme
                                         {getSortIcon('theme') && (
-                                            <FontAwesomeIcon icon={getSortIcon('theme')} className="ml-2" />
+                                            <FontAwesomeIcon icon={getSortIcon('theme')} className="text-xs" />
                                         )}
                                     </button>
                                     
                                     <button
                                         onClick={() => handleSortChange('name')}
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center ${
-                                            sortOption === 'name' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        className={`px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md ${
+                                            sortOption === 'name' 
+                                                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 hover:scale-105' 
+                                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
                                         }`}
                                     >
                                         Name
                                         {getSortIcon('name') && (
-                                            <FontAwesomeIcon icon={getSortIcon('name')} className="ml-2" />
+                                            <FontAwesomeIcon icon={getSortIcon('name')} className="text-xs" />
                                         )}
                                     </button>
                                     
                                     <button
                                         onClick={() => handleSortChange('year')}
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center ${
-                                            sortOption === 'year' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        className={`px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md ${
+                                            sortOption === 'year' 
+                                                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 hover:scale-105' 
+                                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
                                         }`}
                                     >
                                         Year
                                         {getSortIcon('year') && (
-                                            <FontAwesomeIcon icon={getSortIcon('year')} className="ml-2" />
+                                            <FontAwesomeIcon icon={getSortIcon('year')} className="text-xs" />
                                         )}
                                     </button>
                                     
                                     <button
                                         onClick={() => handleSortChange('pieces')}
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center ${
-                                            sortOption === 'pieces' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        className={`px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md ${
+                                            sortOption === 'pieces' 
+                                                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 hover:scale-105' 
+                                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
                                         }`}
                                     >
                                         Pieces
                                         {getSortIcon('pieces') && (
-                                            <FontAwesomeIcon icon={getSortIcon('pieces')} className="ml-2" />
+                                            <FontAwesomeIcon icon={getSortIcon('pieces')} className="text-xs" />
                                         )}
                                     </button>
                                     
                                     <button
                                         onClick={() => handleSortChange('value')}
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center ${
-                                            sortOption === 'value' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        className={`px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md col-span-2 ${
+                                            sortOption === 'value' 
+                                                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 hover:scale-105' 
+                                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
                                         }`}
                                     >
-                                        Value
+                                        Market Value
                                         {getSortIcon('value') && (
-                                            <FontAwesomeIcon icon={getSortIcon('value')} className="ml-2" />
+                                            <FontAwesomeIcon icon={getSortIcon('value')} className="text-xs" />
                                         )}
                                     </button>
                                 </div>
@@ -2388,17 +2439,26 @@ const UserSetsView = () => {
                         </div>
                         
                         {(searchQuery || filterOptions.complete !== 'all' || filterOptions.sealed !== 'all' || filterOptions.decade !== 'all') && (
-                            <div className="mt-6 pt-6 border-t border-gray-200 flex justify-between items-center">
-                                <div className="text-sm text-gray-600">
-                                    <span className="font-medium">{filteredSets.length}</span> set{filteredSets.length === 1 ? '' : 's'} found
+                            <div className="mt-8 pt-6 border-t border-gray-300">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-sm">
+                                            <FontAwesomeIcon icon={faCheckCircle} className="text-white text-sm" />
+                                        </div>
+                                        <div>
+                                            <span className="text-lg font-bold text-gray-800">{filteredSets.length}</span>
+                                            <span className="text-gray-600 ml-1">set{filteredSets.length === 1 ? '' : 's'} found</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <button
+                                        onClick={resetFilters}
+                                        className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105"
+                                    >
+                                        <FontAwesomeIcon icon={faTimes} className="mr-2" />
+                                        Clear All Filters
+                                    </button>
                                 </div>
-                                
-                                <button
-                                    onClick={resetFilters}
-                                    className="px-4 py-2 text-red-600 hover:text-red-700 text-sm font-medium"
-                                >
-                                    Clear All Filters
-                                </button>
                             </div>
                         )}
                     </div>

@@ -47,7 +47,7 @@ const Header = () => {
                             <img 
                                 src="/images/mybricklog_logo.png" 
                                 alt="MyBrickLog" 
-                                className="h-10" 
+                                className="h-8 md:h-10" 
                             />
                         </Link>
                     </div>
