@@ -29,4 +29,3 @@ yarn-error.log*
 sql_backup.sql
 sql_backup_old.sql
 sql_backup.old
-/lego-api/create_log.php
