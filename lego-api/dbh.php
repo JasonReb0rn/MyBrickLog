@@ -35,9 +35,20 @@ $user = $_ENV['MBL_SQL_USER'] ?? $_ENV['MBL_SQL_USERNAME'] ?? 'root';
 $pass = $_ENV['MBL_SQL_PASS'] ?? $_ENV['MBL_SQL_PASSWORD'] ?? '';
 $port = $_ENV['MBL_SQL_PORT'] ?? '3306';
 
+// Debug logging - this will help us troubleshoot
+error_log("=== DATABASE CONNECTION DEBUG ===");
+error_log("Host: " . $host);
+error_log("Port: " . $port);
+error_log("Database: " . $db);
+error_log("User: " . $user);
+error_log("Password length: " . strlen($pass));
+error_log("All ENV vars: " . print_r($_ENV, true));
+
 $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+error_log("DSN: " . $dsn);
 
 try {
+    error_log("Attempting PDO connection...");
     $pdo = new PDO($dsn, $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
@@ -45,11 +56,22 @@ try {
         PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
         PDO::ATTR_AUTOCOMMIT => false
     ]);
+    error_log("Database connection successful!");
 } catch (PDOException $e) {
-    error_log("Database connection failed: " . $e->getMessage());
+    error_log("PDO Exception: " . $e->getMessage());
+    error_log("PDO Error Code: " . $e->getCode());
     header('Content-Type: application/json');
     http_response_code(500);
-    echo json_encode(['error' => 'Database connection failed']);
+    echo json_encode([
+        'error' => 'Database connection failed',
+        'debug' => [
+            'host' => $host,
+            'port' => $port,
+            'database' => $db,
+            'user' => $user,
+            'message' => $e->getMessage()
+        ]
+    ]);
     exit();
 }
 ?>
