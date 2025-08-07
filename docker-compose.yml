@@ -1,32 +1,17 @@
 version: '3.8'
+
 services:
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "1000:80"
-      - "1443:443"
-    env_file:
-      - ./.env
-    volumes:
-      - /etc/letsencrypt/live/mybricklog.com:/etc/nginx/ssl:ro
+      - "80:80"
     environment:
       - NODE_ENV=production
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8080/api}
     depends_on:
       - backend
-    networks:
-      - app-network
-      - shared_public_net
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-          cpus: "1.0"
-        reservations:
-          memory: 256m
-          cpus: "0.5"
     restart: unless-stopped
 
   backend:
@@ -34,24 +19,11 @@ services:
       context: ./lego-api
       dockerfile: Dockerfile
     ports:
-      - "1080:80"
-    env_file:
-      - ./.env.production
-    networks:
-      - app-network
-      - shared_public_net
-    deploy:
-      resources:
-        limits:
-          memory: 256m
-          cpus: "0.5"
-        reservations:
-          memory: 128m
-          cpus: "0.25"
+      - "8080:80"
+    environment:
+      - MBL_SQL_HOST=${MBL_SQL_HOST}
+      - MBL_SQL_USER=${MBL_SQL_USER}
+      - MBL_SQL_PASS=${MBL_SQL_PASS}
+      - MBL_SQL_PORT=${MBL_SQL_PORT:-3306}
+      - MBL_CORS_ORIGIN=${MBL_CORS_ORIGIN}
     restart: unless-stopped
-
-networks:
-  app-network:
-    driver: bridge
-  shared_public_net:
-    external: true
