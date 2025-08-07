@@ -5,11 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "80:80"
     environment:
       - NODE_ENV=production
-      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8080/api}
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-/api}
     depends_on:
       - backend
     restart: unless-stopped
@@ -18,8 +16,6 @@ services:
     build:
       context: ./lego-api
       dockerfile: Dockerfile
-    ports:
-      - "8080:80"
     environment:
       - MBL_SQL_HOST=${MBL_SQL_HOST}
       - MBL_SQL_USER=${MBL_SQL_USER}

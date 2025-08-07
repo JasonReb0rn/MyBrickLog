@@ -30,8 +30,8 @@ In your Coolify project:
 In your Coolify application settings, add these environment variables:
 
 ```bash
-# Frontend Configuration
-REACT_APP_API_URL=https://your-domain.com/api
+# Frontend Configuration (Coolify will handle the domain automatically)
+REACT_APP_API_URL=/api
 
 # Database Configuration (from your Coolify MySQL service)
 MBL_SQL_HOST=your_mysql_service_name
@@ -58,7 +58,7 @@ The simplified setup now consists of:
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Coolify       │    │   Frontend      │    │   Backend       │
 │   (Proxy)       │────│   (React/Nginx) │────│   (PHP/Apache)  │
-│                 │    │   Port 80       │    │   Port 8080     │
+│                 │    │   (Auto Port)   │    │   (Auto Port)   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                                         │
                                               ┌─────────────────┐
