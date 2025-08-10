@@ -86,6 +86,14 @@ const Header = () => {
                             Add Sets
                         </Link>
 
+                        <Link 
+                            to="/price-tool" 
+                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors ${isActive('/price-tool')}`}
+                        >
+                            <FontAwesomeIcon icon="dollar-sign" className="mr-2" />
+                            Price Tool
+                        </Link>
+
                         <button
                             onClick={() => setShowSearch(!showSearch)}
                             className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors"
@@ -196,6 +204,15 @@ const Header = () => {
                         >
                             <FontAwesomeIcon icon="folder-plus" className="mr-3 text-yellow-400" />
                             Add Sets
+                        </Link>
+
+                        <Link 
+                            to="/price-tool" 
+                            className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            <FontAwesomeIcon icon="dollar-sign" className="mr-3 text-yellow-400" />
+                            Price Tool
                         </Link>
 
                         <button

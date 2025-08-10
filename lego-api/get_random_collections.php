@@ -11,7 +11,6 @@ try {
         GROUP BY u.user_id
         HAVING COUNT(c.user_id) > 0
         ORDER BY RAND()
-        LIMIT 3
     ";
 
     $stmt = $pdo->prepare($query);

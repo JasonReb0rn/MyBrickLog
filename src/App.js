@@ -14,6 +14,7 @@ import Profile from './components/Profile';
 import Themes from './components/Themes';
 import SubThemes from './components/SubThemes';
 import SearchResults from './components/SearchResults'; // Import the new SearchResults component
+import PriceTool from './components/PriceTool'; // Import the PriceTool component
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
@@ -50,6 +51,8 @@ const App = () => {
                                 <Route path="/about" element={<About />} />
                                 {/* Add the new search route */}
                                 <Route path="/search" element={<SearchResults />} />
+                                {/* Add the new price tool route */}
+                                <Route path="/price-tool" element={<PriceTool />} />
                             </Routes>
                         </div>
                     <Footer />
