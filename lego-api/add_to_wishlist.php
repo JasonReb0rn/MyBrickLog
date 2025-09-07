@@ -1,6 +1,7 @@
 <?php
 require 'dbh.php';
 require 'cors_headers.php';
+require 'create_log.php';
 
 // Start or resume the session
 session_start();
@@ -35,6 +36,13 @@ if (isset($_SESSION['user_id'])) {
 
             // Commit the transaction
             $pdo->commit();
+            
+            // Log successful addition to wishlist
+            $setCount = count($sets);
+            $setNums = array_column($sets, 'setNum');
+            $log_action = "Added {$setCount} set(s) to wishlist: " . implode(', ', $setNums);
+            insertLog($pdo, $userId, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+            
             $response['success'] = true;
         } catch (PDOException $e) {
             // Roll back the transaction if something failed

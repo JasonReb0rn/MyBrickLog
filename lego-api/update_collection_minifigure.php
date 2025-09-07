@@ -1,6 +1,7 @@
 <?php
 require 'dbh.php';
 require 'cors_headers.php';
+require 'create_log.php';
 
 session_start();
 
@@ -90,6 +91,11 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
         }
 
         $pdo->commit();
+        
+        // Log successful minifigure update
+        $log_action = "Updated minifigure {$fig_num} quantity for set {$set_num}: {$quantity_owned}";
+        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+        
         $response['success'] = true;
         $response['quantity_owned'] = $quantity_owned;
         $response['required_quantity'] = $minifigInfo['required_quantity'];

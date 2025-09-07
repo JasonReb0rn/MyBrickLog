@@ -1,6 +1,7 @@
 <?php
 require 'dbh.php';
 require 'cors_headers.php';
+require 'create_log.php';
 
 session_start();
 
@@ -28,6 +29,11 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
         $minifigStmt->execute([$user_id, $set_num]);
 
         $pdo->commit();
+        
+        // Log successful removal from collection
+        $log_action = "Removed set from collection: {$set_num}";
+        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+        
         $response['success'] = true;
     } catch (PDOException $e) {
         $pdo->rollBack();

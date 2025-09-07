@@ -1,6 +1,7 @@
 <?php
 include 'dbh.php';
 include 'cors_headers.php';
+require 'create_log.php';
 
 session_start();
 
@@ -34,6 +35,10 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
             // Update the sealed count
             $stmt = $pdo->prepare("UPDATE collection SET sealed = ? WHERE user_id = ? AND set_num = ?");
             $stmt->execute([$sealed_count, $user_id, $set_num]);
+            
+            // Log successful sealed count update
+            $log_action = "Updated sealed count for set {$set_num}: {$sealed_count}";
+            insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
             
             $response['success'] = true;
             $response['sealed_count'] = $sealed_count;

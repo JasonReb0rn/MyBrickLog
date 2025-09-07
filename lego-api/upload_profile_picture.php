@@ -1,6 +1,7 @@
 <?php
 require 'dbh.php';
 require 'cors_headers.php';
+require 'create_log.php';
 
 use Aws\S3\S3Client;
 
@@ -94,6 +95,10 @@ if (isset($_FILES['profile_picture'])) {
             
             // If we got here, both database update and S3 upload worked, so commit
             $pdo->commit();
+            
+            // Log successful profile picture upload
+            $log_action = "Profile picture uploaded: {$filename}";
+            insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
             
             $response['success'] = true;
             $response['filename'] = $filename;

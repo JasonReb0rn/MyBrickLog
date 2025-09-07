@@ -1,6 +1,7 @@
 <?php
 require 'dbh.php';
 require 'cors_headers.php';
+require 'create_log.php';
 
 session_start();
 
@@ -117,6 +118,11 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
         }
 
         $pdo->commit();
+        
+        // Log successful move from wishlist to collection
+        $log_action = "Moved set from wishlist to collection: {$set_num}";
+        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+        
         $response['success'] = true;
     } catch (PDOException $e) {
         $pdo->rollBack();

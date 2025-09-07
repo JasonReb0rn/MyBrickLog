@@ -1,6 +1,7 @@
 <?php
 require 'dbh.php';
 require 'cors_headers.php';
+require 'create_log.php';
 
 session_start();
 
@@ -103,6 +104,13 @@ try {
     }
     
     $pdo->commit();
+    
+    // Log successful migration
+    $migratedCount = count($migratedSets);
+    $skippedCount = count($skippedSets);
+    $errorCount = count($errorSets);
+    $log_action = "Migrated collection minifigures: {$migratedCount} sets migrated, {$skippedCount} skipped, {$errorCount} errors";
+    insertLog($pdo, $userId, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
     
     $response['success'] = true;
     $response['migrated_sets'] = $migratedSets;

@@ -23,7 +23,7 @@ $response = ['success' => false];
 
 if (!empty($username) && !empty($password)) {
     // Log the login attempt
-    $log_action = "User attempted login with username: '$username' and password: '$password'";
+    $log_action = "Login attempt for username: '$username'";
     $log_useragent = $_SERVER['HTTP_USER_AGENT'];
     insertLog($pdo, null, $log_action, $log_useragent);
 
@@ -46,7 +46,7 @@ if (!empty($username) && !empty($password)) {
                 $response['username'] = $username;
 
                 // Log successful login
-                $log_action = "User login success with username: '$username'";
+                $log_action = "Login successful for username: '$username'";
                 $log_useragent = $_SERVER['HTTP_USER_AGENT'];
                 insertLog($pdo, $user['user_id'], $log_action, $log_useragent);
 

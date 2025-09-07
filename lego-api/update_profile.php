@@ -1,6 +1,7 @@
 <?php
 require 'dbh.php';
 require 'cors_headers.php';
+require 'create_log.php';
 
 // Enable error logging
 ini_set('display_errors', 1);
@@ -179,22 +180,8 @@ if ($data) {
         
         // Log the profile update
         if ($result) {
-            try {
-                $logStmt = $pdo->prepare("
-                    INSERT INTO log 
-                    (log_user, log_action, log_useragent) 
-                    VALUES 
-                    (?, 'Profile updated', ?)
-                ");
-                
-                $logStmt->execute([
-                    $data['user_id'],
-                    $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'
-                ]);
-            } catch (PDOException $logError) {
-                // Just log the error but don't fail the whole operation
-                error_log("Error logging profile update: " . $logError->getMessage());
-            }
+            // Use the insertLog function which handles its own transaction
+            insertLog($pdo, $data['user_id'], 'Profile updated', $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
             
             $pdo->commit();
             $response['success'] = true;

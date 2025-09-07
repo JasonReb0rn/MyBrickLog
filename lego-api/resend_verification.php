@@ -1,6 +1,7 @@
 <?php
 require 'dbh.php';
 require 'cors_headers.php';
+require 'create_log.php';
 
 use Aws\Ses\SesClient;
 use Aws\Exception\AwsException;
@@ -55,6 +56,10 @@ if (!empty($email) && !empty($verificationToken)) {
         if (isset($result['MessageId'])) {
             $response['success'] = true;
             error_log("Verification email resent successfully");
+            
+            // Log successful resend
+            $log_action = "Verification email resent to: {$email}";
+            insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
         }
     } catch (AwsException $e) {
         error_log("AWS SES Error: " . $e->getMessage());

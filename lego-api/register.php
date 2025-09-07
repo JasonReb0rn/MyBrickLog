@@ -155,7 +155,7 @@ if (!empty($username) && !empty($email) && !empty($password) && !empty($recaptch
             $response['message'] = 'Registration successful! Please check your email to verify your account.';
 
             // Log successful registration
-            $log_action = "User registration successful for username: '$username'";
+            $log_action = "Registration successful for username: '$username', email: '$email'";
             $log_useragent = $_SERVER['HTTP_USER_AGENT'];
             insertLog($pdo, null, $log_action, $log_useragent);
         } else {
@@ -173,7 +173,7 @@ if (!empty($username) && !empty($email) && !empty($password) && !empty($recaptch
         $response['message'] = 'Registration failed: Unable to send verification email. Please try again later.';
         
         // Log the error
-        $log_action = "Registration failed for username: '$username'. Error: " . $e->getMessage();
+        $log_action = "Registration failed for username: '$username', email: '$email'. Error: " . $e->getMessage();
         $log_useragent = $_SERVER['HTTP_USER_AGENT'];
         insertLog($pdo, null, $log_action, $log_useragent);
     }

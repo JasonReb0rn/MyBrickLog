@@ -1,6 +1,7 @@
 <?php
 include 'dbh.php';
 include 'cors_headers.php';
+require 'create_log.php';
 
 session_start();
 
@@ -111,6 +112,11 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
         }
 
         $pdo->commit();
+        
+        // Log successful quantity update
+        $log_action = "Updated set quantity for {$set_num}: {$old_quantity} -> {$quantity} (complete: {$complete_count}, sealed: {$sealed_count})";
+        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+        
         $response['success'] = true;
         $response['quantity'] = $quantity;
         $response['complete_count'] = $complete_count;

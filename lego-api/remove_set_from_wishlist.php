@@ -1,6 +1,7 @@
 <?php
 require 'dbh.php';
 require 'cors_headers.php';
+require 'create_log.php';
 
 session_start();
 
@@ -19,6 +20,11 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
         $stmt->execute([$user_id, $set_num]);
 
         $pdo->commit();
+        
+        // Log successful removal from wishlist
+        $log_action = "Removed set from wishlist: {$set_num}";
+        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+        
         $response['success'] = true;
     } catch (PDOException $e) {
         $pdo->rollBack();
