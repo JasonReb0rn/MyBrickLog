@@ -157,7 +157,7 @@ if (!empty($username) && !empty($email) && !empty($password) && !empty($recaptch
             // Log successful registration
             $log_action = "Registration successful for username: '$username', email: '$email'";
             $log_useragent = $_SERVER['HTTP_USER_AGENT'];
-            insertLog($pdo, null, $log_action, $log_useragent);
+            insertLog($pdo, null, $log_action, $log_useragent, null, 'AUTHENTICATION');
         } else {
             $pdo->rollBack();
             error_log("Transaction rolled back - email not sent");
@@ -175,7 +175,7 @@ if (!empty($username) && !empty($email) && !empty($password) && !empty($recaptch
         // Log the error
         $log_action = "Registration failed for username: '$username', email: '$email'. Error: " . $e->getMessage();
         $log_useragent = $_SERVER['HTTP_USER_AGENT'];
-        insertLog($pdo, null, $log_action, $log_useragent);
+        insertLog($pdo, null, $log_action, $log_useragent, null, 'AUTHENTICATION');
     }
 } else {
     error_log("Invalid registration input received");

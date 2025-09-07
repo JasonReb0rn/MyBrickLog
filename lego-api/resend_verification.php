@@ -59,7 +59,7 @@ if (!empty($email) && !empty($verificationToken)) {
             
             // Log successful resend
             $log_action = "Verification email resent to: {$email}";
-            insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+            insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'AUTHENTICATION');
         }
     } catch (AwsException $e) {
         error_log("AWS SES Error: " . $e->getMessage());

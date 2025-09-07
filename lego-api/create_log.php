@@ -41,7 +41,7 @@ function getRealClientIP() {
     return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 }
 
-function insertLog($pdo, $user_id, $action, $useragent, $ip = null) {
+function insertLog($pdo, $user_id, $action, $useragent, $ip = null, $log_type = 'SYSTEM') {
     try {
         // Truncate user agent to fit database column (45 characters)
         $truncated_useragent = substr($useragent, 0, 45);
@@ -54,32 +54,47 @@ function insertLog($pdo, $user_id, $action, $useragent, $ip = null) {
         // Truncate IP to fit database column (45 characters - should be plenty for IPv6)
         $truncated_ip = substr($ip, 0, 45);
         
-        // Check if we're in a transaction, if not start one
+        // Validate log_type against allowed enum values
+        $allowed_types = ['AUTHENTICATION', 'ADMIN', 'USER_MANAGEMENT', 'COLLECTION', 'SYSTEM', 'SECURITY'];
+        if (!in_array($log_type, $allowed_types)) {
+            $log_type = 'SYSTEM'; // Default fallback
+        }
+        
+        // Always use a separate transaction for logging to avoid conflicts
         $inTransaction = $pdo->inTransaction();
+        $startedTransaction = false;
         
         if (!$inTransaction) {
             $pdo->beginTransaction();
+            $startedTransaction = true;
         }
         
-        $stmt = $pdo->prepare("INSERT INTO log (log_user, log_action, log_useragent, log_ip) VALUES (?, ?, ?, ?)");
-        $result = $stmt->execute([$user_id, $action, $truncated_useragent, $truncated_ip]);
+        $stmt = $pdo->prepare("INSERT INTO log (log_user, log_action, log_type, log_useragent, log_ip) VALUES (?, ?, ?, ?, ?)");
+        $result = $stmt->execute([$user_id, $action, $log_type, $truncated_useragent, $truncated_ip]);
         
         // Only commit if we started the transaction
-        if (!$inTransaction && $result) {
-            $pdo->commit();
-        } elseif (!$inTransaction && !$result) {
-            $pdo->rollBack();
+        if ($startedTransaction) {
+            if ($result) {
+                $pdo->commit();
+                error_log("Log successfully inserted and committed: " . $action);
+            } else {
+                $pdo->rollBack();
+                error_log("Log insert failed, transaction rolled back: " . $action);
+            }
+        } else {
+            error_log("Log inserted within existing transaction: " . $action . " (result: " . ($result ? 'success' : 'failed') . ")");
         }
         
         return $result;
     } catch (PDOException $e) {
         error_log("Failed to insert log: " . $e->getMessage());
-        error_log("Log details - User ID: " . ($user_id ?? 'NULL') . ", Action: " . $action . ", User Agent: " . $truncated_useragent . ", IP: " . ($truncated_ip ?? 'unknown'));
+        error_log("Log details - User ID: " . ($user_id ?? 'NULL') . ", Action: " . $action . ", Type: " . $log_type . ", User Agent: " . $truncated_useragent . ", IP: " . ($truncated_ip ?? 'unknown'));
         
         // Rollback if we started the transaction and we're still in one
-        if (!$inTransaction && $pdo->inTransaction()) {
+        if ($startedTransaction && $pdo->inTransaction()) {
             try {
                 $pdo->rollBack();
+                error_log("Rolled back failed log transaction");
             } catch (PDOException $rollbackError) {
                 error_log("Failed to rollback log transaction: " . $rollbackError->getMessage());
             }

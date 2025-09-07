@@ -13,7 +13,7 @@ if (!empty($token) && !empty($password)) {
    try {
        // Log the attempt (in its own transaction)
        $log_action = "Password reset attempted with token: $token";
-       insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT']);
+       insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT'], null, 'AUTHENTICATION');
 
        // Start transaction for password reset
        $pdo->beginTransaction();
@@ -45,7 +45,7 @@ if (!empty($token) && !empty($password)) {
            
            // Log the successful password reset (in its own transaction)
            $log_action = "Password reset completed for user ID: " . $resetData['user_id'];
-           insertLog($pdo, $resetData['user_id'], $log_action, $_SERVER['HTTP_USER_AGENT']);
+           insertLog($pdo, $resetData['user_id'], $log_action, $_SERVER['HTTP_USER_AGENT'], null, 'AUTHENTICATION');
 
            $response['success'] = true;
            $response['message'] = 'Password successfully reset';
@@ -54,7 +54,7 @@ if (!empty($token) && !empty($password)) {
            
            // Log the invalid token attempt (in its own transaction)
            $log_action = "Invalid or expired password reset token used: $token";
-           insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT']);
+           insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT'], null, 'AUTHENTICATION');
            
            $response['message'] = 'Invalid or expired password reset link';
        }
@@ -66,7 +66,7 @@ if (!empty($token) && !empty($password)) {
        
        // Log the error (in its own transaction)
        $log_action = "Password reset error occurred: " . $e->getMessage();
-       insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT']);
+       insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT'], null, 'AUTHENTICATION');
        
        $response['message'] = 'An error occurred while resetting your password. Please try again.';
    }
@@ -75,7 +75,7 @@ if (!empty($token) && !empty($password)) {
    
    // Log the invalid input (in its own transaction)
    $log_action = "Password reset attempted with invalid input";
-   insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT']);
+   insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT'], null, 'AUTHENTICATION');
 }
 
 echo json_encode($response);

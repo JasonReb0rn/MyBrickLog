@@ -98,7 +98,9 @@ CREATE TABLE `log` (
   `log_id` int NOT NULL,
   `log_user` int DEFAULT NULL,
   `log_action` varchar(256) NOT NULL,
+  `log_type` enum('AUTHENTICATION','ADMIN','USER_MANAGEMENT','COLLECTION','SYSTEM','SECURITY') NOT NULL DEFAULT 'SYSTEM',
   `log_useragent` varchar(45) NOT NULL,
+  `log_ip` varchar(45) NULL,
   `log_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -214,7 +216,8 @@ CREATE TABLE `users` (
   `join_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `twitter_handle` varchar(50) DEFAULT NULL,
   `youtube_channel` varchar(100) DEFAULT NULL,
-  `bricklink_store` varchar(100) DEFAULT NULL
+  `bricklink_store` varchar(100) DEFAULT NULL,
+  `is_admin` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------

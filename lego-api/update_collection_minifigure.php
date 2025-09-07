@@ -94,7 +94,7 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
         
         // Log successful minifigure update
         $log_action = "Updated minifigure {$fig_num} quantity for set {$set_num}: {$quantity_owned}";
-        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'COLLECTION');
         
         $response['success'] = true;
         $response['quantity_owned'] = $quantity_owned;

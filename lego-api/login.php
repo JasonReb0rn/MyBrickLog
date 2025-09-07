@@ -25,10 +25,10 @@ if (!empty($username) && !empty($password)) {
     // Log the login attempt
     $log_action = "Login attempt for username: '$username'";
     $log_useragent = $_SERVER['HTTP_USER_AGENT'];
-    insertLog($pdo, null, $log_action, $log_useragent);
+    insertLog($pdo, null, $log_action, $log_useragent, null, 'AUTHENTICATION');
 
     try {
-        $stmt = $pdo->prepare("SELECT user_id, password_hash, email, verification_token, verified FROM users WHERE username = ?");
+        $stmt = $pdo->prepare("SELECT user_id, password_hash, email, verification_token, verified, is_admin FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -41,14 +41,20 @@ if (!empty($username) && !empty($password)) {
             } else {
                 session_start();
                 $_SESSION['user_id'] = $user['user_id'];
+                $_SESSION['is_admin'] = $user['is_admin'];
                 $response['success'] = true;
                 $response['user_id'] = $user['user_id'];
                 $response['username'] = $username;
+                $response['is_admin'] = $user['is_admin'];
 
                 // Log successful login
                 $log_action = "Login successful for username: '$username'";
                 $log_useragent = $_SERVER['HTTP_USER_AGENT'];
-                insertLog($pdo, $user['user_id'], $log_action, $log_useragent);
+                $log_result = insertLog($pdo, $user['user_id'], $log_action, $log_useragent, null, 'AUTHENTICATION');
+                
+                if ($is_dev) {
+                    error_log('Successful login log result: ' . ($log_result ? 'SUCCESS' : 'FAILED'));
+                }
 
                 if ($is_dev) {
                     error_log('Login successful - Session ID: ' . session_id());
@@ -56,6 +62,11 @@ if (!empty($username) && !empty($password)) {
                 }
             }
         } else {
+            // Log failed login attempt
+            $log_action = "Invalid login attempt for username: '$username'";
+            $log_useragent = $_SERVER['HTTP_USER_AGENT'];
+            insertLog($pdo, null, $log_action, $log_useragent, null, 'SECURITY');
+            
             $response['error'] = 'Invalid username or password';
         }
     } catch (PDOException $e) {

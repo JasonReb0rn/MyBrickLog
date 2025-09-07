@@ -115,7 +115,7 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
         
         // Log successful quantity update
         $log_action = "Updated set quantity for {$set_num}: {$old_quantity} -> {$quantity} (complete: {$complete_count}, sealed: {$sealed_count})";
-        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'COLLECTION');
         
         $response['success'] = true;
         $response['quantity'] = $quantity;

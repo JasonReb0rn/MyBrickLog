@@ -17,6 +17,7 @@ $response = ['valid' => false];
 if (isset($_SESSION['user_id'])) {
     $response['valid'] = true;
     $response['user_id'] = $_SESSION['user_id'];
+    $response['is_admin'] = $_SESSION['is_admin'] ?? 0;
 }
 
 echo json_encode($response);

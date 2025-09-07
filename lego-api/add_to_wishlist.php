@@ -41,7 +41,7 @@ if (isset($_SESSION['user_id'])) {
             $setCount = count($sets);
             $setNums = array_column($sets, 'setNum');
             $log_action = "Added {$setCount} set(s) to wishlist: " . implode(', ', $setNums);
-            insertLog($pdo, $userId, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+            insertLog($pdo, $userId, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'COLLECTION');
             
             $response['success'] = true;
         } catch (PDOException $e) {

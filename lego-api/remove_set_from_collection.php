@@ -32,7 +32,7 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
         
         // Log successful removal from collection
         $log_action = "Removed set from collection: {$set_num}";
-        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'COLLECTION');
         
         $response['success'] = true;
     } catch (PDOException $e) {

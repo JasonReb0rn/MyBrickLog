@@ -1,6 +1,7 @@
 <?php
 include 'dbh.php';
 include 'cors_headers.php';
+require 'create_log.php';
 
 session_start();
 
@@ -16,6 +17,10 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
     try {
         $stmt = $pdo->prepare("UPDATE collection SET sealed = ? WHERE user_id = ? AND set_num = ?");
         $stmt->execute([$sealed, $user_id, $set_num]);
+
+        // Log the toggle action
+        $log_action = "Toggled sealed status for set {$set_num}: " . ($sealed ? 'sealed' : 'not sealed');
+        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'COLLECTION');
 
         $response['success'] = true;
     } catch (PDOException $e) {

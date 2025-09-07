@@ -1,6 +1,7 @@
 <?php
 include 'dbh.php';
 include 'cors_headers.php';
+require 'create_log.php';
 
 session_start();
 
@@ -16,6 +17,10 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
     try {
         $stmt = $pdo->prepare("UPDATE collection SET complete = ? WHERE user_id = ? AND set_num = ?");
         $stmt->execute([$complete, $user_id, $set_num]);
+
+        // Log the toggle action
+        $log_action = "Toggled complete status for set {$set_num}: " . ($complete ? 'complete' : 'incomplete');
+        insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'COLLECTION');
 
         $response['success'] = true;
     } catch (PDOException $e) {

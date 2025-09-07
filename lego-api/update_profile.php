@@ -181,7 +181,7 @@ if ($data) {
         // Log the profile update
         if ($result) {
             // Use the insertLog function which handles its own transaction
-            insertLog($pdo, $data['user_id'], 'Profile updated', $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+            insertLog($pdo, $data['user_id'], 'Profile updated', $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'USER_MANAGEMENT');
             
             $pdo->commit();
             $response['success'] = true;

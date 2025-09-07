@@ -98,7 +98,7 @@ if (isset($_FILES['profile_picture'])) {
             
             // Log successful profile picture upload
             $log_action = "Profile picture uploaded: {$filename}";
-            insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+            insertLog($pdo, $user_id, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'USER_MANAGEMENT');
             
             $response['success'] = true;
             $response['filename'] = $filename;

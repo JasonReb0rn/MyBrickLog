@@ -95,7 +95,7 @@ if (!empty($email)) {
                 
                 // Log the reset request
                 $log_action = "Password reset requested for user ID: " . $user['user_id'];
-                insertLog($pdo, $user['user_id'], $log_action, $_SERVER['HTTP_USER_AGENT']);
+                insertLog($pdo, $user['user_id'], $log_action, $_SERVER['HTTP_USER_AGENT'], null, 'AUTHENTICATION');
             } else {
                 $pdo->rollBack();
                 error_log("Transaction rolled back - email not sent");

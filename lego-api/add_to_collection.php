@@ -115,7 +115,7 @@ if (isset($_SESSION['user_id'])) {
             $setNums = array_column($sets, 'setNum');
             $totalQuantity = array_sum(array_column($sets, 'quantity'));
             $log_action = "Added {$setCount} set(s) to collection with total quantity {$totalQuantity}: " . implode(', ', $setNums);
-            insertLog($pdo, $userId, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+            insertLog($pdo, $userId, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'COLLECTION');
             
             $response['success'] = true;
         } catch (PDOException $e) {

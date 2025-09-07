@@ -19,6 +19,10 @@ import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import About from './components/About';
+import AdminDashboard from './components/AdminDashboard';
+import AdminUsers from './components/AdminUsers';
+import AdminSets from './components/AdminSets';
+import AdminLogs from './components/AdminLogs';
 import { AuthProvider } from './components/AuthContext';
 import 'react-tooltip/dist/react-tooltip.css';
 import './App.css';
@@ -53,6 +57,11 @@ const App = () => {
                                 <Route path="/search" element={<SearchResults />} />
                                 {/* Add the new price tool route */}
                                 <Route path="/price-tool" element={<PriceTool />} />
+                                {/* Admin dashboard routes */}
+                                <Route path="/admin" element={<AdminDashboard />} />
+                                <Route path="/admin/users" element={<AdminUsers />} />
+                                <Route path="/admin/sets" element={<AdminSets />} />
+                                <Route path="/admin/logs" element={<AdminLogs />} />
                             </Routes>
                         </div>
                     <Footer />

@@ -30,7 +30,7 @@ if (!empty($token)) {
                     
                     // Log successful verification
                     $log_action = "Account verified successfully for user ID: " . $user['user_id'];
-                    insertLog($pdo, $user['user_id'], $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+                    insertLog($pdo, $user['user_id'], $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'AUTHENTICATION');
                     
                     $response['success'] = true;
                     $response['message'] = 'Account successfully verified';
@@ -45,7 +45,7 @@ if (!empty($token)) {
             
             // Log invalid verification attempt
             $log_action = "Invalid verification token attempted: {$token}";
-            insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+            insertLog($pdo, null, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'SECURITY');
             
             $response['error'] = 'Invalid verification token';
         }

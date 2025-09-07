@@ -110,7 +110,7 @@ try {
     $skippedCount = count($skippedSets);
     $errorCount = count($errorSets);
     $log_action = "Migrated collection minifigures: {$migratedCount} sets migrated, {$skippedCount} skipped, {$errorCount} errors";
-    insertLog($pdo, $userId, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
+    insertLog($pdo, $userId, $log_action, $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', null, 'COLLECTION');
     
     $response['success'] = true;
     $response['migrated_sets'] = $migratedSets;
