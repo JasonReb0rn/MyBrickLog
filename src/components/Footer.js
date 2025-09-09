@@ -3,23 +3,51 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { faTwitter, faInstagram, faReddit } from '@fortawesome/free-brands-svg-icons';
+import axios from 'axios';
 
 const Footer = () => {
     const [currentYear, setCurrentYear] = useState('');
     const [email, setEmail] = useState('');
     const [subscribed, setSubscribed] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         setCurrentYear(new Date().getFullYear().toString());
     }, []);
 
-    const handleSubscribe = (e) => {
+    const handleSubscribe = async (e) => {
         e.preventDefault();
-        if (email && email.includes('@')) {
-            // In reality, you would send this to your backend
-            setSubscribed(true);
-            setEmail('');
-            setTimeout(() => setSubscribed(false), 3000);
+        
+        if (!email || !email.includes('@')) {
+            setMessage('Please enter a valid email address.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        setMessage('');
+
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/newsletter_subscribe.php`, {
+                email: email
+            });
+
+            if (response.data.success) {
+                setSubscribed(true);
+                setEmail('');
+                setMessage(response.data.message);
+                setTimeout(() => {
+                    setSubscribed(false);
+                    setMessage('');
+                }, 5000);
+            } else {
+                setMessage(response.data.message);
+            }
+        } catch (error) {
+            console.error('Newsletter subscription error:', error);
+            setMessage('An error occurred. Please try again later.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -119,14 +147,25 @@ const Footer = () => {
                                 />
                                 <button
                                     type="submit"
-                                    className="px-3 py-2 bg-yellow-400 text-gray-900 rounded-r hover:bg-yellow-300 transition-colors font-medium"
+                                    disabled={isSubmitting}
+                                    className={`px-3 py-2 rounded-r font-medium transition-colors ${
+                                        isSubmitting 
+                                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                                            : 'bg-yellow-400 text-gray-900 hover:bg-yellow-300'
+                                    }`}
                                 >
-                                    <FontAwesomeIcon icon={faEnvelope} />
+                                    {isSubmitting ? (
+                                        <div className="animate-spin w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full"></div>
+                                    ) : (
+                                        <FontAwesomeIcon icon={faEnvelope} />
+                                    )}
                                 </button>
                             </div>
-                            {subscribed && (
-                                <p className="text-green-400 text-xs mt-2">
-                                    Thanks for subscribing!
+                            {(subscribed || message) && (
+                                <p className={`text-xs mt-2 ${
+                                    subscribed ? 'text-green-400' : 'text-red-400'
+                                }`}>
+                                    {message || 'Thanks for subscribing!'}
                                 </p>
                             )}
                         </form>

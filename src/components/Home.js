@@ -6,6 +6,87 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
+// Newsletter Form Component
+const NewsletterForm = () => {
+    const [email, setEmail] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [message, setMessage] = useState('');
+    const [subscribed, setSubscribed] = useState(false);
+
+    const handleSubscribe = async (e) => {
+        e.preventDefault();
+        
+        if (!email || !email.includes('@')) {
+            setMessage('Please enter a valid email address.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        setMessage('');
+
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/newsletter_subscribe.php`, {
+                email: email
+            });
+
+            if (response.data.success) {
+                setSubscribed(true);
+                setEmail('');
+                setMessage(response.data.message);
+                setTimeout(() => {
+                    setSubscribed(false);
+                    setMessage('');
+                }, 5000);
+            } else {
+                setMessage(response.data.message);
+            }
+        } catch (error) {
+            console.error('Newsletter subscription error:', error);
+            setMessage('An error occurred. Please try again later.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div>
+            <form className="flex max-w-md mx-auto mb-4" onSubmit={handleSubscribe}>
+                <input
+                    type="email"
+                    placeholder="Your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="flex-1 px-4 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    required
+                    disabled={isSubmitting}
+                />
+                <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`px-4 py-2 rounded-r-lg transition-colors ${
+                        isSubmitting 
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                            : 'bg-red-600 text-white hover:bg-red-700'
+                    }`}
+                >
+                    {isSubmitting ? (
+                        <div className="animate-spin w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full mx-auto"></div>
+                    ) : (
+                        'Subscribe'
+                    )}
+                </button>
+            </form>
+            {(subscribed || message) && (
+                <p className={`text-sm mb-2 ${
+                    subscribed ? 'text-green-600' : 'text-red-600'
+                }`}>
+                    {message || 'Thanks for subscribing!'}
+                </p>
+            )}
+        </div>
+    );
+};
+
 const Home = () => {
     const [popularThemes, setPopularThemes] = useState([]);
     const [userCollections, setUserCollections] = useState([]);
@@ -809,20 +890,7 @@ const Home = () => {
                         Subscribe to our newsletter for the latest set releases, features, and community highlights.
                     </p>
                     
-                    <form className="flex max-w-md mx-auto">
-                        <input
-                            type="email"
-                            placeholder="Your email address"
-                            className="flex-1 px-4 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"
-                            required
-                        />
-                        <button
-                            type="submit"
-                            className="px-4 py-2 bg-red-600 text-white rounded-r-lg hover:bg-red-700 transition-colors"
-                        >
-                            Subscribe
-                        </button>
-                    </form>
+                    <NewsletterForm />
                     
                     <p className="text-xs text-gray-500 mt-4">
                         We respect your privacy and will never share your information.

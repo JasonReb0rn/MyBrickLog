@@ -223,6 +223,24 @@ CREATE TABLE `users` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `newsletter_subscriptions`
+--
+
+CREATE TABLE `newsletter_subscriptions` (
+  `id` int NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `subscribed_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `ip_address` varchar(45) NULL,
+  `user_agent` varchar(255) NULL,
+  `status` enum('active','unsubscribed') NOT NULL DEFAULT 'active',
+  `unsubscribe_token` varchar(64) NULL,
+  `confirmed` tinyint(1) DEFAULT '0',
+  `confirmation_token` varchar(64) NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `wishlist`
 --
 
@@ -287,6 +305,16 @@ ALTER TABLE `log`
 --
 ALTER TABLE `minifigs`
   ADD PRIMARY KEY (`fig_num`);
+
+--
+-- Indexes for table `newsletter_subscriptions`
+--
+ALTER TABLE `newsletter_subscriptions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_email` (`email`),
+  ADD KEY `idx_email` (`email`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_subscribed_at` (`subscribed_at`);
 
 --
 -- Indexes for table `popular_themes`
@@ -368,6 +396,12 @@ ALTER TABLE `collection_minifigs`
 --
 ALTER TABLE `log`
   MODIFY `log_id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `newsletter_subscriptions`
+--
+ALTER TABLE `newsletter_subscriptions`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `popular_themes`
