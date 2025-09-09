@@ -46,6 +46,23 @@
   @apply opacity-70;
 }
 
+/* Simple spinner animation */
+@keyframes simple-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.simple-spinner {
+  animation: simple-spinner 1s linear infinite;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #dc2626;
+  border-radius: 50%;
+}
+
 /* Common button styles that can be reused across the app */
 @layer components {
   .btn-primary {

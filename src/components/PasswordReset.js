@@ -82,7 +82,7 @@ const PasswordReset = () => {
                     <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Reset Password</h2>
                     <p className="text-center text-gray-600">Verifying reset link...</p>
                     <div className="flex justify-center mt-4">
-                        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-8 h-8 simple-spinner mx-auto" style={{ borderWidth: '2px' }}></div>
                     </div>
                 </div>
             </div>

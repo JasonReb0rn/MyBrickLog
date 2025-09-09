@@ -160,7 +160,7 @@ const Footer = () => {
                                     }`}
                                 >
                                     {isSubmitting ? (
-                                        <div className="animate-spin w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full"></div>
+                                        <div className="w-4 h-4 simple-spinner" style={{ borderWidth: '2px', borderColor: '#4b5563', borderTopColor: 'transparent' }}></div>
                                     ) : (
                                         <FontAwesomeIcon icon={faEnvelope} />
                                     )}

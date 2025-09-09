@@ -1001,7 +1001,7 @@ const SubThemes = () => {
                     
                     {isLoadingMore && (
                         <div className="text-center py-8">
-                            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-red-600 border-r-transparent"></div>
+                            <div className="inline-block h-8 w-8 simple-spinner mx-auto"></div>
                             <p className="mt-2 text-sm text-gray-600">Loading more sets...</p>
                         </div>
                     )}

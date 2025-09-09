@@ -1,21 +1,19 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleNotch, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 
 // Loading component with spinner
 export const LoadingSpinner = ({ text = "Loading...", size = "lg" }) => {
     const spinnerSize = {
         sm: "h-6 w-6",
-        md: "h-8 w-8",
+        md: "h-8 w-8", 
         lg: "h-12 w-12",
         xl: "h-16 w-16"
     };
 
     return (
         <div className="flex flex-col items-center justify-center py-8">
-            <div className={`${spinnerSize[size]} animate-spin text-blue-500`}>
-                <FontAwesomeIcon icon={faCircleNotch} size={size} />
-            </div>
+            <div className={`${spinnerSize[size]} simple-spinner`}></div>
             <p className="mt-4 text-gray-600">{text}</p>
         </div>
     );

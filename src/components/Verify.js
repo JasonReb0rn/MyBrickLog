@@ -42,7 +42,7 @@ const Verify = () => {
                 
                 {isLoading ? (
                     <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <div className="w-10 h-10 simple-spinner mb-4 mx-auto"></div>
                         <p className="text-gray-600">Verifying your account...</p>
                     </div>
                 ) : (

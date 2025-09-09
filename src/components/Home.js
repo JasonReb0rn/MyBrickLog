@@ -70,7 +70,7 @@ const NewsletterForm = () => {
                     }`}
                 >
                     {isSubmitting ? (
-                        <div className="animate-spin w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full mx-auto"></div>
+                        <div className="w-4 h-4 simple-spinner mx-auto" style={{ borderWidth: '2px', borderColor: '#4b5563', borderTopColor: 'transparent' }}></div>
                     ) : (
                         'Subscribe'
                     )}

@@ -178,7 +178,7 @@ const PriceTool = () => {
                         className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 md:h-10 md:w-10 flex items-center justify-center bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                     >
                         {isSearching ? (
-                            <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-3 h-3 md:w-4 md:h-4 simple-spinner" style={{ borderWidth: '2px', borderColor: 'white', borderTopColor: 'transparent' }}></div>
                         ) : (
                             <FontAwesomeIcon icon={faSearch} className="text-xs md:text-sm" />
                         )}
