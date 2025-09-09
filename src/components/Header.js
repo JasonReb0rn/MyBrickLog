@@ -39,96 +39,104 @@ const Header = () => {
 
     return (
         <header className="bg-red-600 shadow-md">
-            <div className="max-w-7xl mx-auto px-4">
-                <div className="flex justify-between items-center h-16">
+            <div className="max-w-7xl mx-auto px-2 sm:px-4">
+                <div className="flex justify-between items-center h-14 md:h-16">
                     {/* Logo Section */}
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 mr-2 md:mr-4">
                         <Link to="/" className="flex items-center">
                             <img 
                                 src="/images/mybricklog_logo.png" 
                                 alt="MyBrickLog" 
-                                className="h-8 md:h-10" 
+                                className="h-7 md:h-8 lg:h-10 transition-all duration-200" 
                             />
                         </Link>
                     </div>
 
                     {/* Desktop Navigation Links */}
-                    <div className="hidden md:flex items-center space-x-1">
+                    <div className="hidden md:flex items-center space-x-1 lg:space-x-2 xl:space-x-3 flex-1 justify-center max-w-4xl mx-4">
                         <Link 
                             to="/" 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/')}`}
+                            className={`px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/')}`}
                         >
-                            <FontAwesomeIcon icon="house" className="mr-2" />
-                            Home
+                            <FontAwesomeIcon icon="house" className="mr-1 lg:mr-2" />
+                            <span className="hidden lg:inline">Home</span>
+                            <span className="lg:hidden">Home</span>
                         </Link>
 
                         <Link 
                             to={collectionUrl} 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive(collectionUrl)}`}
+                            className={`px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive(collectionUrl)}`}
                         >
-                            <FontAwesomeIcon icon="folder-open" className="mr-2" />
-                            My Collection
+                            <FontAwesomeIcon icon="folder-open" className="mr-1 lg:mr-2" />
+                            <span className="hidden xl:inline">My Collection</span>
+                            <span className="xl:hidden">Collection</span>
                         </Link>
 
                         <Link 
                             to={wishlistUrl} 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive(wishlistUrl)}`}
+                            className={`px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive(wishlistUrl)}`}
                         >
-                            <FontAwesomeIcon icon="heart" className="mr-2" />
-                            My Wishlist
+                            <FontAwesomeIcon icon="heart" className="mr-1 lg:mr-2" />
+                            <span className="hidden xl:inline">My Wishlist</span>
+                            <span className="xl:hidden">Wishlist</span>
                         </Link>
 
                         <Link 
                             to="/themes" 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/themes')}`}
+                            className={`px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/themes')}`}
                         >
-                            <FontAwesomeIcon icon="folder-plus" className="mr-2" />
-                            Add Sets
+                            <FontAwesomeIcon icon="folder-plus" className="mr-1 lg:mr-2" />
+                            <span className="hidden xl:inline">Add Sets</span>
+                            <span className="xl:hidden">Add</span>
                         </Link>
 
                         <Link 
                             to="/price-tool" 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/price-tool')}`}
+                            className={`px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/price-tool')}`}
                         >
-                            <FontAwesomeIcon icon="dollar-sign" className="mr-2" />
-                            Price Tool
+                            <FontAwesomeIcon icon="dollar-sign" className="mr-1 lg:mr-2" />
+                            <span className="hidden xl:inline">Price Tool</span>
+                            <span className="xl:hidden">Price</span>
                         </Link>
 
                         <button
                             onClick={() => setShowSearch(!showSearch)}
-                            className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap"
+                            className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap"
                         >
-                            <FontAwesomeIcon icon={faSearch} className="mr-2" />
-                            Search
+                            <FontAwesomeIcon icon={faSearch} className="mr-1 lg:mr-2" />
+                            <span className="hidden lg:inline">Search</span>
                         </button>
                     </div>
 
                     {/* User Authentication Section */}
-                    <div className="hidden md:flex items-center">
+                    <div className="hidden md:flex items-center flex-shrink-0">
                         {user ? (
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1 lg:space-x-2">
                                 <Link 
                                     to="/profile" 
-                                    className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors"
+                                    className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap"
                                 >
-                                    <FontAwesomeIcon icon="user" className="mr-2" />
-                                    {user.username}
+                                    <FontAwesomeIcon icon="user" className="mr-1 lg:mr-2" />
+                                    <span className="hidden lg:inline">{user.username}</span>
+                                    <span className="lg:hidden truncate max-w-20">{user.username.length > 8 ? user.username.substring(0, 8) + '...' : user.username}</span>
                                 </Link>
                                 <button 
                                     onClick={handleLogout}
-                                    className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors"
+                                    className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap"
                                 >
-                                    <FontAwesomeIcon icon="right-from-bracket" className="mr-2" />
-                                    Sign Out
+                                    <FontAwesomeIcon icon="right-from-bracket" className="mr-1 lg:mr-2" />
+                                    <span className="hidden lg:inline">Sign Out</span>
+                                    <span className="lg:hidden">Out</span>
                                 </button>
                             </div>
                         ) : (
                             <Link 
                                 to="/login" 
-                                className="px-3 py-2 rounded-md text-sm font-medium bg-yellow-400 text-red-700 hover:bg-yellow-300 transition-colors"
+                                className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium bg-yellow-400 text-red-700 hover:bg-yellow-300 transition-colors whitespace-nowrap"
                             >
-                                <FontAwesomeIcon icon="user" className="mr-2" />
-                                Sign In
+                                <FontAwesomeIcon icon="user" className="mr-1 lg:mr-2" />
+                                <span className="hidden lg:inline">Sign In</span>
+                                <span className="lg:hidden">Sign In</span>
                             </Link>
                         )}
                     </div>
@@ -147,18 +155,18 @@ const Header = () => {
 
             {/* Search Bar - Appears below the header */}
             {showSearch && (
-                <div className="bg-red-700 py-3 px-4 shadow-md">
+                <div className="bg-red-700 py-2 md:py-3 px-2 sm:px-4 shadow-md">
                     <form onSubmit={handleSearch} className="max-w-3xl mx-auto flex">
                         <input
                             type="text"
                             placeholder="Search sets, themes, or set numbers..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full py-2 px-4 rounded-l-md focus:outline-none border-0"
+                            className="w-full py-2 px-3 md:px-4 text-sm md:text-base rounded-l-md focus:outline-none border-0"
                         />
                         <button 
                             type="submit"
-                            className="bg-yellow-400 text-red-700 px-4 rounded-r-md hover:bg-yellow-300 transition-colors"
+                            className="bg-yellow-400 text-red-700 px-3 md:px-4 rounded-r-md hover:bg-yellow-300 transition-colors flex-shrink-0"
                         >
                             <FontAwesomeIcon icon={faSearch} />
                         </button>
