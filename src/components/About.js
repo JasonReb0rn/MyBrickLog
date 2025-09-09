@@ -9,11 +9,6 @@ const About = () => {
         display_name: 'Jason'
     });
 
-    const cryptoWallets = [
-        { name: 'Bitcoin (BTC)', address: 'bc1qhclc8003jgk7cjz8f4hqtdw83qc0xmzh4p3sff' },
-        { name: 'Ethereum (ETH)', address: '0x0B1e5c79b1C6862b47391Ea13e9a2860f530b6a8' },
-        { name: 'Dogecoin (DOGE)', address: 'D5DJSKnAt2FXbjL2bTkZCR9JAP7vz8Py5r' }
-    ];
 
     useEffect(() => {
         const fetchCreatorInfo = async () => {
@@ -91,26 +86,25 @@ const About = () => {
                 <div className="p-6 md:p-8 border-b border-gray-200">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">Support the Project</h3>
                     <p className="text-gray-600 mb-6">
-                        If you're enjoying MyBrickLog and would like to support its development or running costs, 
-                        you can contribute using any of these cryptocurrency addresses:
+                        If you're enjoying MyBrickLog and would like to support its development and help keep the servers running, 
+                        consider buying me a coffee! Your support helps maintain this free service for the LEGO® community.
                     </p>
                     
-                    <div className="space-y-6">
-                        {cryptoWallets.map((wallet, index) => (
-                            <div key={index} className="bg-gray-50 rounded-lg p-5">
-                                <h4 className="text-lg font-medium text-gray-800 mb-3">{wallet.name}</h4>
-                                <div className="flex items-center bg-white border border-gray-200 rounded-lg p-3 break-all">
-                                    <code className="text-gray-600 text-sm md:text-base font-mono flex-grow">{wallet.address}</code>
-                                    <button 
-                                        className="ml-2 p-2 text-blue-600 hover:text-blue-800 transition-colors"
-                                        onClick={() => navigator.clipboard.writeText(wallet.address)}
-                                    >
-                                        <FontAwesomeIcon icon="copy" />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="text-center">
+                        <a 
+                            href="https://buymeacoffee.com/jason.online" 
+                            className="inline-flex items-center gap-3 px-8 py-4 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <FontAwesomeIcon icon="coffee" className="text-xl" />
+                            <span className="text-lg">Buy Me a Coffee</span>
+                        </a>
                     </div>
+                    
+                    <p className="text-center text-gray-500 text-sm mt-4">
+                        Every coffee helps keep MyBrickLog running and improving!
+                    </p>
                 </div>
 
                 {/* Disclaimer */}

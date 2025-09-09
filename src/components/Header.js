@@ -56,7 +56,7 @@ const Header = () => {
                     <div className="hidden md:flex items-center space-x-1">
                         <Link 
                             to="/" 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors ${isActive('/')}`}
+                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/')}`}
                         >
                             <FontAwesomeIcon icon="house" className="mr-2" />
                             Home
@@ -64,7 +64,7 @@ const Header = () => {
 
                         <Link 
                             to={collectionUrl} 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors ${isActive(collectionUrl)}`}
+                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive(collectionUrl)}`}
                         >
                             <FontAwesomeIcon icon="folder-open" className="mr-2" />
                             My Collection
@@ -72,7 +72,7 @@ const Header = () => {
 
                         <Link 
                             to={wishlistUrl} 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors ${isActive(wishlistUrl)}`}
+                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive(wishlistUrl)}`}
                         >
                             <FontAwesomeIcon icon="heart" className="mr-2" />
                             My Wishlist
@@ -80,7 +80,7 @@ const Header = () => {
 
                         <Link 
                             to="/themes" 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors ${isActive('/themes')}`}
+                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/themes')}`}
                         >
                             <FontAwesomeIcon icon="folder-plus" className="mr-2" />
                             Add Sets
@@ -88,7 +88,7 @@ const Header = () => {
 
                         <Link 
                             to="/price-tool" 
-                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors ${isActive('/price-tool')}`}
+                            className={`px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/price-tool')}`}
                         >
                             <FontAwesomeIcon icon="dollar-sign" className="mr-2" />
                             Price Tool
@@ -96,7 +96,7 @@ const Header = () => {
 
                         <button
                             onClick={() => setShowSearch(!showSearch)}
-                            className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors"
+                            className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap"
                         >
                             <FontAwesomeIcon icon={faSearch} className="mr-2" />
                             Search
