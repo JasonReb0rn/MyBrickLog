@@ -358,7 +358,7 @@ const BlogPost = () => {
                                         <button
                                             type="submit"
                                             disabled={isSubmittingComment || !newComment.trim()}
-                                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                         >
                                             {isSubmittingComment ? (
                                                 <>
@@ -378,7 +378,7 @@ const BlogPost = () => {
                             <p className="text-gray-600 mb-3">You must be logged in to comment.</p>
                             <Link 
                                 to="/login" 
-                                className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                                className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 hover:text-white transition-colors"
                             >
                                 <FontAwesomeIcon icon="user" className="mr-2" />
                                 Sign In to Comment
@@ -484,7 +484,7 @@ const BlogPost = () => {
                 <div className="text-center">
                     <Link 
                         to="/blog" 
-                        className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                        className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 hover:text-white transition-colors"
                     >
                         <FontAwesomeIcon icon="arrow-left" className="mr-2" />
                         Back to Blog

@@ -497,7 +497,7 @@ const SubThemes = () => {
                                 />
                                 <button 
                                     type="submit"
-                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 flex items-center justify-center bg-red-600 text-white rounded-md hover:bg-red-700"
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 flex items-center justify-center bg-red-600 text-white rounded-md hover:bg-red-700 hover:text-white"
                                 >
                                     <FontAwesomeIcon icon="search" />
                                 </button>
@@ -509,7 +509,7 @@ const SubThemes = () => {
                                 onClick={toggleFilters}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
                                     showFilters || Object.values(filterOptions).some(value => value !== 'all' && value !== 'year_desc')
-                                    ? 'bg-red-600 text-white border-red-600 hover:bg-red-700'
+                                    ? 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:text-white'
                                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                                 }`}
                             >

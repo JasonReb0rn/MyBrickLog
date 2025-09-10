@@ -253,7 +253,7 @@ const AdminBlog = () => {
                     </div>
                     <Link 
                         to="/admin/blog/new"
-                        className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                        className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 hover:text-white transition-colors"
                     >
                         <FontAwesomeIcon icon="plus" className="mr-2" />
                         New Post
@@ -350,28 +350,28 @@ const AdminBlog = () => {
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <Link 
                                 to="/admin/blog/new"
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 hover:text-white"
                             >
                                 <FontAwesomeIcon icon="plus" className="mr-2" />
                                 New Post
                             </Link>
                             <Link 
                                 to="/admin/blog/categories"
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 hover:text-white"
                             >
                                 <FontAwesomeIcon icon="folder" className="mr-2" />
                                 Manage Categories
                             </Link>
                             <Link 
                                 to="/admin/blog/comments"
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 hover:text-white"
                             >
                                 <FontAwesomeIcon icon="comments" className="mr-2" />
                                 Moderate Comments
                             </Link>
                             <button 
                                 onClick={() => window.open('/admin/blog/new', '_blank')}
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 hover:text-white"
                             >
                                 <FontAwesomeIcon icon="image" className="mr-2" />
                                 Upload Images

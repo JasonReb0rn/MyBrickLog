@@ -66,7 +66,7 @@ const NewsletterForm = () => {
                     className={`px-4 py-2 rounded-r-lg transition-colors ${
                         isSubmitting 
                             ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-                            : 'bg-red-600 text-white hover:bg-red-700'
+                            : 'bg-red-600 text-white hover:bg-red-700 hover:text-white'
                     }`}
                 >
                     {isSubmitting ? (
@@ -814,7 +814,7 @@ const Home = () => {
                         <div className="text-center">
                             <Link 
                                 to="/blog"
-                                className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-md hover:shadow-lg"
+                                className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 hover:text-white transition-colors font-medium shadow-md hover:shadow-lg"
                             >
                                 <FontAwesomeIcon icon="newspaper" className="mr-2" />
                                 View All Posts
