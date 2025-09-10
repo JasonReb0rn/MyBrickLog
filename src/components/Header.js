@@ -1,23 +1,60 @@
 // src/components/Header.js - Updated
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faXmark, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faXmark, faSearch, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 const Header = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, checkAdminStatus } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [showSearch, setShowSearch] = useState(false);
+    const [showUserDropdown, setShowUserDropdown] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const dropdownRef = useRef(null);
 
     const handleLogout = async () => {
         await logout();
         navigate('/');
         setIsMobileMenuOpen(false);
+        setShowUserDropdown(false);
     };
+
+    // Check admin status when user changes (runs in background)
+    useEffect(() => {
+        const checkAdmin = async () => {
+            if (user) {
+                try {
+                    const adminStatus = await checkAdminStatus();
+                    setIsAdmin(adminStatus);
+                } catch (error) {
+                    console.error('Error checking admin status:', error);
+                    setIsAdmin(false);
+                }
+            } else {
+                setIsAdmin(false);
+            }
+        };
+
+        checkAdmin();
+    }, [user, checkAdminStatus]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowUserDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -54,14 +91,6 @@ const Header = () => {
 
                     {/* Desktop Navigation Links */}
                     <div className="hidden md:flex items-center space-x-1 lg:space-x-2 xl:space-x-3 flex-1 justify-center max-w-4xl mx-4">
-                        <Link 
-                            to="/" 
-                            className={`px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/')}`}
-                        >
-                            <FontAwesomeIcon icon="house" className="mr-1 lg:mr-2" />
-                            <span className="hidden lg:inline">Home</span>
-                            <span className="lg:hidden">Home</span>
-                        </Link>
 
                         <Link 
                             to={collectionUrl} 
@@ -99,6 +128,15 @@ const Header = () => {
                             <span className="xl:hidden">Price</span>
                         </Link>
 
+                        <Link 
+                            to="/blog" 
+                            className={`px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap ${isActive('/blog')}`}
+                        >
+                            <FontAwesomeIcon icon="comment-dots" className="mr-1 lg:mr-2" />
+                            <span className="hidden xl:inline">Blog</span>
+                            <span className="xl:hidden">Blog</span>
+                        </Link>
+
                         <button
                             onClick={() => setShowSearch(!showSearch)}
                             className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap"
@@ -111,23 +149,51 @@ const Header = () => {
                     {/* User Authentication Section */}
                     <div className="hidden md:flex items-center flex-shrink-0">
                         {user ? (
-                            <div className="flex items-center space-x-1 lg:space-x-2">
-                                <Link 
-                                    to="/profile" 
-                                    className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap"
+                            <div className="relative" ref={dropdownRef}>
+                                <button 
+                                    className="flex items-center px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap"
+                                    onMouseEnter={() => setShowUserDropdown(true)}
+                                    onClick={() => setShowUserDropdown(!showUserDropdown)}
                                 >
                                     <FontAwesomeIcon icon="user" className="mr-1 lg:mr-2" />
                                     <span className="hidden lg:inline">{user.username}</span>
                                     <span className="lg:hidden truncate max-w-20">{user.username.length > 8 ? user.username.substring(0, 8) + '...' : user.username}</span>
-                                </Link>
-                                <button 
-                                    onClick={handleLogout}
-                                    className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-white hover:bg-red-700 hover:text-white transition-colors whitespace-nowrap"
-                                >
-                                    <FontAwesomeIcon icon="right-from-bracket" className="mr-1 lg:mr-2" />
-                                    <span className="hidden lg:inline">Sign Out</span>
-                                    <span className="lg:hidden">Out</span>
+                                    <FontAwesomeIcon icon={faChevronDown} className="ml-1 text-xs" />
                                 </button>
+                                
+                                {/* Dropdown Menu */}
+                                {showUserDropdown && (
+                                    <div 
+                                        className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200 user-dropdown"
+                                        onMouseLeave={() => setShowUserDropdown(false)}
+                                    >
+                                        <Link 
+                                            to="/profile" 
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors dropdown-item"
+                                            onClick={() => setShowUserDropdown(false)}
+                                        >
+                                            <FontAwesomeIcon icon="user" className="mr-2 text-gray-500" />
+                                            My Account
+                                        </Link>
+                                        {isAdmin && (
+                                            <Link 
+                                                to="/admin" 
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors dropdown-item"
+                                                onClick={() => setShowUserDropdown(false)}
+                                            >
+                                                <FontAwesomeIcon icon="cog" className="mr-2 text-gray-500" />
+                                                Admin Panel
+                                            </Link>
+                                        )}
+                                        <button 
+                                            onClick={handleLogout}
+                                            className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors dropdown-item"
+                                        >
+                                            <FontAwesomeIcon icon="right-from-bracket" className="mr-2 text-gray-500" />
+                                            Sign Out
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <Link 
@@ -223,6 +289,15 @@ const Header = () => {
                             Price Tool
                         </Link>
 
+                        <Link 
+                            to="/blog" 
+                            className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            <FontAwesomeIcon icon="comment-dots" className="mr-3 text-yellow-400" />
+                            Blog
+                        </Link>
+
                         <button
                             onClick={() => {
                                 setShowSearch(!showSearch);
@@ -236,17 +311,31 @@ const Header = () => {
 
                         {user ? (
                             <>
+                                <div className="px-3 py-2 text-base font-medium text-yellow-400 border-t border-red-600 mt-2 pt-3">
+                                    <FontAwesomeIcon icon="user" className="mr-3" />
+                                    {user.username}
+                                </div>
                                 <Link 
                                     to="/profile" 
-                                    className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
+                                    className="block px-6 py-2 rounded-md text-sm font-medium text-white hover:bg-red-600 hover:text-white ml-3"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     <FontAwesomeIcon icon="user" className="mr-3 text-yellow-400" />
-                                    {user.username}
+                                    My Account
                                 </Link>
+                                {isAdmin && (
+                                    <Link 
+                                        to="/admin" 
+                                        className="block px-6 py-2 rounded-md text-sm font-medium text-white hover:bg-red-600 hover:text-white ml-3"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        <FontAwesomeIcon icon="cog" className="mr-3 text-yellow-400" />
+                                        Admin Panel
+                                    </Link>
+                                )}
                                 <button 
                                     onClick={handleLogout}
-                                    className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-red-600 hover:text-white"
+                                    className="w-full text-left block px-6 py-2 rounded-md text-sm font-medium text-white hover:bg-red-600 hover:text-white ml-3"
                                 >
                                     <FontAwesomeIcon icon="right-from-bracket" className="mr-3 text-yellow-400" />
                                     Sign Out

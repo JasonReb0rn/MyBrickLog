@@ -434,6 +434,36 @@ ALTER TABLE `wishlist`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `blog_categories`
+--
+ALTER TABLE `blog_categories`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `blog_posts`
+--
+ALTER TABLE `blog_posts`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `blog_images`
+--
+ALTER TABLE `blog_images`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `blog_comments`
+--
+ALTER TABLE `blog_comments`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `blog_tags`
+--
+ALTER TABLE `blog_tags`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- Constraints for dumped tables
 --
 
@@ -490,6 +520,187 @@ ALTER TABLE `set_prices`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `fk_users_favorite_theme` FOREIGN KEY (`favorite_theme`) REFERENCES `themes` (`id`);
+
+--
+-- Indexes for table `blog_categories`
+--
+ALTER TABLE `blog_categories`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_slug` (`slug`),
+  ADD KEY `idx_slug` (`slug`);
+
+--
+-- Indexes for table `blog_posts`
+--
+ALTER TABLE `blog_posts`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_slug` (`slug`),
+  ADD KEY `idx_slug` (`slug`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_published_at` (`published_at`),
+  ADD KEY `idx_author_id` (`author_id`),
+  ADD KEY `idx_category_id` (`category_id`);
+
+--
+-- Indexes for table `blog_images`
+--
+ALTER TABLE `blog_images`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_filename` (`filename`),
+  ADD KEY `idx_uploaded_by` (`uploaded_by`);
+
+--
+-- Indexes for table `blog_comments`
+--
+ALTER TABLE `blog_comments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_post_id` (`post_id`),
+  ADD KEY `idx_author_id` (`author_id`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_parent_id` (`parent_id`),
+  ADD KEY `idx_created_at` (`created_at`);
+
+--
+-- Indexes for table `blog_tags`
+--
+ALTER TABLE `blog_tags`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_slug` (`slug`),
+  ADD KEY `idx_slug` (`slug`);
+
+--
+-- Indexes for table `blog_post_tags`
+--
+ALTER TABLE `blog_post_tags`
+  ADD PRIMARY KEY (`post_id`,`tag_id`),
+  ADD KEY `idx_post_id` (`post_id`),
+  ADD KEY `idx_tag_id` (`tag_id`);
+
+--
+-- Constraints for table `blog_posts`
+--
+ALTER TABLE `blog_posts`
+  ADD CONSTRAINT `blog_posts_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `blog_posts_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `blog_categories` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `blog_images`
+--
+ALTER TABLE `blog_images`
+  ADD CONSTRAINT `blog_images_ibfk_1` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `blog_comments`
+--
+ALTER TABLE `blog_comments`
+  ADD CONSTRAINT `blog_comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `blog_posts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `blog_comments_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `blog_comments_ibfk_3` FOREIGN KEY (`parent_id`) REFERENCES `blog_comments` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `blog_post_tags`
+--
+ALTER TABLE `blog_post_tags`
+  ADD CONSTRAINT `blog_post_tags_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `blog_posts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `blog_post_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `blog_tags` (`id`) ON DELETE CASCADE;
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `blog_categories`
+--
+
+CREATE TABLE `blog_categories` (
+  `id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  `description` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `blog_posts`
+--
+
+CREATE TABLE `blog_posts` (
+  `id` int NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `content` longtext NOT NULL,
+  `excerpt` text,
+  `author_id` int NOT NULL,
+  `category_id` int DEFAULT NULL,
+  `featured_image` varchar(255) DEFAULT NULL,
+  `status` enum('draft','published','archived') NOT NULL DEFAULT 'draft',
+  `published_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `meta_title` varchar(255) DEFAULT NULL,
+  `meta_description` varchar(160) DEFAULT NULL,
+  `view_count` int NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `blog_images`
+--
+
+CREATE TABLE `blog_images` (
+  `id` int NOT NULL,
+  `filename` varchar(255) NOT NULL,
+  `original_filename` varchar(255) NOT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `file_size` int NOT NULL,
+  `mime_type` varchar(100) NOT NULL,
+  `alt_text` varchar(255) DEFAULT NULL,
+  `uploaded_by` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `blog_comments`
+--
+
+CREATE TABLE `blog_comments` (
+  `id` int NOT NULL,
+  `post_id` int NOT NULL,
+  `author_id` int NOT NULL,
+  `content` text NOT NULL,
+  `status` enum('pending','approved','rejected','spam') NOT NULL DEFAULT 'pending',
+  `parent_id` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `blog_tags`
+--
+
+CREATE TABLE `blog_tags` (
+  `id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `blog_post_tags`
+--
+
+CREATE TABLE `blog_post_tags` (
+  `post_id` int NOT NULL,
+  `tag_id` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

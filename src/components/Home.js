@@ -100,6 +100,8 @@ const Home = () => {
     const [activeTab, setActiveTab] = useState('recent');
     const [featuredUserSet, setFeaturedUserSet] = useState(null);
     const [loadingFeatured, setLoadingFeatured] = useState(true);
+    const [recentBlogPosts, setRecentBlogPosts] = useState([]);
+    const [loadingBlogPosts, setLoadingBlogPosts] = useState(true);
     const navigate = useNavigate();
     const { user } = useAuth();
 
@@ -115,12 +117,13 @@ const Home = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [themesResponse, collectionsResponse, recentSetsResponse, statsResponse, featuredUserSetResponse] = await Promise.all([
+                const [themesResponse, collectionsResponse, recentSetsResponse, statsResponse, featuredUserSetResponse, blogPostsResponse] = await Promise.all([
                     axios.get(`${process.env.REACT_APP_API_URL}/get_popular_themes.php`),
                     axios.get(`${process.env.REACT_APP_API_URL}/get_random_collections.php`),
                     axios.get(`${process.env.REACT_APP_API_URL}/get_recent_set_additions.php`),
                     axios.get(`${process.env.REACT_APP_API_URL}/get_site_statistics.php`),
-                    axios.get(`${process.env.REACT_APP_API_URL}/get_random_user_set.php`)
+                    axios.get(`${process.env.REACT_APP_API_URL}/get_random_user_set.php`),
+                    axios.get(`${process.env.REACT_APP_API_URL}/blog_get_posts.php?limit=3`)
                 ]);
     
                 setPopularThemes(themesResponse.data);
@@ -142,9 +145,16 @@ const Home = () => {
                 }
                 setLoadingFeatured(false);
                 
+                // Set recent blog posts
+                if (blogPostsResponse.data && blogPostsResponse.data.success) {
+                    setRecentBlogPosts(blogPostsResponse.data.posts || []);
+                }
+                setLoadingBlogPosts(false);
+                
             } catch (error) {
                 console.error('Error fetching data:', error);
                 setLoadingFeatured(false);
+                setLoadingBlogPosts(false);
                 setSiteStats(prevState => ({...prevState, loading: false}));
             }
         };
@@ -723,6 +733,97 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Recent Blog Posts Section */}
+            {recentBlogPosts.length > 0 && (
+                <section className="py-12 bg-gradient-to-br from-gray-50 to-white">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                                <FontAwesomeIcon icon="newspaper" className="mr-3 text-red-600" />
+                                Latest from the Blog
+                            </h2>
+                            <p className="text-gray-600 max-w-2xl mx-auto">
+                                Stay updated with the latest LEGO® news, reviews, and collection tips from our community.
+                            </p>
+                        </div>
+                        
+                        <div className={`grid gap-6 mb-8 ${
+                            recentBlogPosts.length === 1 
+                                ? 'grid-cols-1 max-w-md mx-auto' 
+                                : recentBlogPosts.length === 2 
+                                ? 'grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto' 
+                                : 'grid-cols-1 md:grid-cols-3'
+                        }`}>
+                            {recentBlogPosts.map((post) => (
+                                <Link 
+                                    key={post.id} 
+                                    to={`/blog/${post.slug}`}
+                                    className="group block bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden hover:-translate-y-1"
+                                >
+                                    {/* Featured Image */}
+                                    <div className="aspect-video overflow-hidden">
+                                        <img
+                                            src={post.featured_image || '/images/lego_piece_questionmark.png'}
+                                            alt={post.title}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            onError={(e) => {
+                                                e.target.src = '/images/lego_piece_questionmark.png';
+                                            }}
+                                        />
+                                    </div>
+                                    
+                                    {/* Content */}
+                                    <div className="p-4">
+                                        {/* Category */}
+                                        <div className="mb-2">
+                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                {post.category?.name || 'General'}
+                                            </span>
+                                        </div>
+                                        
+                                        {/* Title */}
+                                        <h3 className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors mb-2 line-clamp-2">
+                                            {post.title}
+                                        </h3>
+                                        
+                                        {/* Excerpt */}
+                                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                                            {post.excerpt}
+                                        </p>
+                                        
+                                        {/* Meta */}
+                                        <div className="flex items-center justify-between text-xs text-gray-500">
+                                            <span>
+                                                <FontAwesomeIcon icon="user" className="mr-1" />
+                                                {post.author?.username || 'Admin'}
+                                            </span>
+                                            <span>
+                                                {new Date(post.published_at).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                        
+                        {/* View All Posts Link */}
+                        <div className="text-center">
+                            <Link 
+                                to="/blog"
+                                className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-md hover:shadow-lg"
+                            >
+                                <FontAwesomeIcon icon="newspaper" className="mr-2" />
+                                View All Posts
+                                <FontAwesomeIcon icon="arrow-right" className="ml-2" />
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Features Section */}
             <section className="py-16 bg-white">

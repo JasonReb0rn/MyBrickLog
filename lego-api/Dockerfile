@@ -13,10 +13,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Configure PHP for file uploads
 RUN echo "file_uploads = On\n" \
-         "memory_limit = 128M\n" \
-         "upload_max_filesize = 10M\n" \
-         "post_max_size = 10M\n" \
+         "memory_limit = 256M\n" \
+         "upload_max_filesize = 16M\n" \
+         "post_max_size = 16M\n" \
          "max_execution_time = 600\n" \
+         "max_input_time = 600\n" \
          > /usr/local/etc/php/conf.d/uploads.ini
 
 # Copy PHP source code to the container

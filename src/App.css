@@ -46,3 +46,26 @@
 .main-content {
   flex: 1;
 }
+
+/* User dropdown animations */
+.user-dropdown {
+  animation: dropdownFadeIn 0.2s ease-out;
+  transform-origin: top right;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dropdown hover states */
+.dropdown-item:hover {
+  background-color: #f3f4f6;
+  transition: background-color 0.15s ease-in-out;
+}

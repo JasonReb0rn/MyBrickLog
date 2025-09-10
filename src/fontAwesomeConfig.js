@@ -56,7 +56,14 @@ import {
   faUsers,
   faClock,
   faTableCells,
-  faListUl
+  faListUl,
+  faComment,
+  faCommentDots,
+  faPenToSquare,
+  faFeather,
+  faFileLines,
+  faNewspaper,
+  faCog
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -125,6 +132,13 @@ library.add(
   faPiggyBank,
   faUsers,
   faClock,
+  faComment,
+  faCommentDots,
+  faPenToSquare,
+  faFeather,
+  faFileLines,
+  faNewspaper,
+  faCog,
   
   // Brand icons
   faGithub,
