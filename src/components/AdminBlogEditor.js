@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,6 +10,10 @@ const AdminBlogEditor = () => {
     const navigate = useNavigate();
     const { postId } = useParams();
     const isEditing = !!postId;
+    
+    // Use refs to prevent unnecessary re-renders
+    const authCheckRef = useRef(false);
+    const formPersistenceKey = useMemo(() => `blog_editor_form_${postId || 'new'}`, [postId]);
     
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
@@ -36,15 +40,46 @@ const AdminBlogEditor = () => {
     const [uploadedImages, setUploadedImages] = useState([]);
     const [isLoadingImages, setIsLoadingImages] = useState(false);
 
-    useEffect(() => {
-        const verifyAdminAccess = async () => {
-            if (authLoading) return;
-            
-            if (!user) {
-                navigate('/');
-                return;
-            }
+    // Form persistence - save to localStorage on changes
+    const persistFormData = useCallback((data) => {
+        try {
+            localStorage.setItem(formPersistenceKey, JSON.stringify(data));
+        } catch (error) {
+            console.warn('Failed to persist form data:', error);
+        }
+    }, [formPersistenceKey]);
 
+    // Load persisted form data
+    const loadPersistedFormData = useCallback(() => {
+        try {
+            const persisted = localStorage.getItem(formPersistenceKey);
+            return persisted ? JSON.parse(persisted) : null;
+        } catch (error) {
+            console.warn('Failed to load persisted form data:', error);
+            return null;
+        }
+    }, [formPersistenceKey]);
+
+    // Clear persisted form data
+    const clearPersistedFormData = useCallback(() => {
+        try {
+            localStorage.removeItem(formPersistenceKey);
+        } catch (error) {
+            console.warn('Failed to clear persisted form data:', error);
+        }
+    }, [formPersistenceKey]);
+
+    // Memoized admin verification to prevent unnecessary re-runs
+    const verifyAdminAccess = useCallback(async () => {
+        if (authLoading || authCheckRef.current) return;
+        
+        if (!user) {
+            navigate('/');
+            return;
+        }
+
+        try {
+            authCheckRef.current = true;
             const isAdmin = await checkAdminStatus();
             if (!isAdmin) {
                 navigate('/');
@@ -53,12 +88,17 @@ const AdminBlogEditor = () => {
 
             setIsAuthorized(true);
             await loadEditorData();
-        };
+        } finally {
+            authCheckRef.current = false;
+        }
+    }, [user, authLoading, checkAdminStatus, navigate]);
 
+    useEffect(() => {
         verifyAdminAccess();
-    }, [user, authLoading, checkAdminStatus, navigate, postId]);
+    }, [verifyAdminAccess]);
 
-    const loadEditorData = async () => {
+    // Memoized data loading function
+    const loadEditorData = useCallback(async () => {
         try {
             // Fetch categories and tags in parallel
             console.log('Fetching categories and tags...');
@@ -116,7 +156,7 @@ const AdminBlogEditor = () => {
                 }
 
                 const post = postData.post;
-                setFormData({
+                const newFormData = {
                     title: post.title,
                     slug: post.slug,
                     content: post.content,
@@ -127,59 +167,64 @@ const AdminBlogEditor = () => {
                     meta_title: post.meta_title || '',
                     meta_description: post.meta_description || '',
                     tags: post.tags || []
-                });
+                };
+                setFormData(newFormData);
+                // Clear any persisted data when loading existing post
+                clearPersistedFormData();
+            } else {
+                // For new posts, try to load persisted data
+                const persistedData = loadPersistedFormData();
+                if (persistedData) {
+                    setFormData(persistedData);
+                    console.log('Loaded persisted form data');
+                }
             }
         } catch (error) {
             console.error('Error loading editor data:', error);
             setError(`Unable to load editor data: ${error.message}. Please check the console for more details.`);
         }
         setIsLoading(false);
-    };
+    }, [isEditing, postId, loadPersistedFormData, clearPersistedFormData]);
 
-    const generateSlug = (title) => {
+    const generateSlug = useCallback((title) => {
         return title
             .toLowerCase()
             .replace(/[^\w\s-]/g, '')
             .replace(/[\s_-]+/g, '-')
             .replace(/^-+|-+$/g, '');
-    };
+    }, []);
 
-    const handleInputChange = (field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
+    // Memoized form update function with persistence
+    const handleInputChange = useCallback((field, value) => {
+        setFormData(prev => {
+            const newFormData = { ...prev, [field]: value };
+            
+            // Persist form data to localStorage (debounced to avoid excessive writes)
+            if (!isEditing) {
+                persistFormData(newFormData);
+            }
+            
+            return newFormData;
+        });
+    }, [isEditing, persistFormData]);
 
-        // Auto-generate slug when title changes
-        if (field === 'title' && !isEditing) {
-            setFormData(prev => ({
-                ...prev,
-                slug: generateSlug(value)
-            }));
-        }
-
-        // Auto-generate meta title if not manually set
-        if (field === 'title' && !formData.meta_title) {
-            setFormData(prev => ({
-                ...prev,
-                meta_title: value
-            }));
-        }
-    };
-
-    const handleAddTag = () => {
+    const handleAddTag = useCallback(() => {
         if (!newTag.trim()) return;
 
         const tagName = newTag.trim();
         const existingTag = tags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase());
 
         if (existingTag) {
-            if (!formData.tags.includes(existingTag.id)) {
-                setFormData(prev => ({
-                    ...prev,
-                    tags: [...prev.tags, existingTag.id]
-                }));
-            }
+            setFormData(prev => {
+                if (!prev.tags.includes(existingTag.id)) {
+                    const newFormData = { ...prev, tags: [...prev.tags, existingTag.id] };
+                    if (!isEditing) {
+                        persistFormData(newFormData);
+                    }
+                    return newFormData;
+                }
+                return prev;
+            });
         } else {
             // Create new tag (in real app, this would create it in the database)
             const newTagObj = {
@@ -188,76 +233,93 @@ const AdminBlogEditor = () => {
                 slug: generateSlug(tagName)
             };
             setTags(prev => [...prev, newTagObj]);
-            setFormData(prev => ({
-                ...prev,
-                tags: [...prev.tags, newTagObj.id]
-            }));
+            setFormData(prev => {
+                const newFormData = { ...prev, tags: [...prev.tags, newTagObj.id] };
+                if (!isEditing) {
+                    persistFormData(newFormData);
+                }
+                return newFormData;
+            });
         }
 
         setNewTag('');
-    };
+    }, [newTag, tags, generateSlug, isEditing, persistFormData]);
 
-    const handleRemoveTag = (tagId) => {
-        setFormData(prev => ({
-            ...prev,
-            tags: prev.tags.filter(id => id !== tagId)
-        }));
-    };
+    const handleRemoveTag = useCallback((tagId) => {
+        setFormData(prev => {
+            const newFormData = { ...prev, tags: prev.tags.filter(id => id !== tagId) };
+            if (!isEditing) {
+                persistFormData(newFormData);
+            }
+            return newFormData;
+        });
+    }, [isEditing, persistFormData]);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
         setIsSaving(true);
         setError(null);
 
-        try {
-            // Validate required fields
-            if (!formData.title.trim()) {
-                throw new Error('Title is required');
-            }
-            if (!formData.content.trim()) {
-                throw new Error('Content is required');
-            }
-            if (!formData.category_id) {
-                throw new Error('Category is required');
-            }
+        // Get current form data at submission time
+        setFormData(currentFormData => {
+            (async () => {
+                try {
+                    // Validate required fields
+                    if (!currentFormData.title.trim()) {
+                        throw new Error('Title is required');
+                    }
+                    if (!currentFormData.content.trim()) {
+                        throw new Error('Content is required');
+                    }
+                    if (!currentFormData.category_id) {
+                        throw new Error('Category is required');
+                    }
 
-            // Prepare data for submission
-            const submitData = {
-                ...formData,
-                category_id: parseInt(formData.category_id),
-                tags: formData.tags.map(tagId => {
-                    const tag = tags.find(t => t.id === tagId);
-                    return tag ? tag.name : '';
-                }).filter(name => name)
-            };
+                    // Prepare data for submission
+                    const submitData = {
+                        ...currentFormData,
+                        category_id: parseInt(currentFormData.category_id),
+                        tags: currentFormData.tags.map(tagId => {
+                            const tag = tags.find(t => t.id === tagId);
+                            return tag ? tag.name : '';
+                        }).filter(name => name)
+                    };
 
-            if (isEditing) {
-                submitData.id = parseInt(postId);
-            }
+                    if (isEditing) {
+                        submitData.id = parseInt(postId);
+                    }
 
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/admin_blog_save_post.php`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(submitData)
-            });
+                    const response = await fetch(`${process.env.REACT_APP_API_URL}/admin_blog_save_post.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify(submitData)
+                    });
 
-            const data = await response.json();
+                    const data = await response.json();
 
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Failed to save post');
-            }
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Failed to save post');
+                    }
 
-            // Redirect to blog management
-            navigate('/admin/blog');
-        } catch (error) {
-            console.error('Error saving post:', error);
-            setError(error.message || 'Failed to save post. Please try again.');
-        }
-        setIsSaving(false);
-    };
+                    // Clear persisted form data on successful save
+                    clearPersistedFormData();
+                    
+                    // Redirect to blog management
+                    navigate('/admin/blog');
+                } catch (error) {
+                    console.error('Error saving post:', error);
+                    setError(error.message || 'Failed to save post. Please try again.');
+                } finally {
+                    setIsSaving(false);
+                }
+            })();
+            
+            return currentFormData; // Return unchanged form data
+        });
+    }, [tags, isEditing, postId, clearPersistedFormData, navigate]);
 
     const handleImageUpload = async (e) => {
         const file = e.target.files[0];
@@ -330,10 +392,7 @@ const AdminBlogEditor = () => {
                 }
 
                 // Update the featured image URL
-                setFormData(prev => ({
-                    ...prev,
-                    featured_image: response.data.image.url
-                }));
+                handleInputChange('featured_image', response.data.image.url);
 
             } catch (error) {
                 console.error('Error uploading image:', error);
@@ -348,7 +407,7 @@ const AdminBlogEditor = () => {
         }
     };
 
-    const loadUploadedImages = async () => {
+    const loadUploadedImages = useCallback(async () => {
         setIsLoadingImages(true);
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/blog_get_images.php?limit=20`, {
@@ -367,15 +426,12 @@ const AdminBlogEditor = () => {
             setError(`Failed to load images: ${error.message}`);
         }
         setIsLoadingImages(false);
-    };
+    }, []);
 
-    const handleSelectImage = (imageUrl) => {
-        setFormData(prev => ({
-            ...prev,
-            featured_image: imageUrl
-        }));
+    const handleSelectImage = useCallback((imageUrl) => {
+        handleInputChange('featured_image', imageUrl);
         setShowImageBrowser(false);
-    };
+    }, [handleInputChange]);
 
     if (isLoading || authLoading) {
         return (
@@ -476,9 +532,17 @@ const AdminBlogEditor = () => {
                                             id="slug"
                                             value={formData.slug}
                                             onChange={(e) => handleInputChange('slug', e.target.value)}
-                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                            className="flex-1 px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                             placeholder="post-slug"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleInputChange('slug', generateSlug(formData.title))}
+                                            className="px-3 py-2 bg-gray-200 text-gray-700 rounded-r-md hover:bg-gray-300 transition-colors border border-l-0 border-gray-300"
+                                            title="Generate slug from title"
+                                        >
+                                            <FontAwesomeIcon icon="sync" />
+                                        </button>
                                     </div>
                                 </div>
 
@@ -637,7 +701,7 @@ const AdminBlogEditor = () => {
                                         />
                                         <button
                                             type="button"
-                                            onClick={() => setFormData(prev => ({ ...prev, featured_image: '' }))}
+                                            onClick={() => handleInputChange('featured_image', '')}
                                             className="mt-2 text-sm text-red-600 hover:text-red-800"
                                         >
                                             <FontAwesomeIcon icon="times" className="mr-1" />

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useMemo, useRef } from 'react';
 
 const AuthContext = createContext();
 
@@ -7,46 +7,73 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const sessionCheckRef = useRef(null);
+    const lastSessionCheckRef = useRef(0);
 
-    useEffect(() => {
-        const checkSession = async () => {
-            const storedUser = JSON.parse(localStorage.getItem('user'));
-            if (storedUser) {
-                console.log("Stored user found:", storedUser);
-                try {
-                    const response = await fetch(`${process.env.REACT_APP_API_URL}/check_session.php`, {
-                        method: 'GET',
-                        credentials: 'include',
-                    });
-                    const data = await response.json();
-                    if (data.valid) {
-                        console.log("Session is valid. User ID:", data.user_id);
-                        // Update stored user with latest admin status from server
-                        const updatedUser = { ...storedUser, is_admin: data.is_admin || false };
+    // Memoized session check function to prevent unnecessary re-renders
+    const checkSession = useCallback(async (forceCheck = false) => {
+        const now = Date.now();
+        // Only check session if forced or if more than 5 minutes have passed
+        if (!forceCheck && (now - lastSessionCheckRef.current) < 5 * 60 * 1000) {
+            return;
+        }
+        
+        lastSessionCheckRef.current = now;
+        
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (storedUser) {
+            console.log("Stored user found:", storedUser);
+            try {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/check_session.php`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+                const data = await response.json();
+                if (data.valid) {
+                    console.log("Session is valid. User ID:", data.user_id);
+                    // Only update if there's actually a change to prevent re-renders
+                    const updatedUser = { ...storedUser, is_admin: data.is_admin || false };
+                    const hasChanged = JSON.stringify(updatedUser) !== JSON.stringify(storedUser);
+                    if (hasChanged) {
                         setUser(updatedUser);
                         localStorage.setItem('user', JSON.stringify(updatedUser));
                     } else {
-                        console.log("Session is invalid. Removing stored user.");
-                        localStorage.removeItem('user');
-                        setUser(null);
+                        // Set user if it's not already set (initial load)
+                        setUser(prev => prev ? prev : updatedUser);
                     }
-                } catch (error) {
-                    console.error("Error checking session:", error);
+                } else {
+                    console.log("Session is invalid. Removing stored user.");
+                    localStorage.removeItem('user');
                     setUser(null);
                 }
-            } else {
-                console.log("No stored user found.");
+            } catch (error) {
+                console.error("Error checking session:", error);
+                setUser(null);
             }
-            setIsLoading(false);
-        };
-
-        checkSession();
-        const interval = setInterval(checkSession, 5 * 60 * 1000); // Check session every 5 minutes
-
-        return () => clearInterval(interval);
+        } else {
+            console.log("No stored user found.");
+            setUser(null);
+        }
+        setIsLoading(false);
     }, []);
 
-    const login = async (username, password) => {
+    useEffect(() => {
+        // Initial session check
+        checkSession(true);
+        
+        // Set up interval for background session checks (won't cause re-renders unless data changes)
+        const interval = setInterval(() => checkSession(false), 5 * 60 * 1000);
+        sessionCheckRef.current = interval;
+
+        return () => {
+            if (sessionCheckRef.current) {
+                clearInterval(sessionCheckRef.current);
+            }
+        };
+    }, [checkSession]);
+
+    // Memoized login function
+    const login = useCallback(async (username, password) => {
         const response = await fetch(`${process.env.REACT_APP_API_URL}/login.php`, {
             method: 'POST',
             headers: {
@@ -66,9 +93,10 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('user', JSON.stringify(user));
         }
         return data;
-    };
+    }, []);
 
-    const register = async (username, email, password, recaptchaToken) => {
+    // Memoized register function
+    const register = useCallback(async (username, email, password, recaptchaToken) => {
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/register.php`, {
                 method: 'POST',
@@ -91,9 +119,10 @@ export const AuthProvider = ({ children }) => {
                 message: 'An error occurred during registration. Please try again.' 
             };
         }
-    };
+    }, []);
 
-    const logout = async () => {
+    // Memoized logout function
+    const logout = useCallback(async () => {
         await fetch(`${process.env.REACT_APP_API_URL}/logout.php`, {
             method: 'POST',
             headers: {
@@ -103,9 +132,10 @@ export const AuthProvider = ({ children }) => {
         });
         localStorage.removeItem('user');
         setUser(null);
-    };
+    }, []);
 
-    const checkAdminStatus = async () => {
+    // Memoized admin check function
+    const checkAdminStatus = useCallback(async () => {
         if (!user) return false;
         
         try {
@@ -119,10 +149,20 @@ export const AuthProvider = ({ children }) => {
             console.error("Error checking admin status:", error);
             return false;
         }
-    };
+    }, [user]);
+
+    // Memoize the context value to prevent unnecessary re-renders
+    const contextValue = useMemo(() => ({
+        user,
+        isLoading,
+        login,
+        register,
+        logout,
+        checkAdminStatus
+    }), [user, isLoading, login, register, logout, checkAdminStatus]);
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, logout, checkAdminStatus }}>
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     );

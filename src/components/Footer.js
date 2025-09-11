@@ -78,11 +78,6 @@ const Footer = () => {
                         </h3>
                         <ul className="space-y-2">
                             <li>
-                                <Link to="/" className="text-gray-400 hover:text-white transition-colors">
-                                    Home
-                                </Link>
-                            </li>
-                            <li>
                                 <Link to="/collection" className="text-gray-400 hover:text-white transition-colors">
                                     My Collection
                                 </Link>
