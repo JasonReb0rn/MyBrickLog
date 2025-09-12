@@ -98,9 +98,6 @@ export const AuthProvider = ({ children }) => {
     // Memoized register function
     const register = useCallback(async (username, email, password, recaptchaToken) => {
         try {
-            console.log('Attempting registration with:', { username, email });
-            console.log('API URL:', process.env.REACT_APP_API_URL);
-            
             const response = await fetch(`${process.env.REACT_APP_API_URL}/register.php`, {
                 method: 'POST',
                 headers: {
@@ -113,14 +110,8 @@ export const AuthProvider = ({ children }) => {
                     recaptcha_token: recaptchaToken 
                 }),
             });
-
-            console.log('Registration response status:', response.status);
-            console.log('Registration response headers:', response.headers);
     
             if (!response.ok) {
-                console.error('Registration request failed with status:', response.status);
-                const errorText = await response.text();
-                console.error('Error response body:', errorText);
                 return {
                     success: false,
                     message: `Registration failed: ${response.status} ${response.statusText}`
@@ -128,17 +119,11 @@ export const AuthProvider = ({ children }) => {
             }
 
             const data = await response.json();
-            console.log('Registration response data:', data);
             return data;
         } catch (error) {
-            console.error('Registration error details:', error);
-            console.error('Error name:', error.name);
-            console.error('Error message:', error.message);
-            console.error('Error stack:', error.stack);
-            
             return { 
                 success: false, 
-                message: `Registration error: ${error.message}. Please check the console for more details.`
+                message: 'An error occurred during registration. Please try again.'
             };
         }
     }, []);

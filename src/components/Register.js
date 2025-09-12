@@ -31,7 +31,7 @@ const Register = () => {
             recaptchaScript.id = 'recaptcha-script';
             
             recaptchaScript.onload = () => {
-                console.log('ReCAPTCHA script loaded');
+                // ReCAPTCHA script loaded
             };
             
             document.head.appendChild(recaptchaScript);
@@ -141,15 +141,11 @@ const Register = () => {
                 throw new Error('ReCAPTCHA not loaded. Please refresh the page and try again.');
             }
 
-            console.log('Executing ReCAPTCHA...');
             const token = await window.grecaptcha.execute(process.env.REACT_APP_RECAPTCHA_SITE_KEY, {
                 action: 'register'
             });
-            console.log('ReCAPTCHA token obtained:', token ? 'Yes' : 'No');
 
-            console.log('Calling register function...');
             const response = await register(formData.username, formData.email, formData.password, token);
-            console.log('Register response:', response);
             
             if (response.success) {
                 setMessage('Registration successful! Please check your email to verify your account.');
@@ -157,8 +153,7 @@ const Register = () => {
                 setMessage(response.message || 'Registration failed');
             }
         } catch (error) {
-            console.error('Registration error in component:', error);
-            setMessage(`Registration error: ${error.message}. Please check the console for details.`);
+            setMessage(`Registration error: ${error.message}. Please try again.`);
         } finally {
             setIsSubmitting(false);
         }

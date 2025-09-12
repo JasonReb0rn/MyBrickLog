@@ -6,51 +6,19 @@ require 'create_log.php';
 use Aws\Ses\SesClient;
 use Aws\Exception\AwsException;
 
-// Enhanced error logging
-error_log("=== REGISTRATION REQUEST START ===");
-error_log("Request method: " . $_SERVER['REQUEST_METHOD']);
-error_log("Content type: " . ($_SERVER['CONTENT_TYPE'] ?? 'not set'));
-
-$raw_input = file_get_contents('php://input');
-error_log("Raw input: " . $raw_input);
-
-$data = json_decode($raw_input, true);
-error_log("JSON decode result: " . print_r($data, true));
-error_log("JSON decode error: " . json_last_error_msg());
-
+$data = json_decode(file_get_contents('php://input'), true);
 $username = $data['username'] ?? '';
 $email = $data['email'] ?? '';
 $password = $data['password'] ?? '';
 $recaptchaToken = $data['recaptcha_token'] ?? '';
 
-error_log("Parsed data - Username: $username, Email: $email, Password length: " . strlen($password) . ", ReCAPTCHA token length: " . strlen($recaptchaToken));
-
-// Check required environment variables
-$recaptcha_secret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? '';
-$aws_key = $_ENV['AWS_S3_KEY'] ?? '';
-$aws_secret = $_ENV['AWS_S3_SECRET'] ?? '';
-
-error_log("Environment check - ReCAPTCHA secret: " . (empty($recaptcha_secret) ? 'MISSING' : 'present'));
-error_log("Environment check - AWS key: " . (empty($aws_key) ? 'MISSING' : 'present'));
-error_log("Environment check - AWS secret: " . (empty($aws_secret) ? 'MISSING' : 'present'));
-
 $response = ['success' => false, 'message' => ''];
-
-// Debug PDO transaction support
-error_log("PDO driver: " . print_r($pdo->getAttribute(PDO::ATTR_DRIVER_NAME), true));
-error_log("Transaction support: " . print_r(method_exists($pdo, 'beginTransaction'), true));
 
 // Verify ReCAPTCHA token
 function verifyRecaptcha($token) {
     $secret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? '';
     
-    if (empty($secret)) {
-        error_log("ReCAPTCHA secret key not configured");
-        return false;
-    }
-    
-    if (empty($token)) {
-        error_log("ReCAPTCHA token is empty");
+    if (empty($secret) || empty($token)) {
         return false;
     }
     
@@ -73,193 +41,161 @@ function verifyRecaptcha($token) {
     $result = file_get_contents($verifyURL, false, $context);
     
     if ($result === false) {
-        error_log("Failed to contact ReCAPTCHA verification server");
         return false;
     }
-    
-    error_log("ReCAPTCHA verification response: " . $result);
     
     $responseData = json_decode($result);
     
     if (!$responseData) {
-        error_log("Failed to parse ReCAPTCHA response JSON");
         return false;
     }
-    
-    error_log("ReCAPTCHA success: " . ($responseData->success ? 'true' : 'false'));
-    error_log("ReCAPTCHA score: " . ($responseData->score ?? 'not provided'));
     
     return $responseData->success && ($responseData->score ?? 1) >= 0.5;
 }
 
 // Validate input parameters
 if (empty($username)) {
-    error_log("Registration failed: Username is empty");
     $response['message'] = 'Username is required.';
     echo json_encode($response);
     exit;
 }
 
 if (empty($email)) {
-    error_log("Registration failed: Email is empty");
     $response['message'] = 'Email is required.';
     echo json_encode($response);
     exit;
 }
 
 if (empty($password)) {
-    error_log("Registration failed: Password is empty");
     $response['message'] = 'Password is required.';
     echo json_encode($response);
     exit;
 }
 
 if (empty($recaptchaToken)) {
-    error_log("Registration failed: ReCAPTCHA token is empty");
     $response['message'] = 'ReCAPTCHA verification is required.';
     echo json_encode($response);
     exit;
 }
 
-error_log("All input parameters validated successfully");
-
 // Verify ReCAPTCHA first
-error_log("Starting ReCAPTCHA verification");
 if (!verifyRecaptcha($recaptchaToken)) {
-    error_log("ReCAPTCHA verification failed");
     $response['message'] = 'ReCAPTCHA verification failed. Please try again.';
     echo json_encode($response);
     exit;
 }
 
-error_log("ReCAPTCHA verification passed");
+try {
+    // Start transaction
+    $pdo->beginTransaction();
 
-    try {
-        error_log("Starting registration process for username: $username");
-        
-        // Start transaction
-        $pdo->beginTransaction();
-        error_log("Transaction started");
-
-        // Check if username already exists
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
-        $stmt->execute([$username]);
-        if ($stmt->fetchColumn() > 0) {
-            $pdo->rollBack();
-            error_log("Username exists - rolled back");
-            $response['message'] = 'Username is already in use.';
-            echo json_encode($response);
-            exit;
-        }
-
-        // Check if email already exists
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        if ($stmt->fetchColumn() > 0) {
-            $pdo->rollBack();
-            error_log("Email exists - rolled back");
-            $response['message'] = 'Email is already associated with an account.';
-            echo json_encode($response);
-            exit;
-        }
-
-        // Prepare user data
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-        $verificationToken = bin2hex(random_bytes(16));
-        $verificationURL = "https://www.mybricklog.com/verify/$verificationToken";
-
-        // Insert the user
-        $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, verification_token) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$username, $email, $hashedPassword, $verificationToken]);
-        error_log("User inserted into database");
-
-        // Setup AWS SES client
-        $config = [
-            'version' => 'latest',
-            'region' => 'us-east-1',
-            'credentials' => [
-                'key' => $_ENV['AWS_S3_KEY'],
-                'secret' => $_ENV['AWS_S3_SECRET'],
-            ]
-        ];
-
-        // For local development with SSL verification
-        if ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['REMOTE_ADDR'] === '127.0.0.1') {
-            $config['http'] = [
-                'verify' => false  // You might need to set the path to your cacert.pem for local dev
-            ];
-        }
-
-        // Attempt to send email
-        $mailSent = false;
-        try {
-            $client = SesClient::factory($config);
-            $result = $client->sendEmail([
-                'Source' => 'no-reply@mybricklog.com',
-                'Destination' => [
-                    'ToAddresses' => [$email],
-                ],
-                'Message' => [
-                    'Subject' => [
-                        'Data' => 'Verify your MyBrickLog account',
-                        'Charset' => 'UTF-8',
-                    ],
-                    'Body' => [
-                        'Html' => [
-                            'Data' => "Click the following link to verify your account: <a href=\"$verificationURL\">$verificationURL</a>",
-                            'Charset' => 'UTF-8',
-                        ],
-                        'Text' => [
-                            'Data' => "Click the following link to verify your account: $verificationURL",
-                            'Charset' => 'UTF-8',
-                        ],
-                    ],
-                ],
-            ]);
-
-            if (isset($result['MessageId'])) {
-                $mailSent = true;
-                error_log("Verification email sent successfully");
-            }
-            
-        } catch (AwsException $e) {
-            error_log("AWS SES Error: " . $e->getMessage());
-            error_log("AWS Error Code: " . $e->getAwsErrorCode());
-            error_log("AWS Error Type: " . $e->getAwsErrorType());
-            throw $e;
-        }
-
-        // Only commit if email was sent successfully
-        if ($mailSent) {
-            $pdo->commit();
-            error_log("Transaction committed - registration successful");
-            $response['success'] = true;
-            $response['message'] = 'Registration successful! Please check your email to verify your account.';
-
-            // Log successful registration
-            $log_action = "Registration successful for username: '$username', email: '$email'";
-            $log_useragent = $_SERVER['HTTP_USER_AGENT'];
-            insertLog($pdo, null, $log_action, $log_useragent, null, 'AUTHENTICATION');
-        } else {
-            $pdo->rollBack();
-            error_log("Transaction rolled back - email not sent");
-            $response['message'] = 'Registration failed: Unable to send verification email. Please try again later.';
-        }
-
-    } catch (Exception $e) {
-        error_log("Exception caught during registration: " . $e->getMessage());
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-            error_log("Transaction rolled back due to exception");
-        }
-        $response['message'] = 'Registration failed: Unable to send verification email. Please try again later.';
-        
-        // Log the error
-        $log_action = "Registration failed for username: '$username', email: '$email'. Error: " . $e->getMessage();
-        $log_useragent = $_SERVER['HTTP_USER_AGENT'];
-        insertLog($pdo, null, $log_action, $log_useragent, null, 'AUTHENTICATION');
+    // Check if username already exists
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    if ($stmt->fetchColumn() > 0) {
+        $pdo->rollBack();
+        $response['message'] = 'Username is already in use.';
+        echo json_encode($response);
+        exit;
     }
 
-error_log("=== REGISTRATION REQUEST END ===");
+    // Check if email already exists
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetchColumn() > 0) {
+        $pdo->rollBack();
+        $response['message'] = 'Email is already associated with an account.';
+        echo json_encode($response);
+        exit;
+    }
+
+    // Prepare user data
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+    $verificationToken = bin2hex(random_bytes(16));
+    $verificationURL = "https://www.mybricklog.com/verify/$verificationToken";
+
+    // Insert the user
+    $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, verification_token) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$username, $email, $hashedPassword, $verificationToken]);
+
+    // Setup AWS SES client
+    $config = [
+        'version' => 'latest',
+        'region' => 'us-east-1',
+        'credentials' => [
+            'key' => $_ENV['AWS_S3_KEY'],
+            'secret' => $_ENV['AWS_S3_SECRET'],
+        ]
+    ];
+
+    // For local development with SSL verification
+    if ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['REMOTE_ADDR'] === '127.0.0.1') {
+        $config['http'] = [
+            'verify' => false
+        ];
+    }
+
+    // Attempt to send email
+    $mailSent = false;
+    try {
+        $client = SesClient::factory($config);
+        $result = $client->sendEmail([
+            'Source' => 'no-reply@mybricklog.com',
+            'Destination' => [
+                'ToAddresses' => [$email],
+            ],
+            'Message' => [
+                'Subject' => [
+                    'Data' => 'Verify your MyBrickLog account',
+                    'Charset' => 'UTF-8',
+                ],
+                'Body' => [
+                    'Html' => [
+                        'Data' => "Click the following link to verify your account: <a href=\"$verificationURL\">$verificationURL</a>",
+                        'Charset' => 'UTF-8',
+                    ],
+                    'Text' => [
+                        'Data' => "Click the following link to verify your account: $verificationURL",
+                        'Charset' => 'UTF-8',
+                    ],
+                ],
+            ],
+        ]);
+
+        if (isset($result['MessageId'])) {
+            $mailSent = true;
+        }
+        
+    } catch (AwsException $e) {
+        throw $e;
+    }
+
+    // Only commit if email was sent successfully
+    if ($mailSent) {
+        $pdo->commit();
+        $response['success'] = true;
+        $response['message'] = 'Registration successful! Please check your email to verify your account.';
+
+        // Log successful registration
+        $log_action = "Registration successful for username: '$username', email: '$email'";
+        $log_useragent = $_SERVER['HTTP_USER_AGENT'];
+        insertLog($pdo, null, $log_action, $log_useragent, null, 'AUTHENTICATION');
+    } else {
+        $pdo->rollBack();
+        $response['message'] = 'Registration failed: Unable to send verification email. Please try again later.';
+    }
+
+} catch (Exception $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    $response['message'] = 'Registration failed: Unable to send verification email. Please try again later.';
+    
+    // Log the error
+    $log_action = "Registration failed for username: '$username', email: '$email'. Error: " . $e->getMessage();
+    $log_useragent = $_SERVER['HTTP_USER_AGENT'];
+    insertLog($pdo, null, $log_action, $log_useragent, null, 'AUTHENTICATION');
+}
+
 echo json_encode($response);
 ?>
