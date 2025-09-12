@@ -13,7 +13,7 @@ $verificationToken = $data['verificationToken'] ?? '';
 $response = ['success' => false];
 
 if (!empty($email) && !empty($verificationToken)) {
-    $verificationURL = "https://www.mybricklog.com/verify/$verificationToken";
+    $verificationURL = "https://mybricklog.com/verify/$verificationToken";
 
     $config = [
         'version' => 'latest',

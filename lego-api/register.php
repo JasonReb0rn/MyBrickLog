@@ -112,7 +112,7 @@ try {
     // Prepare user data
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
     $verificationToken = bin2hex(random_bytes(16));
-    $verificationURL = "https://www.mybricklog.com/verify/$verificationToken";
+    $verificationURL = "https://mybricklog.com/verify/$verificationToken";
 
     // Insert the user
     $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, verification_token) VALUES (?, ?, ?, ?)");
