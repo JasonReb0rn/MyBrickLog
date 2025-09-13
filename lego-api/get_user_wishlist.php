@@ -90,9 +90,38 @@ try {
     $setsStmt->execute(['user_id' => $userId]);
     $sets = $setsStmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Get user's trophies
+    $trophyStmt = $pdo->prepare("
+        SELECT 
+            t.id as trophy_id,
+            t.name,
+            t.description,
+            t.image_path,
+            t.rarity,
+            ut.awarded_at,
+            ut.notes,
+            u_awarded.username as awarded_by_username
+        FROM user_trophies ut
+        JOIN trophies t ON ut.trophy_id = t.id
+        LEFT JOIN users u_awarded ON ut.awarded_by = u_awarded.user_id
+        WHERE ut.user_id = :user_id 
+        AND t.is_active = 1
+        ORDER BY 
+            CASE t.rarity 
+                WHEN 'mythical' THEN 1 
+                WHEN 'rare' THEN 2 
+                WHEN 'common' THEN 3 
+            END,
+            ut.awarded_at DESC
+    ");
+    
+    $trophyStmt->execute(['user_id' => $userId]);
+    $trophies = $trophyStmt->fetchAll(PDO::FETCH_ASSOC);
+
     $response = [
         'profile' => $profile,
-        'sets' => $sets
+        'sets' => $sets,
+        'trophies' => $trophies
     ];
 
     header('Cache-Control: max-age=300, public');

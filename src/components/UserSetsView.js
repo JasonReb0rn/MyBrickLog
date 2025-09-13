@@ -34,7 +34,12 @@ import {
     faPlus,
     faTimes,
     faExclamationTriangle,
-    faSync
+    faSync,
+    faTrophy,
+    faMedal,
+    faAward,
+    faCrown,
+    faStar
 } from '@fortawesome/free-solid-svg-icons';
 import { 
     faTwitter,
@@ -73,6 +78,145 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, set, isWishlist }) => 
                         Remove
                     </button>
                 </div>
+            </div>
+        </div>
+    );
+};
+
+// Trophy component for displaying individual trophies with hover overlay
+const TrophyItem = ({ trophy }) => {
+    const [showTooltip, setShowTooltip] = useState(false);
+    
+    const getRarityIcon = (rarity) => {
+        switch (rarity) {
+            case 'mythical':
+                return faCrown;
+            case 'rare':
+                return faAward;
+            case 'common':
+            default:
+                return faTrophy;
+        }
+    };
+    
+    const getRarityColors = (rarity) => {
+        switch (rarity) {
+            case 'mythical':
+                return {
+                    bg: 'from-purple-500 to-purple-600',
+                    border: 'border-purple-400',
+                    text: 'text-purple-100',
+                    glow: 'shadow-purple-500/50'
+                };
+            case 'rare':
+                return {
+                    bg: 'from-blue-500 to-blue-600',
+                    border: 'border-blue-400',
+                    text: 'text-blue-100',
+                    glow: 'shadow-blue-500/50'
+                };
+            case 'common':
+            default:
+                return {
+                    bg: 'from-amber-500 to-amber-600',
+                    border: 'border-amber-400',
+                    text: 'text-amber-100',
+                    glow: 'shadow-amber-500/50'
+                };
+        }
+    };
+    
+    const colors = getRarityColors(trophy.rarity);
+    const formattedDate = new Date(trophy.awarded_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    return (
+        <div 
+            className="relative inline-block"
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+        >
+            <div className={`w-12 h-12 bg-gradient-to-br ${colors.bg} ${colors.border} border-2 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 hover:shadow-lg ${colors.glow} cursor-pointer overflow-hidden`}>
+                {trophy.image_path ? (
+                    <>
+                        <img 
+                            src={trophy.image_path}
+                            alt={trophy.name}
+                            className="w-full h-full object-cover rounded-full"
+                            onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextElementSibling.style.display = 'flex';
+                            }}
+                        />
+                        <FontAwesomeIcon 
+                            icon={getRarityIcon(trophy.rarity)} 
+                            className={`text-lg ${colors.text} hidden`}
+                        />
+                    </>
+                ) : (
+                    <FontAwesomeIcon 
+                        icon={getRarityIcon(trophy.rarity)} 
+                        className={`text-lg ${colors.text}`}
+                    />
+                )}
+            </div>
+            
+            {showTooltip && (
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
+                    <div className="bg-gray-900 text-white rounded-lg px-4 py-3 shadow-xl max-w-xs w-max">
+                        <div className="text-center">
+                            <h4 className="font-bold text-sm mb-1">{trophy.name}</h4>
+                            {trophy.description && (
+                                <p className="text-xs text-gray-300 mb-2 leading-relaxed">{trophy.description}</p>
+                            )}
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                                <span className={`text-xs px-2 py-1 rounded-full font-medium capitalize ${
+                                    trophy.rarity === 'mythical' ? 'bg-purple-600 text-purple-100' :
+                                    trophy.rarity === 'rare' ? 'bg-blue-600 text-blue-100' :
+                                    'bg-amber-600 text-amber-100'
+                                }`}>
+                                    {trophy.rarity}
+                                </span>
+                            </div>
+                            <div className="text-xs text-gray-400">
+                                <div>Awarded {formattedDate}</div>
+                                {trophy.awarded_by_username && (
+                                    <div>by {trophy.awarded_by_username}</div>
+                                )}
+                            </div>
+                        </div>
+                        {/* Tooltip arrow */}
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// Trophy display component
+const TrophyDisplay = ({ trophies }) => {
+    if (!trophies || trophies.length === 0) {
+        return null;
+    }
+    
+    return (
+        <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-sm">
+                    <FontAwesomeIcon icon={faTrophy} className="text-yellow-900 text-sm" />
+                </div>
+                <span className="text-sm font-semibold text-gray-700">
+                    {trophies.length} Trophies
+                </span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+                {trophies.map(trophy => (
+                    <TrophyItem key={trophy.trophy_id} trophy={trophy} />
+                ))}
             </div>
         </div>
     );
@@ -749,6 +893,7 @@ const UserSetsView = () => {
     const [profileData, setProfileData] = useState(null);
     const [sets, setSets] = useState([]);
     const [filteredSets, setFilteredSets] = useState([]);
+    const [trophies, setTrophies] = useState([]);
     const [selectedSet, setSelectedSet] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [copiedUrl, setCopiedUrl] = useState(false);
@@ -849,6 +994,7 @@ const UserSetsView = () => {
                     setSets(response.data.sets);
                     setFilteredSets(response.data.sets);
                     setProfileData(response.data.profile);
+                    setTrophies(response.data.trophies || []);
                     
                     // Check migration status after sets are loaded (only for collection owners)
                     if (!isWishlist && isOwner && response.data.sets.length > 0) {
@@ -1737,6 +1883,13 @@ const UserSetsView = () => {
                                     </div>
                                 )}
                             </div>
+                            
+                            {/* Trophy Display */}
+                            {trophies && trophies.length > 0 && (
+                                <div className="mb-4">
+                                    <TrophyDisplay trophies={trophies} />
+                                </div>
+                            )}
                             
                             {profileData.bio && (
                                 <p className="text-gray-600 whitespace-pre-line max-w-3xl leading-relaxed text-base">{profileData.bio}</p>

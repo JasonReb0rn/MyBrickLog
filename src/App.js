@@ -27,6 +27,7 @@ import AdminSets from './components/AdminSets';
 import AdminLogs from './components/AdminLogs';
 import AdminBlog from './components/AdminBlog'; // Import the AdminBlog component
 import AdminBlogEditor from './components/AdminBlogEditor'; // Import the AdminBlogEditor component
+import AdminTrophies from './components/AdminTrophies'; // Import the AdminTrophies component
 import { AuthProvider } from './components/AuthContext';
 import 'react-tooltip/dist/react-tooltip.css';
 import './App.css';
@@ -54,6 +55,7 @@ const App = () => {
                                 <Route path="/themes" element={<Themes />} />
                                 <Route path="/themes/:themeId" element={<SubThemes />} />
                                 <Route path="/verify/:verificationToken" element={<Verify />} />
+                                <Route path="/profile/:userId" element={<Profile />} />
                                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                                 <Route path="/terms-of-service" element={<TermsOfService />} />
                                 <Route path="/about" element={<About />} />
@@ -73,6 +75,8 @@ const App = () => {
                                 <Route path="/admin/blog" element={<AdminBlog />} />
                                 <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
                                 <Route path="/admin/blog/edit/:postId" element={<AdminBlogEditor />} />
+                                {/* Admin trophy routes */}
+                                <Route path="/admin/trophies" element={<AdminTrophies />} />
                             </Routes>
                         </div>
                     <Footer />
