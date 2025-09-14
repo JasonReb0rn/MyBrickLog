@@ -426,9 +426,9 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm p-4" onClick={onClose}>
-            <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-                {/* Modal Header */}
-                <div className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 p-6">
+            <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+                {/* Modal Header - Fixed */}
+                <div className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 p-6 flex-shrink-0 rounded-t-2xl">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden shadow-sm border border-slate-200">
@@ -454,8 +454,8 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                     </div>
                 </div>
 
-                {/* Modal Content */}
-                <div className="overflow-y-auto max-h-[calc(95vh-140px)]">
+                {/* Modal Content - Scrollable */}
+                <div className="flex-1 overflow-y-auto min-h-0">
                     <div className="p-6 space-y-8">
                         {error && (
                             <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center space-x-3">
@@ -827,8 +827,8 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                     </div>
                 </div>
 
-                {/* Modal Footer */}
-                <div className="bg-slate-50 border-t border-slate-200 p-6">
+                {/* Modal Footer - Fixed */}
+                <div className="bg-slate-50 border-t border-slate-200 p-6 flex-shrink-0 rounded-b-2xl">
                     <div className="flex justify-end gap-3">
                         <button 
                             className="px-6 py-3 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded-xl transition-all duration-200 font-medium" 
