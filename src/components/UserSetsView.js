@@ -468,10 +468,6 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                         
                         {/* Status Controls Section */}
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-slate-800 flex items-center">
-                                <FontAwesomeIcon icon={faCube} className="mr-2 text-slate-600" />
-                                Collection Status
-                            </h3>
                             
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {/* Quantity Control */}
