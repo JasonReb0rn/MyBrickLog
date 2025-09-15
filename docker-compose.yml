@@ -7,7 +7,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
-      - REACT_APP_API_URL=${REACT_APP_API_URL:-/api}
     depends_on:
       - backend
     restart: unless-stopped
@@ -16,10 +15,4 @@ services:
     build:
       context: ./lego-api
       dockerfile: Dockerfile
-    environment:
-      - MBL_SQL_HOST=${MBL_SQL_HOST}
-      - MBL_SQL_USER=${MBL_SQL_USER}
-      - MBL_SQL_PASS=${MBL_SQL_PASS}
-      - MBL_SQL_PORT=${MBL_SQL_PORT:-3306}
-      - MBL_CORS_ORIGIN=${MBL_CORS_ORIGIN}
     restart: unless-stopped
