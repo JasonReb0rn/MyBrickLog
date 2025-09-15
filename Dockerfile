@@ -6,7 +6,9 @@ RUN apk add --no-cache git
 
 # Accept build arguments
 ARG REACT_APP_API_URL
+ARG REACT_APP_RECAPTCHA_SITE_KEY
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV REACT_APP_RECAPTCHA_SITE_KEY=$REACT_APP_RECAPTCHA_SITE_KEY
 
 COPY package.json ./
 COPY package-lock.json ./
