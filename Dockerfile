@@ -3,6 +3,11 @@
 FROM node:18-alpine as build
 WORKDIR /app
 RUN apk add --no-cache git
+
+# Accept build arguments
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
 COPY package.json ./
 COPY package-lock.json ./
 RUN npm ci --quiet --no-optional

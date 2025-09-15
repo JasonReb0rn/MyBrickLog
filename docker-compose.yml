@@ -5,9 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
     environment:
       - NODE_ENV=production
-      - REACT_APP_API_URL=${REACT_APP_API_URL:-/api}
     depends_on:
       - backend
     restart: unless-stopped
