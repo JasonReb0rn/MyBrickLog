@@ -21,57 +21,7 @@ try {
     $minifigs = [];
     
     if ($inventory) {
-        // Backwards compatibility: Check if user needs minifigure records created
-        if ($userId) {
-            // Check if user has this set in their collection
-            $collectionStmt = $pdo->prepare("SELECT collection_set_quantity FROM collection WHERE user_id = ? AND set_num = ?");
-            $collectionStmt->execute([$userId, $setNum]);
-            $collectionData = $collectionStmt->fetch(PDO::FETCH_ASSOC);
-            
-            if ($collectionData) {
-                // Check if ANY collection_minifigs records exist for this user/set
-                $existingMinifigsStmt = $pdo->prepare("
-                    SELECT COUNT(*) as count 
-                    FROM collection_minifigs 
-                    WHERE user_id = ? AND set_num = ?
-                ");
-                $existingMinifigsStmt->execute([$userId, $setNum]);
-                $existingCount = $existingMinifigsStmt->fetch(PDO::FETCH_ASSOC)['count'];
-                
-                // If no minifigure records exist, create them all
-                if ($existingCount == 0) {
-                    $setQuantity = $collectionData['collection_set_quantity'];
-                    
-                    // Get all minifigures for this set to create records
-                    $inventoryMinifigsStmt = $pdo->prepare("
-                        SELECT im.fig_num, im.quantity as required_quantity
-                        FROM inventory_minifigs im 
-                        WHERE im.inventory_id = ?
-                    ");
-                    $inventoryMinifigsStmt->execute([$inventory['id']]);
-                    $inventoryMinifigs = $inventoryMinifigsStmt->fetchAll(PDO::FETCH_ASSOC);
-                    
-                    // Create collection_minifigs records - assume user owns all minifigures from their sets
-                    foreach ($inventoryMinifigs as $minifig) {
-                        // Calculate total owned: (minifigs per set) × (number of sets owned)
-                        $expectedQuantity = $minifig['required_quantity'] * $setQuantity;
-                        
-                        try {
-                            $insertStmt = $pdo->prepare("
-                                INSERT INTO collection_minifigs (user_id, set_num, fig_num, quantity_owned) 
-                                VALUES (?, ?, ?, ?)
-                            ");
-                            $insertStmt->execute([$userId, $setNum, $minifig['fig_num'], $expectedQuantity]);
-                        } catch (PDOException $e) {
-                            error_log('Error creating backwards compatibility minifig record: ' . $e->getMessage());
-                            // Continue processing other minifigs even if one fails
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Now build the main query for minifigures in this set
+        // Build the main query for minifigures in this set
         $baseQuery = "
             SELECT 
                 m.fig_num,

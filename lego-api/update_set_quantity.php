@@ -52,8 +52,8 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
                               WHERE user_id = ? AND set_num = ?");
         $stmt->execute([$quantity, $complete_count, $sealed_count, $user_id, $set_num]);
 
-        // Update minifigure quantities proportionally
-        if ($old_quantity > 0) {
+        // Only update minifigure quantities if the set quantity actually changed
+        if ($old_quantity != $quantity) {
             // Get inventory for this set to calculate per-set minifig quantities
             $inventoryStmt = $pdo->prepare("SELECT id FROM inventories WHERE set_num = ?");
             $inventoryStmt->execute([$set_num]);
@@ -69,43 +69,44 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
                 $minifigsStmt->execute([$inventory['id']]);
                 $minifigs = $minifigsStmt->fetchAll(PDO::FETCH_ASSOC);
                 
-                // Update each minifigure's quantity based on new set quantity
-                foreach ($minifigs as $minifig) {
-                    // Calculate total owned: (minifigs per set) × (new total sets)
-                    $new_minifig_quantity = $minifig['per_set_quantity'] * $quantity;
+                if ($quantity > $old_quantity) {
+                    // Adding sets - add the minifigure complement for each new set
+                    $sets_added = $quantity - $old_quantity;
                     
-                    // Check if this minifig exists in collection
-                    $existingStmt = $pdo->prepare("
-                        SELECT id FROM collection_minifigs 
-                        WHERE user_id = ? AND set_num = ? AND fig_num = ?
-                    ");
-                    $existingStmt->execute([$user_id, $set_num, $minifig['fig_num']]);
-                    $existing = $existingStmt->fetch(PDO::FETCH_ASSOC);
+                    foreach ($minifigs as $minifig) {
+                        $minifigs_to_add = $minifig['per_set_quantity'] * $sets_added;
+                        
+                        // Add to existing quantity using INSERT ... ON DUPLICATE KEY UPDATE
+                        $upsertMinifigStmt = $pdo->prepare("
+                            INSERT INTO collection_minifigs (user_id, set_num, fig_num, quantity_owned) 
+                            VALUES (?, ?, ?, ?)
+                            ON DUPLICATE KEY UPDATE 
+                            quantity_owned = quantity_owned + VALUES(quantity_owned),
+                            updated_at = CURRENT_TIMESTAMP
+                        ");
+                        $upsertMinifigStmt->execute([$user_id, $set_num, $minifig['fig_num'], $minifigs_to_add]);
+                    }
+                } else if ($quantity < $old_quantity) {
+                    // Removing sets - scale down proportionally
+                    $ratio = $quantity > 0 ? ($quantity / $old_quantity) : 0;
                     
-                    if ($existing) {
-                        if ($new_minifig_quantity > 0) {
-                            // Update existing record
+                    foreach ($minifigs as $minifig) {
+                        if ($ratio > 0) {
+                            // Scale existing quantities proportionally
                             $updateMinifigStmt = $pdo->prepare("
                                 UPDATE collection_minifigs 
-                                SET quantity_owned = ?, updated_at = CURRENT_TIMESTAMP 
+                                SET quantity_owned = ROUND(quantity_owned * ?), updated_at = CURRENT_TIMESTAMP 
                                 WHERE user_id = ? AND set_num = ? AND fig_num = ?
                             ");
-                            $updateMinifigStmt->execute([$new_minifig_quantity, $user_id, $set_num, $minifig['fig_num']]);
+                            $updateMinifigStmt->execute([$ratio, $user_id, $set_num, $minifig['fig_num']]);
                         } else {
-                            // Remove record if quantity is 0
+                            // If quantity is 0, remove all minifigure records
                             $deleteMinifigStmt = $pdo->prepare("
                                 DELETE FROM collection_minifigs 
                                 WHERE user_id = ? AND set_num = ? AND fig_num = ?
                             ");
                             $deleteMinifigStmt->execute([$user_id, $set_num, $minifig['fig_num']]);
                         }
-                    } else if ($new_minifig_quantity > 0) {
-                        // Insert new record if it doesn't exist and quantity > 0
-                        $insertMinifigStmt = $pdo->prepare("
-                            INSERT INTO collection_minifigs (user_id, set_num, fig_num, quantity_owned) 
-                            VALUES (?, ?, ?, ?)
-                        ");
-                        $insertMinifigStmt->execute([$user_id, $set_num, $minifig['fig_num'], $new_minifig_quantity]);
                     }
                 }
             }

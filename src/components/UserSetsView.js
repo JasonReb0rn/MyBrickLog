@@ -919,10 +919,6 @@ const UserSetsView = () => {
     });
     // New state for tracking pending updates
     const [pendingUpdates, setPendingUpdates] = useState({});
-    const [migrationStatus, setMigrationStatus] = useState(null);
-    const [isMigrating, setIsMigrating] = useState(false);
-    const [migrationNeeded, setMigrationNeeded] = useState(false);
-    const [checkingMigration, setCheckingMigration] = useState(false);
     
     const { userId } = useParams();
     const { user } = useAuth();
@@ -947,32 +943,6 @@ const UserSetsView = () => {
         localStorage.setItem('showPrices', JSON.stringify(showPrices));
     }, [showPrices]);
 
-    // Function to check if migration is needed
-    const checkMigrationStatus = async () => {
-        if (!isOwner || isWishlist || !userId) return;
-        
-        setCheckingMigration(true);
-        try {
-            const response = await axios.get(
-                `${process.env.REACT_APP_API_URL}/check_migration_status.php`,
-                { withCredentials: true }
-            );
-            
-            if (response.data.error) {
-                console.error('Error checking migration status:', response.data.error);
-                setMigrationNeeded(false);
-            } else {
-                setMigrationNeeded(response.data.migration_needed);
-                console.log(`Migration check: ${response.data.sets_needing_migration} sets need migration, migration needed: ${response.data.migration_needed}`);
-            }
-            
-        } catch (error) {
-            console.error('Error checking migration status:', error);
-            // On error, don't show migration button to avoid confusion
-            setMigrationNeeded(false);
-        }
-        setCheckingMigration(false);
-    };
 
     useEffect(() => {
         const fetchSets = async () => {
@@ -991,14 +961,6 @@ const UserSetsView = () => {
                     setFilteredSets(response.data.sets);
                     setProfileData(response.data.profile);
                     setTrophies(response.data.trophies || []);
-                    
-                    // Check migration status after sets are loaded (only for collection owners)
-                    if (!isWishlist && isOwner && response.data.sets.length > 0) {
-                        // Delay the migration check slightly to let the sets state update
-                        setTimeout(() => {
-                            checkMigrationStatus();
-                        }, 100);
-                    }
                 }
             } catch (error) {
                 console.error(`Error fetching user ${isWishlist ? 'wishlist' : 'collection'}:`, error);
@@ -1009,12 +971,6 @@ const UserSetsView = () => {
         fetchSets();
     }, [userId, isWishlist, endpoints.fetch]);
 
-    // Update sets dependency for migration check
-    useEffect(() => {
-        if (sets.length > 0 && !isWishlist && isOwner) {
-            checkMigrationStatus();
-        }
-    }, [sets.length, isWishlist, isOwner]);
 
     useEffect(() => {
         const applyFiltersAndSort = () => {
@@ -1412,64 +1368,6 @@ const UserSetsView = () => {
         });
     };
 
-    // Migration function for backwards compatibility
-    const migrateCollectionMinifigures = async () => {
-        if (!isOwner) return;
-        
-        setIsMigrating(true);
-        setMigrationStatus(null);
-        
-        try {
-            const response = await axios.post(
-                `${process.env.REACT_APP_API_URL}/migrate_collection_minifigures.php`,
-                {},
-                { withCredentials: true }
-            );
-            
-            if (response.data.success) {
-                setMigrationStatus({
-                    type: 'success',
-                    message: `Migration completed! ${response.data.migrated_count} sets migrated, ${response.data.skipped_count} sets skipped.`,
-                    details: response.data
-                });
-                
-                // Hide the migration button after successful migration
-                setMigrationNeeded(false);
-                
-                // Refresh the current set's minifigures if modal is open
-                if (statusModal.isOpen && statusModal.set) {
-                    // This will trigger a refetch of minifigures for the current set
-                    setStatusModal({
-                        isOpen: true,
-                        set: { ...statusModal.set }
-                    });
-                }
-                
-                // Recheck migration status after a delay to see if more migration is needed
-                setTimeout(() => {
-                    checkMigrationStatus();
-                }, 2000);
-            } else {
-                setMigrationStatus({
-                    type: 'error',
-                    message: response.data.error || 'Migration failed'
-                });
-            }
-        } catch (error) {
-            console.error('Error migrating minifigures:', error);
-            setMigrationStatus({
-                type: 'error',
-                message: 'Error occurred during migration'
-            });
-        }
-        
-        setIsMigrating(false);
-        
-        // Clear status after 10 seconds
-        setTimeout(() => {
-            setMigrationStatus(null);
-        }, 10000);
-    };
 
     const toggleSelectSet = (set_num) => {
         if (isOwner) {
@@ -1963,17 +1861,6 @@ const UserSetsView = () => {
                                     )
                                 )}
                                 
-                                {isOwner && !isWishlist && migrationNeeded && (
-                                    <button 
-                                        onClick={migrateCollectionMinifigures}
-                                        disabled={isMigrating || checkingMigration}
-                                        className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 disabled:from-purple-400 disabled:to-purple-500 text-white rounded-xl transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg disabled:cursor-not-allowed"
-                                        title="Migrate existing collection to include minifigure tracking"
-                                    >
-                                        <FontAwesomeIcon icon={isMigrating || checkingMigration ? faSync : faUserCircle} className={`mr-2 ${isMigrating || checkingMigration ? 'animate-spin' : ''}`} />
-                                        {isMigrating ? 'Migrating...' : checkingMigration ? 'Checking...' : 'Migrate Minifigs'}
-                                    </button>
-                                )}
                                 
                                 <button 
                                     onClick={shareUrl} 
@@ -2348,30 +2235,6 @@ const UserSetsView = () => {
 
                 {renderProfileSection()}
                 
-                {/* Migration Status Display */}
-                {migrationStatus && (
-                    <div className={`mb-6 p-4 rounded-lg border ${
-                        migrationStatus.type === 'success' 
-                            ? 'bg-green-50 border-green-200 text-green-800' 
-                            : 'bg-red-50 border-red-200 text-red-800'
-                    }`}>
-                        <div className="flex items-center">
-                            <FontAwesomeIcon 
-                                icon={migrationStatus.type === 'success' ? faCheckCircle : faExclamationTriangle} 
-                                className="mr-2" 
-                            />
-                            <span className="font-medium">{migrationStatus.message}</span>
-                        </div>
-                        {migrationStatus.details && (
-                            <div className="mt-2 text-sm opacity-75">
-                                Total collections: {migrationStatus.details.total_collections} | 
-                                Migrated: {migrationStatus.details.migrated_count} | 
-                                Skipped: {migrationStatus.details.skipped_count} | 
-                                Errors: {migrationStatus.details.error_count}
-                            </div>
-                        )}
-                    </div>
-                )}
                 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                     <h2 className="text-3xl font-bold text-gray-800 flex items-center">

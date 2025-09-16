@@ -28,32 +28,15 @@ function createMinifigureRecords($pdo, $userId, $setNum, $quantity) {
                 // Calculate total owned: (minifigs per set) × (number of sets being added)
                 $totalMinifigQuantity = $minifig['quantity'] * $quantity;
                 
-                // Check if this minifig already exists in user's collection for this set
-                $existingStmt = $pdo->prepare("
-                    SELECT quantity_owned 
-                    FROM collection_minifigs 
-                    WHERE user_id = ? AND set_num = ? AND fig_num = ?
+                // Use INSERT ... ON DUPLICATE KEY UPDATE for atomic operation
+                $upsertStmt = $pdo->prepare("
+                    INSERT INTO collection_minifigs (user_id, set_num, fig_num, quantity_owned) 
+                    VALUES (?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE 
+                    quantity_owned = quantity_owned + VALUES(quantity_owned),
+                    updated_at = CURRENT_TIMESTAMP
                 ");
-                $existingStmt->execute([$userId, $setNum, $minifig['fig_num']]);
-                $existing = $existingStmt->fetch(PDO::FETCH_ASSOC);
-                
-                if ($existing) {
-                    // Update existing record
-                    $newQuantity = $existing['quantity_owned'] + $totalMinifigQuantity;
-                    $updateStmt = $pdo->prepare("
-                        UPDATE collection_minifigs 
-                        SET quantity_owned = ?, updated_at = CURRENT_TIMESTAMP 
-                        WHERE user_id = ? AND set_num = ? AND fig_num = ?
-                    ");
-                    $updateStmt->execute([$newQuantity, $userId, $setNum, $minifig['fig_num']]);
-                } else {
-                    // Insert new record
-                    $insertStmt = $pdo->prepare("
-                        INSERT INTO collection_minifigs (user_id, set_num, fig_num, quantity_owned) 
-                        VALUES (?, ?, ?, ?)
-                    ");
-                    $insertStmt->execute([$userId, $setNum, $minifig['fig_num'], $totalMinifigQuantity]);
-                }
+                $upsertStmt->execute([$userId, $setNum, $minifig['fig_num'], $totalMinifigQuantity]);
             }
         }
     } catch (PDOException $e) {
