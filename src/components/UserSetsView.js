@@ -676,9 +676,10 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                 </div>
                             ) : minifigs.length > 0 ? (
                                 <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 sm:p-6 space-y-4">
-                                    {/* Progress Stats */}
-                                    <div className="space-y-4">
-                                        <div className="w-full">
+                                    {/* Progress Stats with Action Buttons - Responsive Layout */}
+                                    <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
+                                        {/* Progress Section */}
+                                        <div className="flex-1">
                                             {(() => {
                                                 const completeCount = minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length;
                                                 const totalCount = minifigs.length;
@@ -729,10 +730,10 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                             })()}
                                         </div>
                                         
-                                        {/* Action Buttons - Mobile Responsive Layout */}
-                                        <div className="space-y-3">
+                                        {/* Action Buttons - Side on Desktop, Stacked on Mobile */}
+                                        <div className="flex flex-col gap-3 lg:w-48 lg:flex-shrink-0">
                                             {/* Bulk Action Buttons */}
-                                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                                            <div className="flex flex-col sm:flex-row lg:flex-col gap-2 sm:gap-3 lg:gap-3">
                                                 {(() => {
                                                     const completeCount = minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length;
                                                     const totalCount = minifigs.length;
@@ -753,7 +754,7 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                                                         await Promise.all(updatePromises);
                                                                         // The individual updates will handle the set count updates
                                                                     }}
-                                                                    className="flex-1 px-3 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-emerald-300 text-center"
+                                                                    className="flex-1 lg:flex-none px-3 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-emerald-300 text-center whitespace-nowrap"
                                                                     disabled={Object.keys(updatingMinifigs).some(key => updatingMinifigs[key])}
                                                                 >
                                                                     <FontAwesomeIcon icon={faCheckCircle} className="mr-1 sm:mr-2" />
@@ -773,7 +774,7 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                                                         await Promise.all(updatePromises);
                                                                         // The individual updates will handle the set count updates
                                                                     }}
-                                                                    className="flex-1 px-3 sm:px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-slate-300 text-center"
+                                                                    className="flex-1 lg:flex-none px-3 sm:px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-slate-300 text-center whitespace-nowrap"
                                                                     disabled={Object.keys(updatingMinifigs).some(key => updatingMinifigs[key])}
                                                                 >
                                                                     <FontAwesomeIcon icon={faTimes} className="mr-1 sm:mr-2" />
@@ -789,7 +790,7 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                             {/* Show/Hide Minifigures Button */}
                                             <button
                                                 onClick={() => setShowMinifigs(!showMinifigs)}
-                                                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-all duration-200 shadow-sm text-sm"
+                                                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-all duration-200 shadow-sm text-sm whitespace-nowrap"
                                             >
                                                 <FontAwesomeIcon icon={faUserCircle} />
                                                 <span>{showMinifigs ? 'Hide Minifigures' : 'Show Minifigures'}</span>
