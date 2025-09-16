@@ -251,7 +251,7 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
 
     // Function to fetch minifigures for the current set
     const fetchMinifigures = async () => {
-        if (!set) return;
+        if (!set) return Promise.resolve();
         
         setLoadingMinifigs(true);
         try {
@@ -273,12 +273,16 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                     totalMinifigs: response.data.total_minifigs,
                     setInfo: response.data.set_info
                 });
+                
+                return minifigData; // Return the data so we can use it in the chain
             }
         } catch (error) {
             console.error('Error fetching minifigures:', error);
             setMinifigs([]);
+        } finally {
+            setLoadingMinifigs(false);
         }
-        setLoadingMinifigs(false);
+        return [];
     };
 
     // Function to update individual minifigure quantity
@@ -302,6 +306,9 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                         ? { ...minifig, owned_quantity: newQuantity }
                         : minifig
                 ));
+                
+                // Also update the main sets state with new minifigure counts
+                updateSetMinifigureCounts(set.set_num);
             } else {
                 setError('Failed to update minifigure quantity');
             }
@@ -311,6 +318,24 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
         }
         
         setUpdatingMinifigs(prev => ({ ...prev, [figNum]: false }));
+    };
+    
+    // Function to update minifigure counts in the main sets state
+    const updateSetMinifigureCounts = (setNum) => {
+        setSets(prevSets => prevSets.map(s => {
+            if (s.set_num === setNum) {
+                // Calculate new owned and expected counts from current minifigs state
+                const totalOwned = minifigs.reduce((sum, minifig) => sum + (minifig.owned_quantity || 0), 0);
+                const totalExpected = minifigs.reduce((sum, minifig) => sum + (minifig.required_quantity * Number(s.quantity)), 0);
+                
+                return {
+                    ...s,
+                    owned_minifigures: totalOwned.toString(),
+                    expected_minifigures: totalExpected.toString()
+                };
+            }
+            return s;
+        }));
     };
     
     if (!isOpen || !set) return null;
@@ -336,6 +361,10 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
     
         setIsUpdating(true);
         setError('');
+        
+        // Store the original quantity to check if it changed
+        const originalQuantity = Number(set.quantity);
+        const quantityChanged = originalQuantity !== quantity;
     
         // Create a single set of updates to apply after all API calls complete
         const updatedSet = {
@@ -350,10 +379,30 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
             .then(() => onUpdateComplete(set.set_num, adjustedCompleteCount))
             .then(() => onUpdateSealed(set.set_num, sealedCount))
             .then(() => {
-                // This is now properly using the setSets function from props
+                // Update the sets state
                 setSets(prevSets => prevSets.map(s => 
                     s.set_num === set.set_num ? updatedSet : s
                 ));
+                
+                // If quantity changed, refetch minifigures to get updated data
+                if (quantityChanged) {
+                    fetchMinifigures().then((newMinifigData) => {
+                        // After refetching, update the set's minifigure counts with fresh data
+                        if (newMinifigData && newMinifigData.length > 0) {
+                            const totalOwned = newMinifigData.reduce((sum, minifig) => sum + (minifig.owned_quantity || 0), 0);
+                            const totalExpected = newMinifigData.reduce((sum, minifig) => sum + (minifig.required_quantity * quantity), 0);
+                            
+                            setSets(prevSets => prevSets.map(s => 
+                                s.set_num === set.set_num ? {
+                                    ...s,
+                                    owned_minifigures: totalOwned.toString(),
+                                    expected_minifigures: totalExpected.toString()
+                                } : s
+                            ));
+                        }
+                    });
+                }
+                
                 setIsUpdating(false);
                 onClose();
             })
@@ -693,11 +742,15 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                                     <>
                                                         {!allComplete && (
                                                             <button
-                                                                onClick={() => {
-                                                                    minifigs.forEach(minifig => {
+                                                                onClick={async () => {
+                                                                    // Update all minifigures to complete
+                                                                    const updatePromises = minifigs.map(minifig => {
                                                                         const requiredTotal = minifig.required_quantity * quantity;
-                                                                        updateMinifigQuantity(minifig.fig_num, requiredTotal);
+                                                                        return updateMinifigQuantity(minifig.fig_num, requiredTotal);
                                                                     });
+                                                                    
+                                                                    await Promise.all(updatePromises);
+                                                                    // The individual updates will handle the set count updates
                                                                 }}
                                                                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-emerald-300 whitespace-nowrap"
                                                                 disabled={Object.keys(updatingMinifigs).some(key => updatingMinifigs[key])}
@@ -709,10 +762,14 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                                         
                                                         {hasAnyOwned && (
                                                             <button
-                                                                onClick={() => {
-                                                                    minifigs.forEach(minifig => {
-                                                                        updateMinifigQuantity(minifig.fig_num, 0);
-                                                                    });
+                                                                onClick={async () => {
+                                                                    // Update all minifigures to missing (0)
+                                                                    const updatePromises = minifigs.map(minifig => 
+                                                                        updateMinifigQuantity(minifig.fig_num, 0)
+                                                                    );
+                                                                    
+                                                                    await Promise.all(updatePromises);
+                                                                    // The individual updates will handle the set count updates
                                                                 }}
                                                                 className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-slate-300 whitespace-nowrap"
                                                                 disabled={Object.keys(updatingMinifigs).some(key => updatingMinifigs[key])}
