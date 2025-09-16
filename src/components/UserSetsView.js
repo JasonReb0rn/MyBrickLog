@@ -474,13 +474,13 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm p-4" onClick={onClose}>
-            <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm p-2 sm:p-4" onClick={onClose}>
+            <div className="bg-white rounded-xl sm:rounded-2xl max-w-5xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
                 {/* Modal Header - Fixed */}
-                <div className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 p-6 flex-shrink-0 rounded-t-2xl">
+                <div className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 p-4 sm:p-6 flex-shrink-0 rounded-t-xl sm:rounded-t-2xl">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                            <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                        <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-100 rounded-lg sm:rounded-xl overflow-hidden shadow-sm border border-slate-200 flex-shrink-0">
                                 <img 
                                     src={set.img_url} 
                                     alt={set.name} 
@@ -488,24 +488,24 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                     onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
                                 />
                             </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-800 mb-1">Update Set Status</h2>
-                                <h3 className="text-lg font-semibold text-slate-700 mb-1">{set.name}</h3>
-                                <p className="text-sm text-slate-500 font-mono">Set #{set.set_num}</p>
+                            <div className="flex-1 min-w-0">
+                                <h2 className="text-lg sm:text-2xl font-bold text-slate-800 mb-1">Update Set Status</h2>
+                                <h3 className="text-sm sm:text-lg font-semibold text-slate-700 mb-1 truncate">{set.name}</h3>
+                                <p className="text-xs sm:text-sm text-slate-500 font-mono">Set #{set.set_num}</p>
                             </div>
                         </div>
                         <button 
                             onClick={onClose} 
-                            className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 transition-all duration-200 flex items-center justify-center"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 transition-all duration-200 flex items-center justify-center flex-shrink-0 ml-2"
                         >
-                            <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                            <FontAwesomeIcon icon={faTimes} className="text-sm sm:text-lg" />
                         </button>
                     </div>
                 </div>
 
                 {/* Modal Content - Scrollable */}
                 <div className="flex-1 overflow-y-auto min-h-0">
-                    <div className="p-6 space-y-8">
+                    <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
                         {error && (
                             <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center space-x-3">
                                 <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
@@ -518,7 +518,7 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                         {/* Status Controls Section */}
                         <div className="space-y-4">
                             
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 {/* Quantity Control */}
                                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
                                     <div className="text-center mb-4">
@@ -675,23 +675,23 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                     <p className="text-slate-600 font-medium">Loading minifigures...</p>
                                 </div>
                             ) : minifigs.length > 0 ? (
-                                <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 space-y-4">
-                                    {/* Progress Stats with Action Buttons */}
-                                    <div className="flex items-center gap-6">
-                                        <div className="flex-grow">
+                                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 sm:p-6 space-y-4">
+                                    {/* Progress Stats */}
+                                    <div className="space-y-4">
+                                        <div className="w-full">
                                             {(() => {
                                                 const completeCount = minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length;
                                                 const totalCount = minifigs.length;
                                                 const progressPercentage = (completeCount / totalCount) * 100;
                                                 
                                                 return (
-                                                    <div className="bg-white rounded-lg px-6 py-4 border border-purple-200">
+                                                    <div className="bg-white rounded-lg px-4 sm:px-6 py-4 border border-purple-200">
                                                         <div className="flex items-center justify-between mb-3">
                                                             <div className="flex items-center gap-2">
                                                                 <FontAwesomeIcon icon={faUserCircle} className="text-purple-600" />
-                                                                <span className="text-lg font-semibold text-slate-800">Collection Progress</span>
+                                                                <span className="text-base sm:text-lg font-semibold text-slate-800">Collection Progress</span>
                                                             </div>
-                                                            <span className="text-lg font-bold text-slate-800">
+                                                            <span className="text-base sm:text-lg font-bold text-slate-800">
                                                                 {completeCount}/{totalCount}
                                                             </span>
                                                         </div>
@@ -710,7 +710,7 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                                                     style={{ width: `${Math.max(progressPercentage, 0)}%` }}
                                                                 ></div>
                                                             </div>
-                                                            <div className="mt-2 flex justify-between text-sm">
+                                                            <div className="mt-2 flex justify-between text-xs sm:text-sm">
                                                                 <span className="text-slate-600">
                                                                     {completeCount === totalCount 
                                                                         ? 'All minifigures complete!' 
@@ -729,63 +729,67 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                             })()}
                                         </div>
                                         
-                                        {/* Stacked Action Buttons */}
-                                        <div className="flex flex-col gap-3">
-                                            {/* Conditional Bulk Actions */}
-                                            {(() => {
-                                                const completeCount = minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length;
-                                                const totalCount = minifigs.length;
-                                                const hasAnyOwned = minifigs.some(m => (m.owned_quantity || 0) > 0);
-                                                const allComplete = completeCount === totalCount;
-                                                
-                                                return (
-                                                    <>
-                                                        {!allComplete && (
-                                                            <button
-                                                                onClick={async () => {
-                                                                    // Update all minifigures to complete
-                                                                    const updatePromises = minifigs.map(minifig => {
-                                                                        const requiredTotal = minifig.required_quantity * quantity;
-                                                                        return updateMinifigQuantity(minifig.fig_num, requiredTotal);
-                                                                    });
-                                                                    
-                                                                    await Promise.all(updatePromises);
-                                                                    // The individual updates will handle the set count updates
-                                                                }}
-                                                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-emerald-300 whitespace-nowrap"
-                                                                disabled={Object.keys(updatingMinifigs).some(key => updatingMinifigs[key])}
-                                                            >
-                                                                <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
-                                                                Mark All Complete
-                                                            </button>
-                                                        )}
-                                                        
-                                                        {hasAnyOwned && (
-                                                            <button
-                                                                onClick={async () => {
-                                                                    // Update all minifigures to missing (0)
-                                                                    const updatePromises = minifigs.map(minifig => 
-                                                                        updateMinifigQuantity(minifig.fig_num, 0)
-                                                                    );
-                                                                    
-                                                                    await Promise.all(updatePromises);
-                                                                    // The individual updates will handle the set count updates
-                                                                }}
-                                                                className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-slate-300 whitespace-nowrap"
-                                                                disabled={Object.keys(updatingMinifigs).some(key => updatingMinifigs[key])}
-                                                            >
-                                                                <FontAwesomeIcon icon={faTimes} className="mr-1" />
-                                                                Mark All Missing
-                                                            </button>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()}
+                                        {/* Action Buttons - Mobile Responsive Layout */}
+                                        <div className="space-y-3">
+                                            {/* Bulk Action Buttons */}
+                                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                                                {(() => {
+                                                    const completeCount = minifigs.filter(m => (m.owned_quantity || 0) >= (m.required_quantity * quantity)).length;
+                                                    const totalCount = minifigs.length;
+                                                    const hasAnyOwned = minifigs.some(m => (m.owned_quantity || 0) > 0);
+                                                    const allComplete = completeCount === totalCount;
+                                                    
+                                                    return (
+                                                        <>
+                                                            {!allComplete && (
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        // Update all minifigures to complete
+                                                                        const updatePromises = minifigs.map(minifig => {
+                                                                            const requiredTotal = minifig.required_quantity * quantity;
+                                                                            return updateMinifigQuantity(minifig.fig_num, requiredTotal);
+                                                                        });
+                                                                        
+                                                                        await Promise.all(updatePromises);
+                                                                        // The individual updates will handle the set count updates
+                                                                    }}
+                                                                    className="flex-1 px-3 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-emerald-300 text-center"
+                                                                    disabled={Object.keys(updatingMinifigs).some(key => updatingMinifigs[key])}
+                                                                >
+                                                                    <FontAwesomeIcon icon={faCheckCircle} className="mr-1 sm:mr-2" />
+                                                                    <span className="hidden sm:inline">Mark All Complete</span>
+                                                                    <span className="sm:hidden">All Complete</span>
+                                                                </button>
+                                                            )}
+                                                            
+                                                            {hasAnyOwned && (
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        // Update all minifigures to missing (0)
+                                                                        const updatePromises = minifigs.map(minifig => 
+                                                                            updateMinifigQuantity(minifig.fig_num, 0)
+                                                                        );
+                                                                        
+                                                                        await Promise.all(updatePromises);
+                                                                        // The individual updates will handle the set count updates
+                                                                    }}
+                                                                    className="flex-1 px-3 sm:px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg transition-all duration-200 font-medium disabled:bg-slate-300 text-center"
+                                                                    disabled={Object.keys(updatingMinifigs).some(key => updatingMinifigs[key])}
+                                                                >
+                                                                    <FontAwesomeIcon icon={faTimes} className="mr-1 sm:mr-2" />
+                                                                    <span className="hidden sm:inline">Mark All Missing</span>
+                                                                    <span className="sm:hidden">All Missing</span>
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
                                             
-                                            {/* Show/Hide Minifigures Button - Always at bottom */}
+                                            {/* Show/Hide Minifigures Button */}
                                             <button
                                                 onClick={() => setShowMinifigs(!showMinifigs)}
-                                                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-all duration-200 shadow-sm whitespace-nowrap text-sm"
+                                                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-all duration-200 shadow-sm text-sm"
                                             >
                                                 <FontAwesomeIcon icon={faUserCircle} />
                                                 <span>{showMinifigs ? 'Hide Minifigures' : 'Show Minifigures'}</span>
@@ -796,8 +800,8 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                     
                                     {/* Detailed Minifigure List */}
                                     {showMinifigs && (
-                                        <div className="bg-white rounded-xl border border-purple-200 p-4">
-                                            <div className="grid gap-3">
+                                        <div className="bg-white rounded-xl border border-purple-200 p-3 sm:p-4">
+                                            <div className="grid gap-2 sm:gap-3">
                                                 {minifigs.map(minifig => {
                                                     const requiredTotal = minifig.required_quantity * quantity;
                                                     const owned = minifig.owned_quantity || 0;
@@ -805,57 +809,63 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                                                     const isUpdating = updatingMinifigs[minifig.fig_num];
                                                     
                                                     return (
-                                                        <div key={minifig.fig_num} className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
-                                                            {/* Minifigure Image */}
-                                                            <div className="w-12 h-12 bg-white rounded-lg overflow-hidden shadow-sm border border-slate-200 flex-shrink-0">
-                                                                <img 
-                                                                    src={minifig.img_url} 
-                                                                    alt={minifig.name}
-                                                                    className="w-full h-full object-contain"
-                                                                    onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
-                                                                />
-                                                            </div>
-                                                            
-                                                            {/* Minifigure Info */}
-                                                            <div className="flex-grow min-w-0">
-                                                                <h4 className="font-semibold text-slate-800 truncate text-sm mb-1">{minifig.name}</h4>
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                                                        isComplete 
-                                                                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' 
-                                                                            : 'bg-amber-100 text-amber-700 border border-amber-200'
-                                                                    }`}>
-                                                                        {owned}/{requiredTotal} owned
-                                                                    </span>
-                                                                    {isComplete && (
-                                                                        <FontAwesomeIcon icon={faCheckCircle} className="text-emerald-600 text-sm" />
-                                                                    )}
+                                                        <div key={minifig.fig_num} className="bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors p-2 sm:p-3">
+                                                            {/* Mobile Layout: Stacked */}
+                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                                                {/* Top Row on Mobile: Image + Name + Status */}
+                                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                                    {/* Minifigure Image */}
+                                                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-lg overflow-hidden shadow-sm border border-slate-200 flex-shrink-0">
+                                                                        <img 
+                                                                            src={minifig.img_url} 
+                                                                            alt={minifig.name}
+                                                                            className="w-full h-full object-contain"
+                                                                            onError={e => e.target.src = '/images/lego_piece_questionmark.png'}
+                                                                        />
+                                                                    </div>
+                                                                    
+                                                                    {/* Minifigure Info */}
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h4 className="font-semibold text-slate-800 truncate text-xs sm:text-sm mb-1">{minifig.name}</h4>
+                                                                        <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                                                            <span className={`text-xs px-2 py-0.5 sm:py-1 rounded-full font-medium ${
+                                                                                isComplete 
+                                                                                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' 
+                                                                                    : 'bg-amber-100 text-amber-700 border border-amber-200'
+                                                                            }`}>
+                                                                                {owned}/{requiredTotal}
+                                                                            </span>
+                                                                            {isComplete && (
+                                                                                <FontAwesomeIcon icon={faCheckCircle} className="text-emerald-600 text-xs sm:text-sm" />
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            
-                                                            {/* Quantity Controls */}
-                                                            <div className="flex items-center gap-2">
-                                                                <button
-                                                                    className="w-8 h-8 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-all duration-200 flex items-center justify-center text-sm font-semibold disabled:bg-slate-300"
-                                                                    onClick={() => updateMinifigQuantity(minifig.fig_num, Math.max(0, owned - 1))}
-                                                                    disabled={isUpdating || owned <= 0}
-                                                                >
-                                                                    −
-                                                                </button>
-                                                                <div className="w-10 text-center">
-                                                                    {isUpdating ? (
-                                                                        <FontAwesomeIcon icon={faSync} className="animate-spin text-slate-400 text-sm" />
-                                                                    ) : (
-                                                                        <span className="text-sm font-bold text-slate-800">{owned}</span>
-                                                                    )}
+                                                                
+                                                                {/* Bottom Row on Mobile: Quantity Controls */}
+                                                                <div className="flex items-center justify-center sm:justify-end gap-1 sm:gap-2">
+                                                                    <button
+                                                                        className="w-8 h-8 sm:w-8 sm:h-8 bg-slate-600 hover:bg-slate-700 text-white rounded-md sm:rounded-lg transition-all duration-200 flex items-center justify-center text-xs sm:text-sm font-semibold disabled:bg-slate-300"
+                                                                        onClick={() => updateMinifigQuantity(minifig.fig_num, Math.max(0, owned - 1))}
+                                                                        disabled={isUpdating || owned <= 0}
+                                                                    >
+                                                                        −
+                                                                    </button>
+                                                                    <div className="w-10 sm:w-10 text-center">
+                                                                        {isUpdating ? (
+                                                                            <FontAwesomeIcon icon={faSync} className="animate-spin text-slate-400 text-xs sm:text-sm" />
+                                                                        ) : (
+                                                                            <span className="text-sm font-bold text-slate-800">{owned}</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <button
+                                                                        className="w-8 h-8 sm:w-8 sm:h-8 bg-slate-600 hover:bg-slate-700 text-white rounded-md sm:rounded-lg transition-all duration-200 flex items-center justify-center text-xs sm:text-sm font-semibold disabled:bg-slate-300"
+                                                                        onClick={() => updateMinifigQuantity(minifig.fig_num, owned + 1)}
+                                                                        disabled={isUpdating}
+                                                                    >
+                                                                        +
+                                                                    </button>
                                                                 </div>
-                                                                <button
-                                                                    className="w-8 h-8 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-all duration-200 flex items-center justify-center text-sm font-semibold disabled:bg-slate-300"
-                                                                    onClick={() => updateMinifigQuantity(minifig.fig_num, owned + 1)}
-                                                                    disabled={isUpdating}
-                                                                >
-                                                                    +
-                                                                </button>
                                                             </div>
                                                         </div>
                                                     );
@@ -881,28 +891,28 @@ const SetStatusModal = ({ isOpen, onClose, set, onUpdateQuantity, onUpdateComple
                 </div>
 
                 {/* Modal Footer - Fixed */}
-                <div className="bg-slate-50 border-t border-slate-200 p-6 flex-shrink-0 rounded-b-2xl">
-                    <div className="flex justify-end gap-3">
+                <div className="bg-slate-50 border-t border-slate-200 p-4 sm:p-6 flex-shrink-0 rounded-b-xl sm:rounded-b-2xl">
+                    <div className="flex flex-col sm:flex-row justify-end gap-3">
                         <button 
-                            className="px-6 py-3 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded-xl transition-all duration-200 font-medium" 
+                            className="px-4 sm:px-6 py-2.5 sm:py-3 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded-lg sm:rounded-xl transition-all duration-200 font-medium text-center" 
                             onClick={onClose}
                         >
                             Cancel
                         </button>
                         <button 
-                            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all duration-200 font-medium flex items-center disabled:bg-red-400"
+                            className="px-4 sm:px-6 py-2.5 sm:py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg sm:rounded-xl transition-all duration-200 font-medium flex items-center justify-center disabled:bg-red-400"
                             onClick={validateAndUpdate}
                             disabled={isUpdating}
                         >
                             {isUpdating ? (
                                 <>
                                     <FontAwesomeIcon icon={faSync} className="mr-2 animate-spin" />
-                                    Updating...
+                                    <span>Updating...</span>
                                 </>
                             ) : (
                                 <>
                                     <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
-                                    Update Status
+                                    <span>Update Status</span>
                                 </>
                             )}
                         </button>
